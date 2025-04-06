@@ -1,0 +1,28 @@
+
+ability to scroll off a display (and scroll on, like inserting 12 spaces before or after)
+also scroll in the other direction (for short strings)
+
+mad libs
+
+time game choose a color and the average is stored with it, allowing for three profiles
+
+have segments disappear randomly or go into place randomly
+
+keep timer running in the background
+	save and restore a timer basis when it's started
+
+if title show times < 3 doesn't show it
+
+last frame of scroll animation seems to skip ahead 1
+
+tests - button closure time while pressed, glitchyness etc., timing of millis
+
+setting for clock speed
+it's losing about 2 seconds a day, might be able to tweak the daily clock basis
+
+the clock should look different in idle mode so you know it's ok not to use a long press (or in idle mode long press to exit)
+
+add lm34
+option to show temp instead of seconds for clock
+option for c or f
+
