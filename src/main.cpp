@@ -81,6 +81,12 @@ bool main_menu(){
 
 void loop()
 {
-    display.show_string(FSTR("FluxTune"));
-    while(true);
+    display.show_string(FSTR("FLuXTuNE"));
+    unsigned long time = millis();
+    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
+
+    while(true){
+        unsigned long time = millis();
+        panel_leds.step(time);
+    }
 }

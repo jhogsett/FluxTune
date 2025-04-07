@@ -86,9 +86,14 @@ void LEDHandler::step(unsigned long time){
 	bool blanking_period = (_style & STYLE_BLANKING) && (_frame % 2);
 	if(!blanking_period){
 		if(_style & STYLE_RANDOM){
-			int r; // skip prevention logic here if nothing enabled
-			while( (r = random(_num_states)) == _active )
-				;
+            int r; // skip prevention logic here if nothing enabled
+            // with just two LEDs, allow them to repeat
+            if(_num_leds == 2){
+                r = random(_num_states);
+            } else {
+                while( (r = random(_num_states)) == _active )
+                    ;
+            }
 			_active = r;
 		} else {
 			_active++;
