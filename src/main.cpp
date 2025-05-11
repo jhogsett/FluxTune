@@ -17,6 +17,23 @@
 #include "utils.h"
 // #include "word_game.h"
 
+#include <Encoder.h>
+#include "encoder_handler.h"
+
+#define CLKA 2
+#define DTA 3
+#define SWA 4
+
+#define CLKB 5
+#define DTB 6
+#define SWB 7
+
+#define PULSES_PER_DETENT 2
+
+EncoderHandler encoder_handlerA(0, CLKA, DTA, SWA, PULSES_PER_DETENT);
+EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
+
+
 void setup_display(){
 	Wire.begin();
 	display.init(display_brightnesses);
@@ -46,7 +63,7 @@ void setup_buttons(){
 }
 
 void setup(){
-	// Serial.begin(115200);
+	Serial.begin(115200);
 	randomizer.randomize();
 
 	setup_leds();
@@ -88,5 +105,8 @@ void loop()
     while(true){
         unsigned long time = millis();
         panel_leds.step(time);
-    }
+		
+		encoder_handlerA.step();
+		encoder_handlerB.step();
+	}
 }
