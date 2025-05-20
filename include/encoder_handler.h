@@ -28,6 +28,9 @@ public:
       pencoder = new Encoder(clock_pin, data_pin);
     else
       pencoder = NULL;
+
+    _changed = false;
+    _diff = 0;
   }
 
   void step(){
@@ -87,9 +90,29 @@ public:
   // diff is -1 for CCW, 1 for CW, 0 for button press, 2 for button repeat
   // sent is: 0 for CCW, 2 for CW, 1 for button press, 3 for button repeat
   void send(int diff){
-    char buffer[5];
-    sprintf(buffer, "%d%d", _id, diff + 1);
-    Serial.println(buffer);
+    // char buffer[5];
+    // sprintf(buffer, "%d%d", _id, diff + 1);
+    // Serial.println(buffer);
+
+// accumulate the diffs while changed = true
+
+    if(_changed){
+      // the latest has not been seen, accumulate the diff
+      _diff += diff;
+
+    } else {
+      _changed = true;
+      _diff = diff;
+    }
+  }
+
+  bool changed(){
+    return _changed;
+  }
+
+  int diff(){
+    _changed = false;
+    return _diff;
   }
 
   const int DEBOUNCE_TIME = 50;
@@ -106,6 +129,8 @@ private:
   byte button_state;  
   unsigned long valid_time;
 
+  bool _changed;
+  int _diff;
 };
 
 #endif

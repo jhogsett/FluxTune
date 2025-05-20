@@ -1,37 +1,36 @@
 #ifndef __VFO_TUNER_H__
 #define __VFO_TUNER_H__
 
-class VFO_Tuner
+#include <HT16K33Disp.h>
+#include "mode.h"
+#include "mode_handler.h"
+
+class VFO_Tuner : public ModeHandler
 {
 public:
     // constructor
-    VFO_Tuner();
+    VFO_Tuner(Mode * mode);
 
-    // destructor
-    // ~VFO_Tuner();
+    virtual bool event_sink(int event, int count);
 
-    void frequency_up(int steps);
+    // virtual void step(unsigned long time);
 
-    void frequency_down(int steps);
-
-    void band_up(int steps);
-
-    void band_down(int steps);
+    virtual void update_display(HT16K33Disp *display);
 
 
-    // methods to get and set the frequency, step, band, and form
-    // float get_frequency() const;
-    // void setFrequency(int frequency);
+    void frequency_up(float steps);
 
-    // int getStep() const;
-    // void setStep(int step);
+    void frequency_down(float steps);
 
-    // int getBand() const;
-    // void setBand(int band);
+    void band_up(float steps);
 
-    // int getForm() const;
-    // void setForm(int form);
-// derived from mode_handler
+    void band_down(float steps);
+
+    void step_up(float steps);
+
+    void step_down(float steps);
+
+private:
 };
 
 #endif // __VFO_TUNER_H__

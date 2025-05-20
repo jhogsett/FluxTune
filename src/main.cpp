@@ -20,12 +20,16 @@
 #include <Encoder.h>
 #include "encoder_handler.h"
 
-#define CLKA 2
-#define DTA 3
+#include "vfo.h"
+#include "vfo_tuner.h"
+#include "event_dispatcher.h"
+
+#define CLKA 3
+#define DTA 2
 #define SWA 4
 
-#define CLKB 5
-#define DTB 6
+#define CLKB 6
+#define DTB 5
 #define SWB 7
 
 #define PULSES_PER_DETENT 2
@@ -102,11 +106,24 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
+	VFO vfo(147.300, 0.1, 0);
+	VFO_Tuner tuner(&vfo);
+	EventDispatcher dispatcher(&tuner);
+
     while(true){
         unsigned long time = millis();
         panel_leds.step(time);
 		
 		encoder_handlerA.step();
 		encoder_handlerB.step();
+
+		if(encoder_handlerA.changed()){
+			// Serial.println(encoder_handlerA.diff());
+			dispatcher.dispatch_event(encoder_handlerA.diff(), 0);
+			dispatcher.update_display(&display);
+		}
+		if(encoder_handlerB.changed()){
+			// Serial.println(encoder_handlerB.diff());
+		}
 	}
 }

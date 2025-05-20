@@ -6,12 +6,13 @@ Mode
 Mode Handler
 - receives encoder/button events
 - return indicates (either?) event consumed or need to refresh (?)
+-
 
 
-Mode Presenter
+Mode Realizer
 - receives timing events
 - has an associated mode
-
+- does mode specific realizations, for example, playing a sound
 
 Mode Handler(s)
 - VFO Handler
@@ -82,3 +83,8 @@ handler requests vfo to update presentation
 handler returns true
 
 
+mode activator
+  given a mode, 
+
+
+current mode needs to receive continuous timing events
