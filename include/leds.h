@@ -9,8 +9,8 @@
 #define DEFAULT_ALL_LEDS_BLANK_TIME   1000
 
 // default on/off time when animating panel LEDs
-#define DEFAULT_PANEL_LEDS_SHOW_TIME   750
-#define DEFAULT_PANEL_LEDS_BLANK_TIME  350
+#define DEFAULT_PANEL_LEDS_SHOW_TIME   1500
+#define DEFAULT_PANEL_LEDS_BLANK_TIME  700
 
 // default on/off time when animated button LEDs
 #define DEFAULT_BUTTON_LEDS_SHOW_TIME  800

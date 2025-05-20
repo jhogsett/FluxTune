@@ -17,6 +17,27 @@
 #include "utils.h"
 // #include "word_game.h"
 
+#include <Encoder.h>
+#include "encoder_handler.h"
+
+#include "vfo.h"
+#include "vfo_tuner.h"
+#include "event_dispatcher.h"
+
+#define CLKA 3
+#define DTA 2
+#define SWA 4
+
+#define CLKB 6
+#define DTB 5
+#define SWB 7
+
+#define PULSES_PER_DETENT 2
+
+EncoderHandler encoder_handlerA(0, CLKA, DTA, SWA, PULSES_PER_DETENT);
+EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
+
+
 void setup_display(){
 	Wire.begin();
 	display.init(display_brightnesses);
@@ -46,7 +67,7 @@ void setup_buttons(){
 }
 
 void setup(){
-	// Serial.begin(115200);
+	Serial.begin(115200);
 	randomizer.randomize();
 
 	setup_leds();
@@ -81,6 +102,28 @@ bool main_menu(){
 
 void loop()
 {
-    display.show_string(FSTR("FluxTune"));
-    while(true);
+    display.show_string(FSTR("FLuXTuNE"));
+    unsigned long time = millis();
+    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
+
+	VFO vfo(147.300, 0.1, 0);
+	VFO_Tuner tuner(&vfo);
+	EventDispatcher dispatcher(&tuner);
+
+    while(true){
+        unsigned long time = millis();
+        panel_leds.step(time);
+		
+		encoder_handlerA.step();
+		encoder_handlerB.step();
+
+		if(encoder_handlerA.changed()){
+			// Serial.println(encoder_handlerA.diff());
+			dispatcher.dispatch_event(encoder_handlerA.diff(), 0);
+			dispatcher.update_display(&display);
+		}
+		if(encoder_handlerB.changed()){
+			// Serial.println(encoder_handlerB.diff());
+		}
+	}
 }

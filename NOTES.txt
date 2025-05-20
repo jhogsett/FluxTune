@@ -1,28 +1,90 @@
+Mode
+- holds state info pertaining to the mode
+- has an associated Handler to make changes
 
-ability to scroll off a display (and scroll on, like inserting 12 spaces before or after)
-also scroll in the other direction (for short strings)
 
-mad libs
+Mode Handler
+- receives encoder/button events
+- return indicates (either?) event consumed or need to refresh (?)
+-
 
-time game choose a color and the average is stored with it, allowing for three profiles
 
-have segments disappear randomly or go into place randomly
+Mode Realizer
+- receives timing events
+- has an associated mode
+- does mode specific realizations, for example, playing a sound
 
-keep timer running in the background
-	save and restore a timer basis when it's started
+Mode Handler(s)
+- VFO Handler
+- Options Handler
 
-if title show times < 3 doesn't show it
 
-last frame of scroll animation seems to skip ahead 1
+Mode Presenters(s)
+- VFO Presenter
+- Options Presenter
 
-tests - button closure time while pressed, glitchyness etc., timing of millis
 
-setting for clock speed
-it's losing about 2 seconds a day, might be able to tweak the daily clock basis
+VFO (Mode)
+- Band
+- Frequency
+- Tuning Step
 
-the clock should look different in idle mode so you know it's ok not to use a long press (or in idle mode long press to exit)
 
-add lm34
-option to show temp instead of seconds for clock
-option for c or f
+VFO Tuner (Mode Handler)
+- receives events
+- operates an associated VFO
 
+
+
+VFO Presenter
+- has an associated VFO
+- 
+
+
+
+
+
+Encoder to Mode Handler Connector
+- current mode
+
+
+
+Encoder
+- generates events
+    - encoder turns
+    - button presses
+    - button long presses
+
+
+Event Handling
+- events drill down
+- whether the display needs refreshing bubbles up
+
+modes include presentation logic
+
+
+dispatcher receives events from encoders
+  sends event to current mode handler
+  recognizes an event to cycle through a list of current mode handlers 
+  handles a long press to do (something)
+
+mode handler receives events from dispatcher
+  recognizes events to modify a mode in specific ways
+  returns true if event was consumed (needed?)
+
+
+turn freq knob
+encoder +1 event generated
+dispatcher receives event
+event dispatched to vfo handler
+handler recognizes event as frequency up at current step
+handler modifies vfo
+handler requests vfo to update presentation
+handler returns true
+
+
+mode activator
+  given a mode, 
+
+
+current mode needs to receive continuous timing events
