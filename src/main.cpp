@@ -106,8 +106,11 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	VFO vfo(147.300, 0.1, 0);
+	delay(2000);
+
+	VFO vfo(10000000, 100, 0);
 	VFO_Tuner tuner(&vfo);
+	tuner.update_display(&display);
 	EventDispatcher dispatcher(&tuner);
 
     while(true){

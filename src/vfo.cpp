@@ -1,6 +1,6 @@
 #include "vfo.h"
 
-VFO::VFO(float frequency, float step, int band){
+VFO::VFO(unsigned long frequency, unsigned long step, int band){
     _frequency = frequency;
     _step = step;
     band = band;
@@ -14,7 +14,7 @@ void VFO::render(char *buffer){
 
     // // sprintf_P(buffer, PSTR("%3.5f"), _frequency);
     // int intpart = int(_frequency);
-    // float decpart = _frequency - intpart;
+    // unsigned long decpart = _frequency - intpart;
     // int decparti = int(decpart * 1000.0);
 
     // // sprintf(buffer, "%3d.%4d", intpart, decparti);

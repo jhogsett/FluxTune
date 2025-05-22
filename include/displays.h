@@ -3,8 +3,8 @@
 
 #include <HT16K33Disp.h>
 
-#define DISPLAY_BRIGHTNESS1 15 // Red needs maximum brightness to match minimum Emerald Green brightness
-#define DISPLAY_BRIGHTNESS2 15 // Red needs maximum brightness to match minimum Emerald Green brightness
+#define DISPLAY_BRIGHTNESS1 3 // Red needs maximum brightness to match minimum Emerald Green brightness
+#define DISPLAY_BRIGHTNESS2 3 // Red needs maximum brightness to match minimum Emerald Green brightness
 // #define DISPLAY_BRIGHTNESS3 15
 
 // main 8 digit full display

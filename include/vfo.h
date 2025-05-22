@@ -9,12 +9,12 @@ class VFO : public Mode
 {
 public:
     // constructor
-    VFO(float frequency, float step, int band);
+    VFO(unsigned long frequency, unsigned long step, int band);
     
     virtual void render(char *buffer);
 
-    float _frequency;
-    float _step;
+    unsigned long _frequency;
+    unsigned long _step;
     int _band;
     
 private:
