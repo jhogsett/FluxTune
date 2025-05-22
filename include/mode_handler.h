@@ -22,6 +22,7 @@ public:
 
     // virtual void step(unsigned long time);
 
+    void show_title(HT16K33Disp *display);
     virtual void update_display(HT16K33Disp *display);
 
 protected:

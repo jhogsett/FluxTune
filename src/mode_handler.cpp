@@ -20,6 +20,15 @@ bool ModeHandler::event_sink(int event, int event_data){
 
 // }
 
+
+
+
+void ModeHandler::show_title(HT16K33Disp *display){
+    display->scroll_string(_mode->_title);
+    update_display(display);
+}
+
+
 void ModeHandler::update_display(HT16K33Disp *display){
 
 }

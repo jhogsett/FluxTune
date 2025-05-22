@@ -9,7 +9,7 @@ class VFO : public Mode
 {
 public:
     // constructor
-    VFO(unsigned long frequency, unsigned long step, int band);
+    VFO(const char *title, unsigned long frequency, unsigned long step, int band);
     
     virtual void render(char *buffer);
 

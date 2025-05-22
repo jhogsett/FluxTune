@@ -102,18 +102,21 @@ bool main_menu(){
 
 void loop()
 {
-    display.show_string(FSTR("FLuXTuNE"));
+    display.scroll_string(FSTR("FLuXTuNE"));
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
 	delay(2000);
 
-	VFO vfo(10000000, 100, 0);
-	VFO_Tuner tuner(&vfo);
-	tuner.update_display(&display);
-	EventDispatcher dispatcher(&tuner);
+	VFO vfoa("VFO A", 10000000, 100, 0);
+	VFO vfob("VFO B", 100000000, 1000, 0);
+	VFO_Tuner tunera(&vfoa);
+	VFO_Tuner tunerb(&vfob);
+	ModeHandler *handlers[2] = {&tunera, &tunerb};
+	EventDispatcher dispatcher(handlers, 2);
+	dispatcher.update_display(&display);
 
-    while(true){
+	while(true){
         unsigned long time = millis();
         panel_leds.step(time);
 		
@@ -122,11 +125,13 @@ void loop()
 
 		if(encoder_handlerA.changed()){
 			// Serial.println(encoder_handlerA.diff());
-			dispatcher.dispatch_event(encoder_handlerA.diff(), 0);
+			dispatcher.dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 			dispatcher.update_display(&display);
 		}
 		if(encoder_handlerB.changed()){
 			// Serial.println(encoder_handlerB.diff());
+			dispatcher.dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
+			dispatcher.update_display(&display);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 #include "vfo.h"
 
-VFO::VFO(unsigned long frequency, unsigned long step, int band){
+VFO::VFO(const char *title, unsigned long frequency, unsigned long step, int band) : Mode(title)
+{
     _frequency = frequency;
     _step = step;
     band = band;

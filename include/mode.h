@@ -13,10 +13,11 @@
 class Mode
 {
 public:
-    Mode();
+    Mode(const char *title);
 
     virtual void render(char *buffer);
 
+    const char *_title;
 
 private:
 };

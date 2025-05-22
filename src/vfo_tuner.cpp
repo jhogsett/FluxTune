@@ -10,19 +10,19 @@ VFO_Tuner::VFO_Tuner(Mode * mode) : ModeHandler(mode) {
 bool VFO_Tuner::event_sink(int event, int event_data){
     VFO *vfo = (VFO*) _mode;
 
-    Serial.println("--------------------");
-    Serial.println(vfo->_frequency);
-    Serial.println(vfo->_step);
+    // Serial.println("--------------------");
+    // Serial.println(vfo->_frequency);
+    // Serial.println(vfo->_step);
 
     if(event == 1){
         vfo->_frequency += vfo->_step;
     } else if(event == -1){
         vfo->_frequency -= vfo->_step;
     }
-    Serial.println(vfo->_frequency);
-    Serial.println(vfo->_step);
+    // Serial.println(vfo->_frequency);
+    // Serial.println(vfo->_step);
 
-    Serial.println("--------------------");
+    // Serial.println("--------------------");
 
     return true;
 }
