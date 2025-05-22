@@ -108,8 +108,8 @@ void loop()
 
 	delay(2000);
 
-	VFO vfoa("VFO A", 10000000, 100, 0);
-	VFO vfob("VFO B", 100000000, 1000, 0);
+	VFO vfoa("VFO A", 7000000, 100, 0);
+	VFO vfob("VFO B", 146520000, 5000, 0);
 	VFO_Tuner tunera(&vfoa);
 	VFO_Tuner tunerb(&vfob);
 	ModeHandler *handlers[2] = {&tunera, &tunerb};
