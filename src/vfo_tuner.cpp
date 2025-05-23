@@ -53,15 +53,22 @@ void VFO_Tuner::update_display(HT16K33Disp *display){
 
     // Serial.println(vfo->_frequency);
 
-    int intpart = vfo->_frequency / 1000000L;
-    long decpart = vfo->_frequency - (intpart * 1000000L);
-    int decparti = decpart / 100L;
+    if(vfo->_step >= 100){
+        // Display as xxxx.yyyy in MHz
+        int intpart = vfo->_frequency / 1000000L;
+        long decpart = vfo->_frequency - (intpart * 1000000L);
+        int decparti = decpart / 100L;
 
-    // Serial.println(intpart);
-    // Serial.println(decpart);
-    // Serial.println(decparti);
+        // Serial.println(intpart);
+        // Serial.println(decpart);
+        // Serial.println(decparti);
 
-    sprintf(buffer, "%4d.%04d", intpart, decparti);
+        sprintf(buffer, "%4d.%04d", intpart, decparti);
+    } else {
+        // Display in Hz
+        sprintf(buffer, "%8ld", vfo->_frequency);
+    }
+
     // Serial.println(buffer);
     display->show_string(buffer);
 
