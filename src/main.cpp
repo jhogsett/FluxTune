@@ -110,14 +110,16 @@ void loop()
 
 	VFO vfoa("VFO A", 7000000, 100, 0);
 	VFO vfob("VFO B", 146520000, 5000, 0);
-	VFO vfoc("VFO C", 700, 1, 0);
+	VFO vfoc("VFO S", 700, 1, 0);
 
 	VFO_Tuner tunera(&vfoa);
 	VFO_Tuner tunerb(&vfob);
-	VFO_Tuner tunerc(&vfoc);
-	ModeHandler *handlers[3] = {&tunera, &tunerb, &tunerc};
+ 	VFO_Tuner tunerc(&vfoc);
+	ModeHandler *handlers[5] = {&tunera, &tunerb, &tunerc};
 	EventDispatcher dispatcher(handlers, 3);
-	dispatcher.update_display(&display);
+	dispatcher.set_mode(&display, 0);
+	// _mode_handler->show_title(display);
+	// dispatcher.update_display(&display);
 
 	while(true){
         unsigned long time = millis();
@@ -127,12 +129,10 @@ void loop()
 		encoder_handlerB.step();
 
 		if(encoder_handlerA.changed()){
-			// Serial.println(encoder_handlerA.diff());
 			dispatcher.dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 			dispatcher.update_display(&display);
 		}
 		if(encoder_handlerB.changed()){
-			// Serial.println(encoder_handlerB.diff());
 			dispatcher.dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
 			dispatcher.update_display(&display);
 		}

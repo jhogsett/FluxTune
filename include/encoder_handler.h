@@ -90,9 +90,6 @@ public:
   // diff is -1 for CCW, 1 for CW, 0 for button press, 2 for button repeat
   // sent is: 0 for CCW, 2 for CW, 1 for button press, 3 for button repeat
   void send(int diff){
-    // char buffer[5];
-    // sprintf(buffer, "%d%d", _id, diff + 1);
-    // Serial.println(buffer);
 
 // accumulate the diffs while changed = true
 

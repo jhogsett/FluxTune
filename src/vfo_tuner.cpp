@@ -10,19 +10,20 @@ VFO_Tuner::VFO_Tuner(Mode * mode) : ModeHandler(mode) {
 bool VFO_Tuner::event_sink(int event, int event_data){
     VFO *vfo = (VFO*) _mode;
 
-    // Serial.println("--------------------");
-    // Serial.println(vfo->_frequency);
-    // Serial.println(vfo->_step);
-
+    unsigned long _old_freq = vfo->_frequency;
     if(event == 1){
         vfo->_frequency += vfo->_step;
+        if(_old_freq > vfo->_frequency){
+            // unsigned long wrapped up
+            vfo->_frequency = (unsigned long)-1L;
+        }        
     } else if(event == -1){
         vfo->_frequency -= vfo->_step;
+        if(_old_freq < vfo->_frequency){
+            // unsigned long wrapped down
+            vfo->_frequency = 0;
+        }
     }
-    // Serial.println(vfo->_frequency);
-    // Serial.println(vfo->_step);
-
-    // Serial.println("--------------------");
 
     return true;
 }
@@ -35,23 +36,7 @@ bool VFO_Tuner::event_sink(int event, int event_data){
 void VFO_Tuner::update_display(HT16K33Disp *display){
     char buffer[20];
 
-    // Serial.println("1");
-
     VFO *vfo = (VFO*) _mode;
-
-    // Serial.println("2");
-
-    // // vfo->render(NULL);
-    // // _mode->render(NULL);
-
-    // Serial.println("3");
-
-    // Serial.println(buffer);
-
-    // // // display->simple_show_string(buffer);
-    // display->show_string(buffer);
-
-    // Serial.println(vfo->_frequency);
 
     if(vfo->_step >= 100){
         // Display as xxxx.yyyy in MHz
@@ -59,17 +44,12 @@ void VFO_Tuner::update_display(HT16K33Disp *display){
         long decpart = vfo->_frequency - (intpart * 1000000L);
         int decparti = decpart / 100L;
 
-        // Serial.println(intpart);
-        // Serial.println(decpart);
-        // Serial.println(decparti);
-
         sprintf(buffer, "%4d.%04d", intpart, decparti);
     } else {
         // Display in Hz
         sprintf(buffer, "%8ld", vfo->_frequency);
     }
 
-    // Serial.println(buffer);
     display->show_string(buffer);
 
 }

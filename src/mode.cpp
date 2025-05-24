@@ -7,6 +7,5 @@ Mode::Mode(const char *title){
 
 // render the current state for display
 void Mode::render(char *buffer){
-    // Serial.println("B");
 
 }

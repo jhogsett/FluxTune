@@ -15,6 +15,10 @@ void EventDispatcher::set_mode(int nhandler){
     _mode_handler = _mode_handlers[_ncurrent_handler];
 }
 
+void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){
+    set_mode(nhandler);
+    _mode_handler->show_title(display);
+}
 
 //returns true if the event was consumed
 // some events are meta-events, for example to change modes
@@ -28,24 +32,19 @@ bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, int e
 
         case ID_ENCODER_MODES:
         {
-            Serial.println("A");
-            Serial.println(event);
             if(event == 1){
-                Serial.println("B");
                 int handler = _ncurrent_handler + 1;
                 if(handler >= _nhandlers)
                 handler = 0; 
-                set_mode(handler);
-                _mode_handler->show_title(display);
+                set_mode(display, handler);
+                // _mode_handler->show_title(display);
             } else if(event == -1){
-                Serial.println("N");
                 int handler = _ncurrent_handler - 1;
                 if(handler < 0)
                     handler = _nhandlers - 1; 
-                set_mode(handler);
-                _mode_handler->show_title(display);
+                set_mode(display, handler);
+                // _mode_handler->show_title(display);
             }
-            Serial.println("Z");
             break;
         }
     }
