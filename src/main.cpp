@@ -34,6 +34,14 @@
 
 #define PULSES_PER_DETENT 2
 
+// Display handling
+// show a display string for 700ms before beginning scrolling for ease of reading
+#define DISPLAY_SHOW_TIME 800
+// scroll the display every 90ms for ease of reading
+#define DISPLAY_SCROLL_TIME 70
+// scroll flipped options every 100ms
+#define OPTION_FLIP_SCROLL_TIME 100
+
 EncoderHandler encoder_handlerA(0, CLKA, DTA, SWA, PULSES_PER_DETENT);
 EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 
@@ -102,7 +110,7 @@ bool main_menu(){
 
 void loop()
 {
-    display.scroll_string(FSTR("FLuXTuNE"));
+    display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
@@ -121,7 +129,7 @@ void loop()
 	ModeHandler *handlers2[1] = {&tunerc};
 
 	EventDispatcher dispatcher1(handlers1, 2);
-	EventDispatcher dispatcher2(handlers2, 2);
+	EventDispatcher dispatcher2(handlers2, 1);
 	
 	EventDispatcher * dispatcher = &dispatcher1;
 	int current_dispatcher = 1;
@@ -145,9 +153,15 @@ void loop()
 				if(current_dispatcher == 1){
 					dispatcher = &dispatcher2;
 					current_dispatcher = 2;
+					display.scroll_string("        AUDIO   ", 1, DISPLAY_SCROLL_TIME);
+					delay(DISPLAY_SHOW_TIME);
+					// dispatcher->update_display(&display);				
 				} else {
 					dispatcher = &dispatcher1;
 					current_dispatcher = 1;
+					display.scroll_string("        RADIO   ", 1, DISPLAY_SCROLL_TIME);
+					delay(DISPLAY_SHOW_TIME);
+					// dispatcher->update_display(&display);				
 				}
 				dispatcher->set_mode(&display, 0);
 
