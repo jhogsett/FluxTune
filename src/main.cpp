@@ -114,10 +114,19 @@ void loop()
 
 	VFO_Tuner tunera(&vfoa);
 	VFO_Tuner tunerb(&vfob);
+
  	VFO_Tuner tunerc(&vfoc);
-	ModeHandler *handlers[5] = {&tunera, &tunerb, &tunerc};
-	EventDispatcher dispatcher(handlers, 3);
-	dispatcher.set_mode(&display, 0);
+
+	ModeHandler *handlers1[2] = {&tunera, &tunerb};
+	ModeHandler *handlers2[1] = {&tunerc};
+
+	EventDispatcher dispatcher1(handlers1, 2);
+	EventDispatcher dispatcher2(handlers2, 2);
+	
+	EventDispatcher * dispatcher = &dispatcher1;
+	int current_dispatcher = 1;
+	
+	dispatcher->set_mode(&display, 0);
 	// _mode_handler->show_title(display);
 	// dispatcher.update_display(&display);
 
@@ -128,13 +137,45 @@ void loop()
 		encoder_handlerA.step();
 		encoder_handlerB.step();
 
-		if(encoder_handlerA.changed()){
-			dispatcher.dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
-			dispatcher.update_display(&display);
+		// check for changing dispatchers
+		bool pressed = encoder_handlerB.pressed();
+		bool long_pressed = encoder_handlerB.long_pressed();
+		if(pressed || long_pressed){
+			if(pressed){
+				if(current_dispatcher == 1){
+					dispatcher = &dispatcher2;
+					current_dispatcher = 2;
+				} else {
+					dispatcher = &dispatcher1;
+					current_dispatcher = 1;
+				}
+				dispatcher->set_mode(&display, 0);
+
+				// empty outstanding events
+				encoder_handlerA.changed();
+				encoder_handlerB.changed();
+				encoder_handlerA.pressed();
+				encoder_handlerA.long_pressed();
+				encoder_handlerB.pressed();
+				encoder_handlerB.long_pressed();
+			}
+			// dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, pressed, long_pressed);
 		}
+
+		if(encoder_handlerA.changed()){
+			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
+			dispatcher->update_display(&display);
+		}
+
 		if(encoder_handlerB.changed()){
-			dispatcher.dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
-			dispatcher.update_display(&display);
+			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
+			dispatcher->update_display(&display);
+		}
+
+		pressed = encoder_handlerA.pressed();
+		long_pressed = encoder_handlerA.long_pressed();
+		if(pressed || long_pressed){
+			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, pressed, long_pressed);
 		}
 	}
 }

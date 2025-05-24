@@ -19,6 +19,7 @@ public:
     void set_mode(HT16K33Disp *display, int nhandler);
      
     bool dispatch_event(HT16K33Disp *display, int encoder_id, int event, int event_data);
+    bool dispatch_event(HT16K33Disp *display, int encoder_id, bool press, bool long_press);
 
     void update_display(HT16K33Disp *display);
 

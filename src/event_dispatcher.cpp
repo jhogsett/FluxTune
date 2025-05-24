@@ -23,9 +23,6 @@ void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){
 //returns true if the event was consumed
 // some events are meta-events, for example to change modes
 bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, int event, int event_data){
-    /// HARDCODED ///
-    // encoder id 0 is the tuning knob
-    // encoder id 1 is the modes knob
     switch(encoder_id){
         case ID_ENCODER_TUNING:
             return _mode_handler->event_sink(event, event_data);
@@ -37,18 +34,27 @@ bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, int e
                 if(handler >= _nhandlers)
                 handler = 0; 
                 set_mode(display, handler);
-                // _mode_handler->show_title(display);
             } else if(event == -1){
                 int handler = _ncurrent_handler - 1;
                 if(handler < 0)
                     handler = _nhandlers - 1; 
                 set_mode(display, handler);
-                // _mode_handler->show_title(display);
             }
             break;
         }
     }
 }
+
+bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, bool press, bool long_press){
+    switch(encoder_id){
+        case ID_ENCODER_TUNING:
+            return _mode_handler->event_sink(press, long_press);
+
+        case ID_ENCODER_MODES:
+            return _mode_handler->event_sink(press, long_press);
+    }
+}
+
 
 void EventDispatcher::update_display(HT16K33Disp *display){
     _mode_handler->update_display(display);

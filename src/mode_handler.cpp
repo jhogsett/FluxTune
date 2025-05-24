@@ -15,6 +15,10 @@ bool ModeHandler::event_sink(int event, int event_data){
     return false;
 }
 
+bool ModeHandler::event_sink(bool pressed, bool long_pressed){
+    return false;
+}
+
 // // periodic timing events for dynamic activities
 // void step(unsigned long time){
 
