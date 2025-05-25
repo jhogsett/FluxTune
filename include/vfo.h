@@ -11,7 +11,7 @@ public:
     // constructor
     VFO(const char *title, unsigned long frequency, unsigned long step, int band);
     
-    // virtual void render(char *buffer);
+    virtual void update_display(HT16K33Disp *display);
 
     unsigned long _frequency;
     unsigned long _step;

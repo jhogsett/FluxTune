@@ -32,24 +32,3 @@ bool VFO_Tuner::event_sink(int event, int event_data){
 // void VFO_Tuner::step(unsigned long time){
 
 // }
-
-void VFO_Tuner::update_display(HT16K33Disp *display){
-    char buffer[20];
-
-    VFO *vfo = (VFO*) _mode;
-
-    if(vfo->_step >= 100){
-        // Display as xxxx.yyyy in MHz
-        int intpart = vfo->_frequency / 1000000L;
-        long decpart = vfo->_frequency - (intpart * 1000000L);
-        int decparti = decpart / 100L;
-
-        sprintf(buffer, "%4d.%04d", intpart, decparti);
-    } else {
-        // Display in Hz
-        sprintf(buffer, "%8ld", vfo->_frequency);
-    }
-
-    display->show_string(buffer);
-
-}

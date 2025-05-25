@@ -16,8 +16,6 @@ public:
 
     // virtual void step(unsigned long time);
 
-    virtual void update_display(HT16K33Disp *display);
-
     void next_option();
     void prev_option();
 

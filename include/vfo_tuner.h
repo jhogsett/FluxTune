@@ -15,8 +15,6 @@ public:
 
     // virtual void step(unsigned long time);
 
-    virtual void update_display(HT16K33Disp *display);
-
 
     void frequency_up(unsigned long steps);
 
