@@ -1,5 +1,9 @@
 #include <Arduino.h>
 #include <Wire.h>
+
+#include <MD_AD9833.h>
+#include <SPI.h>
+
 // #include "buttons.h"
 #include "displays.h"
 #include "hardware.h"
@@ -52,9 +56,9 @@ VFO vfoa("VFO A",   7000000, 100, 0);
 VFO vfob("VFO B",  14300000, 500, 0);
 VFO vfoc("VFO C", 146520000, 5000, 0);
 
-VFO vfod("OUTPUT 1", 700, 1, 0);
-VFO vfoe("OUTPUT 2", 1000, 1, 0);
-VFO vfof("OUTPUT 3", 1, 1, 0);
+VFO vfod("OUTPUT 1", 0, 1, 0);
+VFO vfoe("OUTPUT 2", 0, 1, 0);
+VFO vfof("OUTPUT 3", 0, 1, 0);
 
 Contrast contrast("Contrast");
 
@@ -78,7 +82,23 @@ EventDispatcher dispatcher3(handlers3, 1);
 
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
-	
+
+// Pins for SPI comm with the AD9833 IC
+const uint8_t PIN_DATA = 11;  ///< SPI Data pin number
+const uint8_t PIN_CLK = 13;  	///< SPI Clock pin number
+const uint8_t PIN_FSYNC = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
+// const uint8_t PIN_FSYNC2 = 9;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+// const uint8_t PIN_FSYNC3 = 8;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+// const uint8_t PIN_FSYNC4 = 7;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+
+MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
+// MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
+// MD_AD9833	AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
+// MD_AD9833	AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
+
+#define SILENT_FREQ 1000000.0
+
+
 #define APP_SIMRADIO 1
 #define APP_AUDIOOUT 2
 #define APP_SETTINGS 3
@@ -142,6 +162,9 @@ void setup(){
 
 	// dispatcher->set_mode(&display, 0);
 
+	AD1.begin();
+	AD1.setFrequency((MD_AD9833::channel_t)0, 1000000.0);
+	AD1.setMode(MD_AD9833::MODE_SINE);
 }	
 
 bool main_menu(){
