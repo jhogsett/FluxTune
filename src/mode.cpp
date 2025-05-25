@@ -5,7 +5,11 @@ Mode::Mode(const char *title){
     _title = title;
 }
 
-// render the current state for display
-void Mode::render(char *buffer){
+// // render the current state for display
+// void Mode::render(char *buffer){
+
+// }
+
+void Mode::update_display(HT16K33Disp *display){
 
 }

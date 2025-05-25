@@ -4,7 +4,7 @@
 #include "chime.h"
 #include "displays.h"
 #include "leds.h"
-#include "play_data.h"
+#include "saved_data.h"
 #include "timeouts.h"
 #include "utils.h"
 #include "clock.h"
@@ -29,31 +29,31 @@ long time_in_seconds() {
 }
 
 void increment_time_basis(byte &second, byte &minute, byte &hour, byte seconds, byte minutes, byte hours) {
-	long total_seconds = time_basis / 1000L;
-	total_seconds += time_to_seconds(seconds, minutes, hours);
-	seconds_to_time(total_seconds, second, minute, hour);
+	// long total_seconds = time_basis / 1000L;
+	// total_seconds += time_to_seconds(seconds, minutes, hours);
+	// seconds_to_time(total_seconds, second, minute, hour);
 
-	if (option_clock_24h) {
-	} else {
-		if (hour == 0)
-			hour = 12;
-	}
+	// if (option_clock_24h) {
+	// } else {
+	// 	if (hour == 0)
+	// 		hour = 12;
+	// }
 
-	total_seconds = time_to_seconds(second, minute, hour);
-	time_basis = total_seconds * 1000L;
+	// total_seconds = time_to_seconds(second, minute, hour);
+	// time_basis = total_seconds * 1000L;
 }
 
 void render_clock_string(byte seconds, byte minutes, byte hours) {
-	byte effective_hours;
-	if (option_clock_24h) {
-		effective_hours = hours;
-	} else {
-		effective_hours = (hours % 12);
-		if (effective_hours == 0)
-			effective_hours = 12;
-	}
+	// byte effective_hours;
+	// if (option_clock_24h) {
+	// 	effective_hours = hours;
+	// } else {
+	// 	effective_hours = (hours % 12);
+	// 	if (effective_hours == 0)
+	// 		effective_hours = 12;
+	// }
 
-	sprintf_P(display_buffer, PSTR("  %2d %02d %02d  "), effective_hours, minutes, seconds);
+	// sprintf_P(display_buffer, PSTR("  %2d %02d %02d  "), effective_hours, minutes, seconds);
 }
 
 // // returns true if the clock timed out while being set

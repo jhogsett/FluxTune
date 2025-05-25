@@ -7,7 +7,7 @@ VFO::VFO(const char *title, unsigned long frequency, unsigned long step, int ban
     band = band;
 }
 
-// render the current state for display
-void VFO::render(char *buffer){
+// // render the current state for display
+// void VFO::render(char *buffer){
 
-}
+// }

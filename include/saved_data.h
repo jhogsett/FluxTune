@@ -1,5 +1,5 @@
-#ifndef __PLAY_DATA_H
-#define __PLAY_DATA_H
+#ifndef __SAVED_DATA_H
+#define __SAVED_DATA_H
 
 #include <Arduino.h>
 #include "idle_mode.h"
@@ -11,7 +11,9 @@
 // ##DATA Increment the save data version to force upgraded devices to auto-reset after programming
 // Current save data version
 // On start-up if this differs from the EEPROM value, the data is reset to defaults
-#define SAVE_DATA_VERSION 0
+#define SAVE_DATA_VERSION 1
+
+#define DEFAULT_CONTRAST 2
 
 // // All money originates in the bank, this is in money basis units
 // #define DEFAULT_OUTSTANDING (DEFAULT_GANG + DEFAULT_HOUSE + DEFAULT_PURSE)
@@ -40,13 +42,13 @@
 // default milliseconds until device goes into idle mode
 #define DEFAULT_IDLE_TIME (5L * 60L * 1000L)
 
-#define DEFAULT_VIG 0L
+// #define DEFAULT_VIG 0L
 
-#define DEFAULT_VIB_STR false
+// #define DEFAULT_VIB_STR false
 
-#define DEFAULT_CLOCK_CHIME CHIME_NONE
+// #define DEFAULT_CLOCK_CHIME CHIME_NONE
 
-#define DEFAULT_WPM DEFAULT_MORSE_WPM
+// #define DEFAULT_WPM DEFAULT_MORSE_WPM
 
 // ##DATA add new defaults on play data reset above here
 
@@ -57,34 +59,36 @@
 
 extern byte save_data_version;
 
-// Whether to play sounds
-extern bool option_sound;
+extern int option_contrast;
 
-// Whether to use vibration feedback
-extern bool option_vibrate;
+// // Whether to play sounds
+// extern bool option_sound;
 
-// vibration strength true=hi false=lo
-extern bool option_vib_str;
+// // Whether to use vibration feedback
+// extern bool option_vibrate;
+
+// // vibration strength true=hi false=lo
+// extern bool option_vib_str;
 
 // Player's Cash
 // extern long purse;
 
-// Player's best time in The TimeGame
-extern unsigned long best_time;
+// // Player's best time in The TimeGame
+// extern unsigned long best_time;
 
-// Whether to display 12 or 24 hour time
-extern bool option_clock_24h;
+// // Whether to display 12 or 24 hour time
+// extern bool option_clock_24h;
 
-// mode when mode none, sleep, clock
-extern byte option_idle_mode;
+// // mode when mode none, sleep, clock
+// extern byte option_idle_mode;
 
 // Current bank
 // extern unsigned long bank;
 
 // Additional slots for best times (future use)
-extern unsigned long best_time1;
-extern unsigned long best_time2;
-extern unsigned long best_time3;
+// extern unsigned long best_time1;
+// extern unsigned long best_time2;
+// extern unsigned long best_time3;
 
 // Current house
 // extern long house;
@@ -93,16 +97,16 @@ extern unsigned long best_time3;
 // extern long gang;
 
 // Idle Time in milliseconds
-extern unsigned long option_idle_time;
+// extern unsigned long option_idle_time;
 
 // Current vig
 // extern long vig;
 
-extern byte option_clock_chime;
+// extern byte option_clock_chime;
 
-extern byte option_wpm;
+// extern byte option_wpm;
 
-extern bool auto_play_enabled;
+// extern bool auto_play_enabled;
 
 // ##DATA Add 'extern's for new persisted play data veriables here
 
@@ -110,24 +114,34 @@ extern bool auto_play_enabled;
 // Saved data structure version 1
 struct SavedData{
 	byte version;
-	bool option_sound;
-	bool option_vibrate;
-	unsigned long purse;
-	unsigned long best_time;
-	bool option_clock_24h;
-	byte option_idle_mode;
+
+	int option_contrast;
+
+	// bool option_sound;
+	// bool option_vibrate;
+
+	// unsigned long purse;
+	// unsigned long best_time;
+
+	// bool option_clock_24h;
+	// byte option_idle_mode;
+
 	// unsigned long bank;
-	unsigned long best_time1;
-	unsigned long best_time2;
-	unsigned long best_time3;
+	// unsigned long best_time1;
+	// unsigned long best_time2;
+	// unsigned long best_time3;
 	// long house;
 	// long gang;
-	unsigned long option_idle_time;
+	// unsigned long option_idle_time;
     // long vig;
-    bool option_vib_str;
-    byte option_clock_chime;
-    byte option_wpm;
-    bool auto_play_enabled;
+
+	// bool option_vib_str;
+
+	// byte option_clock_chime;
+
+	// byte option_wpm;
+
+	// bool auto_play_enabled;
 
 	// ##DATA Add new persisted data types above here
 };

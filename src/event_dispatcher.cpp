@@ -34,15 +34,18 @@ bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, int e
                 if(handler >= _nhandlers)
                 handler = 0; 
                 set_mode(display, handler);
+                return true;
             } else if(event == -1){
                 int handler = _ncurrent_handler - 1;
                 if(handler < 0)
-                    handler = _nhandlers - 1; 
+                handler = _nhandlers - 1; 
                 set_mode(display, handler);
+                return true;
             }
             break;
         }
     }
+    return false;
 }
 
 bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, bool press, bool long_press){
@@ -53,6 +56,7 @@ bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, bool 
         case ID_ENCODER_MODES:
             return _mode_handler->event_sink(press, long_press);
     }
+    return false;
 }
 
 

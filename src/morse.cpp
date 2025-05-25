@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "play_data.h"
+#include "saved_data.h"
 // #include "speaker.h"
 #include "morse.h"
 
@@ -106,18 +106,18 @@ void _send_morse_char(char c, int time){
 }
 
 void send_morse(char c, int wpm){
-    if(wpm == 0)
-        wpm = option_wpm;
-    _send_morse_char(c, MORSE_TIME_FROM_WPM(wpm));
+    // if(wpm == 0)
+    //     wpm = option_wpm;
+    // _send_morse_char(c, MORSE_TIME_FROM_WPM(wpm));
 }
 
 void send_morse(const char *s, int wpm){
-    if(wpm == 0)
-        wpm = option_wpm;
-    int time = MORSE_TIME_FROM_WPM(wpm);
-    int l = strlen(s);
-    for(int i = 0; i < l; i++){
-        _send_morse_char(s[i], time);
-        _send_char_space(time);
-    }
+    // if(wpm == 0)
+    //     wpm = option_wpm;
+    // int time = MORSE_TIME_FROM_WPM(wpm);
+    // int l = strlen(s);
+    // for(int i = 0; i < l; i++){
+    //     _send_morse_char(s[i], time);
+    //     _send_char_space(time);
+    // }
 }

@@ -15,7 +15,7 @@ class Mode
 public:
     Mode(const char *title);
 
-    virtual void render(char *buffer);
+    virtual void update_display(HT16K33Disp *display);
 
     const char *_title;
 

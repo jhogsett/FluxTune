@@ -8,7 +8,7 @@
 #include "leds.h"
 // #include "motor.h"
 #include "options_mode.h"
-#include "play_data.h"
+#include "saved_data.h"
 // #include "prompts.h"
 #include "seeding.h"
 // #include "slot_game.h"
@@ -48,6 +48,8 @@ EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 
 void setup_display(){
 	Wire.begin();
+
+	const byte display_brightnesses[] = {(unsigned char)option_contrast, (unsigned char)option_contrast};
 	display.init(display_brightnesses);
 	/* the duplicated displays do not need reinitialization
 	disp1.init(brightness+0);
@@ -78,11 +80,12 @@ void setup(){
 	Serial.begin(115200);
 	randomizer.randomize();
 
+	load_save_data();
+
 	setup_leds();
 	setup_display();
 	// setup_buttons();
 
-	load_save_data();
 
     // // if all three buttons are pressed, enable auto play
     // if((digitalRead(GREEN_BUTTON) == HIGH) && (digitalRead(AMBER_BUTTON) == HIGH) && (digitalRead(RED_BUTTON) == HIGH)){
@@ -118,18 +121,21 @@ void loop()
 
 	VFO vfoa("VFO A", 7000000, 100, 0);
 	VFO vfob("VFO B", 146520000, 5000, 0);
-	VFO vfoc("VFO S", 700, 1, 0);
+
+	VFO vfoc("CHAN 1", 700, 1, 0);
+	VFO vfod("CHAN 2", 1, 1, 0);
 
 	VFO_Tuner tunera(&vfoa);
 	VFO_Tuner tunerb(&vfob);
 
  	VFO_Tuner tunerc(&vfoc);
+ 	VFO_Tuner tunerd(&vfod);
 
 	ModeHandler *handlers1[2] = {&tunera, &tunerb};
-	ModeHandler *handlers2[1] = {&tunerc};
+	ModeHandler *handlers2[2] = {&tunerc, &tunerd};
 
 	EventDispatcher dispatcher1(handlers1, 2);
-	EventDispatcher dispatcher2(handlers2, 1);
+	EventDispatcher dispatcher2(handlers2, 2);
 	
 	EventDispatcher * dispatcher = &dispatcher1;
 	int current_dispatcher = 1;
@@ -153,13 +159,13 @@ void loop()
 				if(current_dispatcher == 1){
 					dispatcher = &dispatcher2;
 					current_dispatcher = 2;
-					display.scroll_string("        AUDIO   ", 1, DISPLAY_SCROLL_TIME);
+					display.scroll_string(FSTR("        AUDIO   "), 1, DISPLAY_SCROLL_TIME);
 					delay(DISPLAY_SHOW_TIME);
 					// dispatcher->update_display(&display);				
 				} else {
 					dispatcher = &dispatcher1;
 					current_dispatcher = 1;
-					display.scroll_string("        RADIO   ", 1, DISPLAY_SCROLL_TIME);
+					display.scroll_string(FSTR("        RADIO   "), 1, DISPLAY_SCROLL_TIME);
 					delay(DISPLAY_SHOW_TIME);
 					// dispatcher->update_display(&display);				
 				}
