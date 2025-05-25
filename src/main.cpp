@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 #include <MD_AD9833.h>
-#include <SPI.h>
+// #include <SPI.h>
 
 // #include "buttons.h"
 #include "displays.h"
@@ -30,6 +30,8 @@
 
 #include "contrast.h"
 #include "contrast_handler.h"
+
+#include "wavegen.h"
 
 #define CLKA 3
 #define DTA 2
@@ -95,6 +97,8 @@ MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
 // MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
 // MD_AD9833	AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
 // MD_AD9833	AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
+
+WaveGen wavegen1(&AD1);
 
 #define SILENT_FREQ 1000000.0
 
@@ -175,7 +179,7 @@ bool main_menu(){
 
 
 
-EventDispatcher * set_application(int application, HT16K33Disp *display){
+EventDispatcher * set_application(int application, HT16K33Disp *display, Realization *realization){
 	EventDispatcher *dispatcher;
 	char *title;
 
@@ -200,7 +204,7 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 	}
 		
 	display->scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-	dispatcher->set_mode(display, 0);
+	dispatcher->set_mode(display, realization, 0);
 
 	// // empty outstanding events
 	// encoder_handlerA.changed();
@@ -234,7 +238,7 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	set_application(APP_SIMRADIO, &display);
+	set_application(APP_SIMRADIO, &display, &wavegen1);
 
 	while(true){
         unsigned long time = millis();
@@ -252,21 +256,21 @@ void loop()
 				switch(current_dispatcher){
 					case 1:
 						// 
-						dispatcher = set_application(APP_WAVEGEN, &display); // &dispatcher2;
+						dispatcher = set_application(APP_WAVEGEN, &display, &wavegen1); // &dispatcher2;
 						// current_dispatcher = 2;
 						// title = (FSTR("AudioOut"));
 						break;
 						
 						case 2:
 						// 
-						dispatcher = set_application(APP_SETTINGS, &display); // &dispatcher3;
+						dispatcher = set_application(APP_SETTINGS, &display, &wavegen1); // &dispatcher3;
 						// current_dispatcher = 3;
 						// title = (FSTR("Settings"));
 						break;
 						
 						case 3:
 						// 
-						dispatcher = set_application(APP_SIMRADIO, &display); // &dispatcher1;
+						dispatcher = set_application(APP_SIMRADIO, &display, &wavegen1); // &dispatcher1;
 						// current_dispatcher = 1;
 						// title = (FSTR("SimRadio"));
 						break;
@@ -288,21 +292,23 @@ void loop()
 		}
 
 		if(encoder_handlerA.changed()){
-			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
+			dispatcher->dispatch_event(&display, &wavegen1, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 			dispatcher->update_display(&display);
-			dispatcher->update_realization();
+
+			dispatcher->update_realization(&wavegen1);
 		}
 
 		if(encoder_handlerB.changed()){
-			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
+			dispatcher->dispatch_event(&display, &wavegen1, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
 			dispatcher->update_display(&display);
-			dispatcher->update_realization();
+
+			dispatcher->update_realization(&wavegen1);
 		}
 
 		pressed = encoder_handlerA.pressed();
 		long_pressed = encoder_handlerA.long_pressed();
 		if(pressed || long_pressed){
-			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, pressed, long_pressed);
+			dispatcher->dispatch_event(&display, &wavegen1, ID_ENCODER_TUNING, pressed, long_pressed);
 		}
 	}
 }

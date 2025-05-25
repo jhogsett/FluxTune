@@ -3,6 +3,7 @@
 
 #include <HT16K33Disp.h>
 #include "mode.h"
+#include "realization.h"
 
 // generic mode handler, associated to a mode, has mode-specific methods for operating on a mode
 // modes: vfo, options
@@ -25,7 +26,7 @@ public:
 
     void show_title(HT16K33Disp *display);
     virtual void update_display(HT16K33Disp *display);
-    virtual void update_realization();
+    virtual void update_realization(Realization *realization);
 
 protected:
     Mode *_mode;

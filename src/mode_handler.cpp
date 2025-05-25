@@ -29,7 +29,7 @@ bool ModeHandler::event_sink(bool pressed, bool long_pressed){
 
 void ModeHandler::show_title(HT16K33Disp *display){
     display->scroll_string(_mode->_title);
-    update_display(display);
+    // update_display(display);
 }
 
 
@@ -37,6 +37,6 @@ void ModeHandler::update_display(HT16K33Disp *display){
     _mode->update_display(display);
 }
 
-void ModeHandler::update_realization(){
-    
+void ModeHandler::update_realization(Realization *realization){
+    _mode->update_realization(realization);
 }

@@ -2,6 +2,7 @@
 #define __MODE_H__
 
 #include <HT16K33Disp.h>
+#include "realization.h"
 
 // generic mode, has data and methods specific to a mode
 
@@ -16,7 +17,7 @@ public:
     Mode(const char *title);
 
     virtual void update_display(HT16K33Disp *display);
-    virtual void update_realization();
+    virtual void update_realization(Realization *realization);
 
     const char *_title;
 

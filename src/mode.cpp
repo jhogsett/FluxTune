@@ -9,6 +9,6 @@ void Mode::update_display(HT16K33Disp *display){
 
 }
 
-void Mode::update_realization(){
+void Mode::update_realization(Realization *realization){
     
 }

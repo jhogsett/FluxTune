@@ -1,3 +1,5 @@
+#include <MD_AD9833.h>
+#include "wavegen.h"
 #include "vfo.h"
 
 VFO::VFO(const char *title, unsigned long frequency, unsigned long step, int band) : Mode(title)
@@ -24,6 +26,7 @@ void VFO::update_display(HT16K33Disp *display){
     display->show_string(buffer);
 }
 
-void VFO::update_realization(){
-    
+void VFO::update_realization(Realization *realization){
+    WaveGen *wavegen = (WaveGen *)realization;
+	wavegen->_sig_gen->setFrequency((MD_AD9833::channel_t)0, float(_frequency));
 }

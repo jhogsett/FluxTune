@@ -2,6 +2,7 @@
 #define __EVENT_DISPATCHER_H__
 
 #include "mode_handler.h"
+#include "realization.h"
 
 #define ID_ENCODER_TUNING 0
 #define ID_ENCODER_MODES 1
@@ -16,14 +17,13 @@ public:
     EventDispatcher(ModeHandler **mode_handlers, int nhandlers);
 
     void set_mode(int nhandler);
-    void set_mode(HT16K33Disp *display, int nhandler);
+    void set_mode(HT16K33Disp *display, Realization *Realization, int nhandler);
      
-    bool dispatch_event(HT16K33Disp *display, int encoder_id, int event, int event_data);
-    bool dispatch_event(HT16K33Disp *display, int encoder_id, bool press, bool long_press);
+    bool dispatch_event(HT16K33Disp *display, Realization *realization, int encoder_id, int event, int event_data);
+    bool dispatch_event(HT16K33Disp *display, Realization *realization, int encoder_id, bool press, bool long_press);
 
     void update_display(HT16K33Disp *display);
-    void update_realization();
-
+    void update_realization(Realization *realization);
 
 private:
     ModeHandler * _mode_handler;
