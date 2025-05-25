@@ -12,6 +12,7 @@ public:
     VFO(const char *title, unsigned long frequency, unsigned long step, int band);
     
     virtual void update_display(HT16K33Disp *display);
+    virtual void update_realization();
 
     unsigned long _frequency;
     unsigned long _step;

@@ -12,8 +12,6 @@ public:
     virtual void next_option();
     virtual void prev_option();
 
-    virtual void update_display(HT16K33Disp *display);
-
 private:
 };
 

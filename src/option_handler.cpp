@@ -2,8 +2,8 @@
 #include "option.h"
 #include "option_handler.h"
 
-Option_Handler::Option_Handler(Mode * mode) : ModeHandler(mode) {
-    // VFO *vfo = (VFO*) _mode;
+Option_Handler::Option_Handler(Mode * mode) : ModeHandler(mode)
+{
 }
 
 // does mode-specific handling of the event to modify the mode
@@ -29,8 +29,4 @@ bool Option_Handler::event_sink(bool pressed, bool long_pressed){
 
 // }
 
-// void Option_Handler::update_display(HT16K33Disp *display){
-//     Option *option = (Option*) _mode;
-//     _mode->update_display(display);
-// }
 

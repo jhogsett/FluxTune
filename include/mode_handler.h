@@ -25,6 +25,7 @@ public:
 
     void show_title(HT16K33Disp *display);
     virtual void update_display(HT16K33Disp *display);
+    virtual void update_realization();
 
 protected:
     Mode *_mode;

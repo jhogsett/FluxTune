@@ -23,3 +23,7 @@ void VFO::update_display(HT16K33Disp *display){
     
     display->show_string(buffer);
 }
+
+void VFO::update_realization(){
+    
+}

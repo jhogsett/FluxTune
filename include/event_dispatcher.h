@@ -22,6 +22,7 @@ public:
     bool dispatch_event(HT16K33Disp *display, int encoder_id, bool press, bool long_press);
 
     void update_display(HT16K33Disp *display);
+    void update_realization();
 
 
 private:

@@ -48,35 +48,40 @@
 EncoderHandler encoder_handlerA(0, CLKA, DTA, SWA, PULSES_PER_DETENT);
 EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 
-VFO vfoa("VFO A", 7000000, 100, 0);
-VFO vfob("VFO B", 146520000, 5000, 0);
+VFO vfoa("VFO A",   7000000, 100, 0);
+VFO vfob("VFO B",  14300000, 500, 0);
+VFO vfoc("VFO C", 146520000, 5000, 0);
 
-VFO vfoc("CHAN 1", 700, 1, 0);
-VFO vfod("CHAN 2", 1, 1, 0);
+VFO vfod("OUTPUT 1", 700, 1, 0);
+VFO vfoe("OUTPUT 2", 1000, 1, 0);
+VFO vfof("OUTPUT 3", 1, 1, 0);
 
 Contrast contrast("Contrast");
 
 VFO_Tuner tunera(&vfoa);
 VFO_Tuner tunerb(&vfob);
-
 VFO_Tuner tunerc(&vfoc);
+
 VFO_Tuner tunerd(&vfod);
+VFO_Tuner tunere(&vfoe);
+VFO_Tuner tunerf(&vfof);
 
 ContrastHandler contrast_handler(&contrast);
 
-ModeHandler *handlers1[2] = {&tunera, &tunerb};
-ModeHandler *handlers2[2] = {&tunerc, &tunerd};
+ModeHandler *handlers1[3] = {&tunera, &tunerb, &tunerc};
+ModeHandler *handlers2[3] = {&tunerd, &tunere, &tunerf};
 ModeHandler *handlers3[1] = {&contrast_handler};
 
-EventDispatcher dispatcher1(handlers1, 2);
-EventDispatcher dispatcher2(handlers2, 2);
+EventDispatcher dispatcher1(handlers1, 3);
+EventDispatcher dispatcher2(handlers2, 3);
 EventDispatcher dispatcher3(handlers3, 1);
 
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
 	
-// dispatcher->set_mode(&display, 0);
-
+#define APP_SIMRADIO 1
+#define APP_AUDIOOUT 2
+#define APP_SETTINGS 3
 
 void setup_display(){
 	Wire.begin();
@@ -145,26 +150,28 @@ bool main_menu(){
     return true;
 }
 
-EventDispatcher * change_application(int application){
+
+
+EventDispatcher * set_application(int application){
 	EventDispatcher *dispatcher;
 	char *title;
 
 	switch(application){
-		case 1:
+		case APP_SIMRADIO:
 			dispatcher = &dispatcher1;
-			current_dispatcher = 1;
+			current_dispatcher = APP_SIMRADIO;
 			title = (FSTR("SimRadio"));
 		break;
 
-		case 2:
+		case APP_AUDIOOUT:
 		dispatcher = &dispatcher2;
-			current_dispatcher = 2;
+			current_dispatcher = APP_AUDIOOUT;
 			title = (FSTR("AudioOut"));
 		break;
 
-		case 3:
+		case APP_SETTINGS:
 			dispatcher = &dispatcher3;
-			current_dispatcher = 3;
+			current_dispatcher = APP_SETTINGS;
 			title = (FSTR("Settings"));
 		break;
 	}
@@ -181,38 +188,7 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	// delay(1000);
-
-	dispatcher->set_mode(&display, 0);
-
-	// VFO vfoa("VFO A", 7000000, 100, 0);
-	// VFO vfob("VFO B", 146520000, 5000, 0);
-
-	// VFO vfoc("CHAN 1", 700, 1, 0);
-	// VFO vfod("CHAN 2", 1, 1, 0);
-
-	// Contrast contrast("Contrast");
-
-	// VFO_Tuner tunera(&vfoa);
-	// VFO_Tuner tunerb(&vfob);
-
- 	// VFO_Tuner tunerc(&vfoc);
- 	// VFO_Tuner tunerd(&vfod);
-
-	// ContrastHandler contrast_handler(&contrast);
-
-	// ModeHandler *handlers1[2] = {&tunera, &tunerb};
-	// ModeHandler *handlers2[2] = {&tunerc, &tunerd};
-	// ModeHandler *handlers3[1] = {&contrast_handler};
-
-	// EventDispatcher dispatcher1(handlers1, 2);
-	// EventDispatcher dispatcher2(handlers2, 2);
-	// EventDispatcher dispatcher3(handlers3, 1);
-	
-	// EventDispatcher * dispatcher = &dispatcher1;
-	// int current_dispatcher = 1;
-	
-	// dispatcher->set_mode(&display, 0);
+	set_application(APP_SIMRADIO);
 
 	while(true){
         unsigned long time = millis();
@@ -263,11 +239,13 @@ void loop()
 		if(encoder_handlerA.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 			dispatcher->update_display(&display);
+			dispatcher->update_realization();
 		}
 
 		if(encoder_handlerB.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
 			dispatcher->update_display(&display);
+			dispatcher->update_realization();
 		}
 
 		pressed = encoder_handlerA.pressed();

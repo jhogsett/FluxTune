@@ -64,5 +64,11 @@ void EventDispatcher::update_display(HT16K33Disp *display){
     _mode_handler->update_display(display);
 }
 
+void EventDispatcher::update_realization(){
+    _mode_handler->update_realization();
+}
+
+
+
 
 // need an array of mode handlers that can be cycled through

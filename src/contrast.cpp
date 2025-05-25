@@ -21,15 +21,9 @@ void Contrast::prev_option(){
 }
 
 void Contrast::update_display(HT16K33Disp *display){
-    // char buffer[9];
-    // sprintf_P(buffer, FSTR("LEVEL %d"), option_contrast);
-
-    // Serial.println(option_contrast);
-
-    // display->clear();
-
 	const byte display_brightnesses[] = {(unsigned char)option_contrast, (unsigned char)option_contrast};
 	display->init(display_brightnesses);
-
-    display->scroll_string("CONTRAST", 1, 1);
+    char buffer[9];
+    sprintf(buffer, "Level %d", option_contrast);
+    display->scroll_string(buffer, 1, 1);
 }

@@ -1,8 +1,8 @@
 #include "vfo.h"
 #include "vfo_tuner.h"
 
-VFO_Tuner::VFO_Tuner(Mode * mode) : ModeHandler(mode) {
-    // VFO *vfo = (VFO*) _mode;
+VFO_Tuner::VFO_Tuner(Mode * mode) : ModeHandler(mode)
+{
 }
 
 // does mode-specific handling of the event to modify the mode

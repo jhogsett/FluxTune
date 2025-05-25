@@ -36,3 +36,7 @@ void ModeHandler::show_title(HT16K33Disp *display){
 void ModeHandler::update_display(HT16K33Disp *display){
     _mode->update_display(display);
 }
+
+void ModeHandler::update_realization(){
+    
+}
