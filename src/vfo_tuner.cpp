@@ -14,18 +14,22 @@ bool VFO_Tuner::event_sink(int event, int event_data){
     if(event == 1){
         vfo->_frequency += vfo->_step;
         if(_old_freq > vfo->_frequency){
-            // unsigned long wrapped up
+            // unsigned long wrapped up??
             vfo->_frequency = (unsigned long)-1L;
         }        
     } else if(event == -1){
         vfo->_frequency -= vfo->_step;
         if(_old_freq < vfo->_frequency){
-            // unsigned long wrapped down
+            // unsigned long wrapped down??
             vfo->_frequency = 0;
         }
     }
 
     return true;
+}
+
+bool VFO_Tuner::event_sink(bool pressed, bool long_pressed){
+    return false;
 }
 
 // // periodic timing events for dynamic activities

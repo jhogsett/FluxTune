@@ -24,6 +24,9 @@
 #include "vfo_tuner.h"
 #include "event_dispatcher.h"
 
+#include "contrast.h"
+#include "contrast_handler.h"
+
 #define CLKA 3
 #define DTA 2
 #define SWA 4
@@ -44,6 +47,35 @@
 
 EncoderHandler encoder_handlerA(0, CLKA, DTA, SWA, PULSES_PER_DETENT);
 EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
+
+VFO vfoa("VFO A", 7000000, 100, 0);
+VFO vfob("VFO B", 146520000, 5000, 0);
+
+VFO vfoc("CHAN 1", 700, 1, 0);
+VFO vfod("CHAN 2", 1, 1, 0);
+
+Contrast contrast("Contrast");
+
+VFO_Tuner tunera(&vfoa);
+VFO_Tuner tunerb(&vfob);
+
+VFO_Tuner tunerc(&vfoc);
+VFO_Tuner tunerd(&vfod);
+
+ContrastHandler contrast_handler(&contrast);
+
+ModeHandler *handlers1[2] = {&tunera, &tunerb};
+ModeHandler *handlers2[2] = {&tunerc, &tunerd};
+ModeHandler *handlers3[1] = {&contrast_handler};
+
+EventDispatcher dispatcher1(handlers1, 2);
+EventDispatcher dispatcher2(handlers2, 2);
+EventDispatcher dispatcher3(handlers3, 1);
+
+EventDispatcher * dispatcher = &dispatcher1;
+int current_dispatcher = 1;
+	
+// dispatcher->set_mode(&display, 0);
 
 
 void setup_display(){
@@ -103,12 +135,44 @@ void setup(){
 	// if(option_vibrate)
 	// 	vibrate();
 
-}
+	// dispatcher->set_mode(&display, 0);
+
+}	
 
 bool main_menu(){
 	// bool buttons[] = {false, true, true, true};
 	// return branch_prompt(FSTR("FluxTune"), NULL, NULL, NULL, NULL, buttons);
     return true;
+}
+
+EventDispatcher * change_application(int application){
+	EventDispatcher *dispatcher;
+	char *title;
+
+	switch(application){
+		case 1:
+			dispatcher = &dispatcher1;
+			current_dispatcher = 1;
+			title = (FSTR("SimRadio"));
+		break;
+
+		case 2:
+		dispatcher = &dispatcher2;
+			current_dispatcher = 2;
+			title = (FSTR("AudioOut"));
+		break;
+
+		case 3:
+			dispatcher = &dispatcher3;
+			current_dispatcher = 3;
+			title = (FSTR("Settings"));
+		break;
+	}
+		
+	display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
+	dispatcher->set_mode(&display, 0);
+
+	return dispatcher;
 }
 
 void loop()
@@ -117,32 +181,38 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	delay(1000);
+	// delay(1000);
 
-	VFO vfoa("VFO A", 7000000, 100, 0);
-	VFO vfob("VFO B", 146520000, 5000, 0);
-
-	VFO vfoc("CHAN 1", 700, 1, 0);
-	VFO vfod("CHAN 2", 1, 1, 0);
-
-	VFO_Tuner tunera(&vfoa);
-	VFO_Tuner tunerb(&vfob);
-
- 	VFO_Tuner tunerc(&vfoc);
- 	VFO_Tuner tunerd(&vfod);
-
-	ModeHandler *handlers1[2] = {&tunera, &tunerb};
-	ModeHandler *handlers2[2] = {&tunerc, &tunerd};
-
-	EventDispatcher dispatcher1(handlers1, 2);
-	EventDispatcher dispatcher2(handlers2, 2);
-	
-	EventDispatcher * dispatcher = &dispatcher1;
-	int current_dispatcher = 1;
-	
 	dispatcher->set_mode(&display, 0);
-	// _mode_handler->show_title(display);
-	// dispatcher.update_display(&display);
+
+	// VFO vfoa("VFO A", 7000000, 100, 0);
+	// VFO vfob("VFO B", 146520000, 5000, 0);
+
+	// VFO vfoc("CHAN 1", 700, 1, 0);
+	// VFO vfod("CHAN 2", 1, 1, 0);
+
+	// Contrast contrast("Contrast");
+
+	// VFO_Tuner tunera(&vfoa);
+	// VFO_Tuner tunerb(&vfob);
+
+ 	// VFO_Tuner tunerc(&vfoc);
+ 	// VFO_Tuner tunerd(&vfod);
+
+	// ContrastHandler contrast_handler(&contrast);
+
+	// ModeHandler *handlers1[2] = {&tunera, &tunerb};
+	// ModeHandler *handlers2[2] = {&tunerc, &tunerd};
+	// ModeHandler *handlers3[1] = {&contrast_handler};
+
+	// EventDispatcher dispatcher1(handlers1, 2);
+	// EventDispatcher dispatcher2(handlers2, 2);
+	// EventDispatcher dispatcher3(handlers3, 1);
+	
+	// EventDispatcher * dispatcher = &dispatcher1;
+	// int current_dispatcher = 1;
+	
+	// dispatcher->set_mode(&display, 0);
 
 	while(true){
         unsigned long time = millis();
@@ -156,19 +226,28 @@ void loop()
 		bool long_pressed = encoder_handlerB.long_pressed();
 		if(pressed || long_pressed){
 			if(pressed){
-				if(current_dispatcher == 1){
-					dispatcher = &dispatcher2;
-					current_dispatcher = 2;
-					display.scroll_string(FSTR("        AUDIO   "), 1, DISPLAY_SCROLL_TIME);
-					delay(DISPLAY_SHOW_TIME);
-					// dispatcher->update_display(&display);				
-				} else {
-					dispatcher = &dispatcher1;
-					current_dispatcher = 1;
-					display.scroll_string(FSTR("        RADIO   "), 1, DISPLAY_SCROLL_TIME);
-					delay(DISPLAY_SHOW_TIME);
-					// dispatcher->update_display(&display);				
+				char *title;
+				switch(current_dispatcher){
+					case 1:
+						dispatcher = &dispatcher2;
+						current_dispatcher = 2;
+						title = (FSTR("AudioOut"));
+						break;
+
+					case 2:
+						dispatcher = &dispatcher3;
+						current_dispatcher = 3;
+						title = (FSTR("Settings"));
+						break;
+						
+					case 3:
+						dispatcher = &dispatcher1;
+						current_dispatcher = 1;
+						title = (FSTR("SimRadio"));
+						break;
 				}
+					
+				display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
 				dispatcher->set_mode(&display, 0);
 
 				// empty outstanding events
@@ -179,7 +258,6 @@ void loop()
 				encoder_handlerB.pressed();
 				encoder_handlerB.long_pressed();
 			}
-			// dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, pressed, long_pressed);
 		}
 
 		if(encoder_handlerA.changed()){
