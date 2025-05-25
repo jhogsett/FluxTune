@@ -56,9 +56,9 @@ VFO vfoa("VFO A",   7000000, 100, 0);
 VFO vfob("VFO B",  14300000, 500, 0);
 VFO vfoc("VFO C", 146520000, 5000, 0);
 
-VFO vfod("OUTPUT 1", 0, 1, 0);
-VFO vfoe("OUTPUT 2", 0, 1, 0);
-VFO vfof("OUTPUT 3", 0, 1, 0);
+VFO vfod("CHAN 1", 1L, 1L, 0);
+VFO vfoe("CHAN 2", 100L, 100L, 0);
+VFO vfof("CHAN 3", 1000000, 1000L, 0);
 
 Contrast contrast("Contrast");
 
@@ -100,7 +100,7 @@ MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
 
 
 #define APP_SIMRADIO 1
-#define APP_AUDIOOUT 2
+#define APP_WAVEGEN 2
 #define APP_SETTINGS 3
 
 void setup_display(){
@@ -175,7 +175,7 @@ bool main_menu(){
 
 
 
-EventDispatcher * set_application(int application){
+EventDispatcher * set_application(int application, HT16K33Disp *display){
 	EventDispatcher *dispatcher;
 	char *title;
 
@@ -186,10 +186,10 @@ EventDispatcher * set_application(int application){
 			title = (FSTR("SimRadio"));
 		break;
 
-		case APP_AUDIOOUT:
+		case APP_WAVEGEN:
 		dispatcher = &dispatcher2;
-			current_dispatcher = APP_AUDIOOUT;
-			title = (FSTR("AudioOut"));
+			current_dispatcher = APP_WAVEGEN;
+			title = (FSTR("Wave Gen"));
 		break;
 
 		case APP_SETTINGS:
@@ -199,10 +199,33 @@ EventDispatcher * set_application(int application){
 		break;
 	}
 		
-	display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-	dispatcher->set_mode(&display, 0);
+	display->scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
+	dispatcher->set_mode(display, 0);
+
+	// // empty outstanding events
+	// encoder_handlerA.changed();
+	// encoder_handlerB.changed();
+	// encoder_handlerA.pressed();
+	// encoder_handlerA.long_pressed();
+	// encoder_handlerB.pressed();
+	// encoder_handlerB.long_pressed();
+
+
+
+	// display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
+	// dispatcher->set_mode(&display, 0);
 
 	return dispatcher;
+}
+
+void purge_events(){
+	encoder_handlerA.changed();
+	encoder_handlerA.pressed();
+	encoder_handlerA.long_pressed();
+
+	encoder_handlerB.changed();
+	encoder_handlerB.pressed();
+	encoder_handlerB.long_pressed();
 }
 
 void loop()
@@ -211,7 +234,7 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	set_application(APP_SIMRADIO);
+	set_application(APP_SIMRADIO, &display);
 
 	while(true){
         unsigned long time = millis();
@@ -225,37 +248,42 @@ void loop()
 		bool long_pressed = encoder_handlerB.long_pressed();
 		if(pressed || long_pressed){
 			if(pressed){
-				char *title;
+				// char *title;
 				switch(current_dispatcher){
 					case 1:
-						dispatcher = &dispatcher2;
-						current_dispatcher = 2;
-						title = (FSTR("AudioOut"));
-						break;
-
-					case 2:
-						dispatcher = &dispatcher3;
-						current_dispatcher = 3;
-						title = (FSTR("Settings"));
+						// 
+						dispatcher = set_application(APP_WAVEGEN, &display); // &dispatcher2;
+						// current_dispatcher = 2;
+						// title = (FSTR("AudioOut"));
 						break;
 						
-					case 3:
-						dispatcher = &dispatcher1;
-						current_dispatcher = 1;
-						title = (FSTR("SimRadio"));
+						case 2:
+						// 
+						dispatcher = set_application(APP_SETTINGS, &display); // &dispatcher3;
+						// current_dispatcher = 3;
+						// title = (FSTR("Settings"));
+						break;
+						
+						case 3:
+						// 
+						dispatcher = set_application(APP_SIMRADIO, &display); // &dispatcher1;
+						// current_dispatcher = 1;
+						// title = (FSTR("SimRadio"));
 						break;
 				}
-					
-				display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-				dispatcher->set_mode(&display, 0);
 
-				// empty outstanding events
-				encoder_handlerA.changed();
-				encoder_handlerB.changed();
-				encoder_handlerA.pressed();
-				encoder_handlerA.long_pressed();
-				encoder_handlerB.pressed();
-				encoder_handlerB.long_pressed();
+				purge_events();
+					
+				// display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
+				// dispatcher->set_mode(&display, 0);
+
+				// // empty outstanding events
+				// encoder_handlerA.changed();
+				// encoder_handlerB.changed();
+				// encoder_handlerA.pressed();
+				// encoder_handlerA.long_pressed();
+				// encoder_handlerB.pressed();
+				// encoder_handlerB.long_pressed();
 			}
 		}
 
