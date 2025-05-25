@@ -9,19 +9,45 @@ VFO::VFO(const char *title, unsigned long frequency, unsigned long step, int ban
     band = band;
 }
 
+// step needs to be in 0.1Hz units
+// when step is 0.1Hz, use xxxxxxx.y format
 void VFO::update_display(HT16K33Disp *display){
-    char buffer[17];
-    if(_step >= 100){
-        // Display as xxxx.yyyy in MHz
+    char buffer[20];
+    if(_frequency >= 10000000L){
+        // Display as 2450.0000 in MHz
         int intpart = _frequency / 1000000L;
         long decpart = _frequency - (intpart * 1000000L);
         int decparti = decpart / 100L;
         
         sprintf(buffer, "%4d.%04d", intpart, decparti);
+
+    } else if(_frequency >= 1000000L) {
+        // Display 7,015,089 as 7015.089 in KHz
+        int intpart = _frequency / 1000L;
+        long decpart = _frequency - (intpart * 1000L);
+        int decparti = int(decpart);
+
+        sprintf(buffer, " %4d.%03d", intpart, decparti);
+
     } else {
         // Display in Hz
         sprintf(buffer, "%8ld", _frequency);
     }
+
+
+
+    // if(_step >= 1000){
+    // } else if(_step >= 100){
+    //     // Display as xxxx.yyyy in MHz
+    //     int intpart = _frequency / 1000000L;
+    //     long decpart = _frequency - (intpart * 1000000L);
+    //     int decparti = decpart / 100L;
+        
+    //     sprintf(buffer, "%4d.%04d", intpart, decparti);
+    // } else {
+    //     // Display in Hz
+    //     sprintf(buffer, "%8ld", _frequency);
+    // }
     
     display->show_string(buffer);
 }
