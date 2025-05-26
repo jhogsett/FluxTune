@@ -17,7 +17,7 @@ public:
     Mode(const char *title);
 
     virtual void update_display(HT16K33Disp *display);
-    virtual void update_realization(Realization *realization);
+    virtual void update_realization();
 
     const char *_title;
 

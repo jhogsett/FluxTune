@@ -2,11 +2,12 @@
 #include "wavegen.h"
 #include "vfo.h"
 
-VFO::VFO(const char *title, unsigned long frequency, unsigned long step, int band) : Mode(title)
+VFO::VFO(const char *title, float frequency, unsigned long step, Realization *realization) : Mode(title)
 {
-    _frequency = frequency;
+    _frequency = int(frequency);
+    _sub_frequency = int((frequency - _frequency) * 10.0);
     _step = step;
-    band = band;
+    _realization = realization;
 }
 
 // step needs to be in 0.1Hz units
@@ -54,7 +55,15 @@ void VFO::update_display(HT16K33Disp *display){
     display->show_string(buffer);
 }
 
-void VFO::update_realization(Realization *realization){
-    WaveGen *wavegen = (WaveGen *)realization;
-	wavegen->_sig_gen->setFrequency((MD_AD9833::channel_t)0, float(_frequency));
+void VFO::update_realization(){
+    if(_realization){
+        _realization->update(this);
+    }
+
+
+
+    // float ffrequency = float(_frequency) + (_sub_frequency / 10.0);
+
+    // // WaveGen *wavegen = (WaveGen *)realization;
+	// wavegen->_sig_gen->setFrequency((MD_AD9833::channel_t)0, float(_frequency));
 }

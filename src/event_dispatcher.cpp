@@ -15,16 +15,16 @@ void EventDispatcher::set_mode(int nhandler){
     _mode_handler = _mode_handlers[_ncurrent_handler];
 }
 
-void EventDispatcher::set_mode(HT16K33Disp *display, Realization *realization, int nhandler){
+void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){
     set_mode(nhandler);
     _mode_handler->show_title(display);
     update_display(display);
-    update_realization(realization);
+    update_realization();
 }
 
 //returns true if the event was consumed
 // some events are meta-events, for example to change modes
-bool EventDispatcher::dispatch_event(HT16K33Disp *display, Realization *realization, int encoder_id, int event, int event_data){
+bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, int event, int event_data){
     switch(encoder_id){
         case ID_ENCODER_TUNING:
             return _mode_handler->event_sink(event, event_data);
@@ -35,13 +35,13 @@ bool EventDispatcher::dispatch_event(HT16K33Disp *display, Realization *realizat
                 int handler = _ncurrent_handler + 1;
                 if(handler >= _nhandlers)
                 handler = 0; 
-                set_mode(display, realization, handler);
+                set_mode(display, handler);
                 return true;
             } else if(event == -1){
                 int handler = _ncurrent_handler - 1;
                 if(handler < 0)
                 handler = _nhandlers - 1; 
-                set_mode(display, realization, handler);
+                set_mode(display, handler);
                 return true;
             }
             break;
@@ -50,7 +50,7 @@ bool EventDispatcher::dispatch_event(HT16K33Disp *display, Realization *realizat
     return false;
 }
 
-bool EventDispatcher::dispatch_event(HT16K33Disp *display, Realization *realization, int encoder_id, bool press, bool long_press){
+bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, bool press, bool long_press){
     switch(encoder_id){
         case ID_ENCODER_TUNING:
             return _mode_handler->event_sink(press, long_press);
@@ -66,8 +66,8 @@ void EventDispatcher::update_display(HT16K33Disp *display){
     _mode_handler->update_display(display);
 }
 
-void EventDispatcher::update_realization(Realization *realization){
-    _mode_handler->update_realization(realization);
+void EventDispatcher::update_realization(){
+    _mode_handler->update_realization();
 }
 
 

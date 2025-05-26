@@ -33,6 +33,8 @@
 #include "contrast_handler.h"
 
 #include "wavegen.h"
+#include "wave_out.h"
+
 
 #define CLKA 3
 #define DTA 2
@@ -55,13 +57,30 @@
 EncoderHandler encoder_handlerA(0, CLKA, DTA, SWA, PULSES_PER_DETENT);
 EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 
-VFO vfoa("VFO A",   7000000, 100, 0);
-VFO vfob("VFO B",  14300000, 500, 0);
-VFO vfoc("VFO C", 146520000, 5000, 0);
 
-VFO vfod("CHAN 1", 1L, 1L, 0);
-VFO vfoe("CHAN 2", 100L, 10L, 0);
-VFO vfof("CHAN 3", 1000000, 100L, 0);
+// Pins for SPI comm with the AD9833 IC
+const uint8_t PIN_DATA = 11;  ///< SPI Data pin number
+const uint8_t PIN_CLK = 13;  	///< SPI Clock pin number
+const uint8_t PIN_FSYNC = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
+// const uint8_t PIN_FSYNC2 = 9;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+// const uint8_t PIN_FSYNC3 = 8;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+// const uint8_t PIN_FSYNC4 = 7;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+
+MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
+// MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
+// MD_AD9833	AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
+// MD_AD9833	AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
+
+WaveGen wavegen1(&AD1);
+WaveOut waveout1(&wavegen1);
+
+VFO vfoa("VFO A",   7000000, 100, &waveout1);
+VFO vfob("VFO B",  14300000, 500, &waveout1);
+VFO vfoc("VFO C", 146520000, 5000, &waveout1);
+
+VFO vfod("CHAN 1", 1L, 1L, &waveout1);
+VFO vfoe("CHAN 2", 100L, 10L, &waveout1);
+VFO vfof("CHAN 3", 1000000, 100L, &waveout1);
 
 Contrast contrast("Contrast");
 
@@ -86,20 +105,6 @@ EventDispatcher dispatcher3(handlers3, 1);
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
 
-// Pins for SPI comm with the AD9833 IC
-const uint8_t PIN_DATA = 11;  ///< SPI Data pin number
-const uint8_t PIN_CLK = 13;  	///< SPI Clock pin number
-const uint8_t PIN_FSYNC = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC2 = 9;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC3 = 8;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC4 = 7;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-
-MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
-// MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
-// MD_AD9833	AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
-// MD_AD9833	AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
-
-WaveGen wavegen1(&AD1);
 
 #define SILENT_FREQ 1000000.0
 
@@ -180,7 +185,7 @@ bool main_menu(){
 
 
 
-EventDispatcher * set_application(int application, HT16K33Disp *display, Realization *realization){
+EventDispatcher * set_application(int application, HT16K33Disp *display){
 	EventDispatcher *dispatcher;
 	char *title;
 
@@ -205,7 +210,7 @@ EventDispatcher * set_application(int application, HT16K33Disp *display, Realiza
 	}
 		
 	display->scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-	dispatcher->set_mode(display, realization, 0);
+	dispatcher->set_mode(display, 0);
 
 	// // empty outstanding events
 	// encoder_handlerA.changed();
@@ -242,7 +247,7 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	set_application(APP_SIMRADIO, &display, &wavegen1);
+	set_application(APP_SIMRADIO, &display);
 
 	while(true){
         unsigned long time = millis();
@@ -260,21 +265,21 @@ void loop()
 				switch(current_dispatcher){
 					case 1:
 						// 
-						dispatcher = set_application(APP_WAVEGEN, &display, &wavegen1); // &dispatcher2;
+						dispatcher = set_application(APP_WAVEGEN, &display); // &dispatcher2;
 						// current_dispatcher = 2;
 						// title = (FSTR("AudioOut"));
 						break;
 						
 						case 2:
 						// 
-						dispatcher = set_application(APP_SETTINGS, &display, &wavegen1); // &dispatcher3;
+						dispatcher = set_application(APP_SETTINGS, &display); // &dispatcher3;
 						// current_dispatcher = 3;
 						// title = (FSTR("Settings"));
 						break;
 						
 						case 3:
 						// 
-						dispatcher = set_application(APP_SIMRADIO, &display, &wavegen1); // &dispatcher1;
+						dispatcher = set_application(APP_SIMRADIO, &display); // &dispatcher1;
 						// current_dispatcher = 1;
 						// title = (FSTR("SimRadio"));
 						break;
@@ -296,13 +301,13 @@ void loop()
 		}
 
 		if(encoder_handlerA.changed()){
-			dispatcher->dispatch_event(&display, &wavegen1, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
+			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 			dispatcher->update_display(&display);
-			dispatcher->update_realization(&wavegen1);
+			dispatcher->update_realization();
 		}
 
 		if(encoder_handlerB.changed()){
-			dispatcher->dispatch_event(&display, &wavegen1, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
+			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
 
 			purge_events();
 
@@ -318,7 +323,7 @@ void loop()
 		pressed = encoder_handlerA.pressed();
 		long_pressed = encoder_handlerA.long_pressed();
 		if(pressed || long_pressed){
-			dispatcher->dispatch_event(&display, &wavegen1, ID_ENCODER_TUNING, pressed, long_pressed);
+			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, pressed, long_pressed);
 		}
 	}
 }
