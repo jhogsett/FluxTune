@@ -59,8 +59,8 @@ VFO vfob("VFO B",  14300000, 500, 0);
 VFO vfoc("VFO C", 146520000, 5000, 0);
 
 VFO vfod("CHAN 1", 1L, 1L, 0);
-VFO vfoe("CHAN 2", 100L, 100L, 0);
-VFO vfof("CHAN 3", 1000000, 1000L, 0);
+VFO vfoe("CHAN 2", 100L, 10L, 0);
+VFO vfof("CHAN 3", 1000000, 100L, 0);
 
 Contrast contrast("Contrast");
 
