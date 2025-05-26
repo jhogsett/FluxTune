@@ -21,6 +21,7 @@
 #include "utils.h"
 // #include "word_game.h"
 
+// #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 #include "encoder_handler.h"
 
@@ -223,14 +224,17 @@ EventDispatcher * set_application(int application, HT16K33Disp *display, Realiza
 }
 
 void purge_events(){
-	encoder_handlerA.changed();
-	encoder_handlerA.pressed();
-	encoder_handlerA.long_pressed();
+	while(encoder_handlerA.changed());
+	while(encoder_handlerB.changed());
 
-	encoder_handlerB.changed();
-	encoder_handlerB.pressed();
-	encoder_handlerB.long_pressed();
+	while(encoder_handlerA.pressed());
+	while(encoder_handlerA.long_pressed());
+
+	while(encoder_handlerB.pressed());
+	while(encoder_handlerB.long_pressed());
 }
+
+#define PURGE_TIME 1000
 
 void loop()
 {
@@ -294,15 +298,21 @@ void loop()
 		if(encoder_handlerA.changed()){
 			dispatcher->dispatch_event(&display, &wavegen1, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 			dispatcher->update_display(&display);
-
 			dispatcher->update_realization(&wavegen1);
 		}
 
 		if(encoder_handlerB.changed()){
 			dispatcher->dispatch_event(&display, &wavegen1, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
-			dispatcher->update_display(&display);
 
-			dispatcher->update_realization(&wavegen1);
+			purge_events();
+
+			dispatcher->update_display(&display);
+			// dispatcher->update_realization(&wavegen1);
+
+			// after mode change
+			unsigned long endtime = millis() + PURGE_TIME;
+			while(millis() < endtime)
+				purge_events();
 		}
 
 		pressed = encoder_handlerA.pressed();

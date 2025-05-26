@@ -15,19 +15,21 @@ void VFO::update_display(HT16K33Disp *display){
     char buffer[20];
     if(_frequency >= 10000000L){
         // Display as 2450.0000 in MHz
-        int intpart = _frequency / 1000000L;
-        long decpart = _frequency - (intpart * 1000000L);
+        int megpart = _frequency / 1000000L;
+        long decpart = _frequency - (megpart * 1000000L);
         int decparti = decpart / 100L;
         
-        sprintf(buffer, "%4d.%04d", intpart, decparti);
+        sprintf(buffer, "%4d.%04d", megpart, decparti);
 
     } else if(_frequency >= 1000000L) {
         // Display 7,015,089 as 7015.089 in KHz
-        int intpart = _frequency / 1000L;
-        long decpart = _frequency - (intpart * 1000L);
-        int decparti = int(decpart);
+        int megpart = _frequency / 1000000L;
+        long remainder = _frequency - (megpart * 1000000L);
+        int kilpart = remainder / 1000L;
+        remainder = remainder - (kilpart * 1000L);
+        int unipart = remainder;
 
-        sprintf(buffer, " %4d.%03d", intpart, decparti);
+        sprintf(buffer, " %1d.%03d.%03d", megpart, kilpart, unipart);
 
     } else {
         // Display in Hz
