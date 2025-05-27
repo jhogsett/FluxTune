@@ -4,7 +4,7 @@
 
 VFO::VFO(const char *title, float frequency, unsigned long step, Realization *realization) : Mode(title)
 {
-    _frequency = int(frequency);
+    _frequency = long(frequency);
     _sub_frequency = int((frequency - _frequency) * 10.0);
     _step = step;
     _realization = realization;
@@ -21,7 +21,7 @@ void VFO::update_display(HT16K33Disp *display){
         int decparti = decpart / 100L;
         
         sprintf(buffer, "%4d.%04d", megpart, decparti);
-
+        
     } else if(_frequency >= 1000000L) {
         // Display 7,015,089 as 7015.089 in KHz
         int megpart = _frequency / 1000000L;
@@ -29,15 +29,13 @@ void VFO::update_display(HT16K33Disp *display){
         int kilpart = remainder / 1000L;
         remainder = remainder - (kilpart * 1000L);
         int unipart = remainder;
-
+        
         sprintf(buffer, " %1d.%03d.%03d", megpart, kilpart, unipart);
-
+        
     } else {
         // Display in Hz
         sprintf(buffer, "%8ld", _frequency);
     }
-
-
 
     // if(_step >= 1000){
     // } else if(_step >= 100){

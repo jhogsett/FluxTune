@@ -74,13 +74,13 @@ MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
 WaveGen wavegen1(&AD1);
 WaveOut waveout1(&wavegen1);
 
-VFO vfoa("VFO A",   7000000, 100, &waveout1);
-VFO vfob("VFO B",  14300000, 500, &waveout1);
-VFO vfoc("VFO C", 146520000, 5000, &waveout1);
+VFO vfoa("VFO A",   7000000.0, 100, &waveout1);
+VFO vfob("VFO B",  14300000.0, 500, &waveout1);
+VFO vfoc("VFO C", 146520000.0, 5000, &waveout1);
 
-VFO vfod("CHAN 1", 1L, 1L, &waveout1);
-VFO vfoe("CHAN 2", 100L, 10L, &waveout1);
-VFO vfof("CHAN 3", 1000000, 100L, &waveout1);
+VFO vfod("CHAN 1", 1.0, 1L, &waveout1);
+VFO vfoe("CHAN 2", 100.0, 10L, &waveout1);
+VFO vfof("CHAN 3", 1000000.0, 100L, &waveout1);
 
 Contrast contrast("Contrast");
 
