@@ -10,7 +10,7 @@ public:
     
     virtual bool update(Mode *mode);
 
-    // virtual bool begin(unsigned long time);
+    // virtual void begin(unsigned long time);
     // virtual bool step(unsigned long time);
     // virtual void end();
 

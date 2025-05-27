@@ -16,7 +16,7 @@ public:
 
     virtual bool update(Mode *mode);
 
-    virtual bool begin(unsigned long time);
+    virtual void begin(unsigned long time, unsigned long period);
     virtual bool step(unsigned long time);
     virtual void end();
 
@@ -24,7 +24,8 @@ public:
 
     Realizer *_realizer;
     unsigned long _started;
-    unsigned long _next_step;
+    unsigned long _period;
+    unsigned long _next_internal_step;
 };
 
 #endif

@@ -35,6 +35,8 @@
 #include "wavegen.h"
 #include "wave_out.h"
 
+#include "sim_signal.h"
+
 
 #define CLKA 3
 #define DTA 2
@@ -73,10 +75,11 @@ MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
 
 WaveGen wavegen1(&AD1);
 WaveOut waveout1(&wavegen1);
+SimSignal simsignal1(&wavegen1);
 
-VFO vfoa("VFO A",   7000000.0, 100, &waveout1);
-VFO vfob("VFO B",  14300000.0, 500, &waveout1);
-VFO vfoc("VFO C", 146520000.0, 5000, &waveout1);
+VFO vfoa("VFO A",   7000000.0, 50, &simsignal1);
+VFO vfob("VFO B",  14300000.0, 500, &simsignal1);
+VFO vfoc("VFO C", 146520000.0, 5000, &simsignal1);
 
 VFO vfod("CHAN 1", 1.0, 1L, &waveout1);
 VFO vfoe("CHAN 2", 100.0, 10L, &waveout1);
@@ -247,11 +250,14 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
+	simsignal1.begin(millis(), 200);
+
 	set_application(APP_SIMRADIO, &display);
 
 	while(true){
         unsigned long time = millis();
         panel_leds.step(time);
+		simsignal1.step(time);
 		
 		encoder_handlerA.step();
 		encoder_handlerB.step();
