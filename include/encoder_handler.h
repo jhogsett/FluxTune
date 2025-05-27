@@ -30,6 +30,8 @@ public:
       pencoder = NULL;
 
     _changed = false;
+    _pressed = false;
+    _long_pressed = false;
     _diff = 0;
   }
 
@@ -90,20 +92,31 @@ public:
   // diff is -1 for CCW, 1 for CW, 0 for button press, 2 for button repeat
   // sent is: 0 for CCW, 2 for CW, 1 for button press, 3 for button repeat
   void send(int diff){
-    // char buffer[5];
-    // sprintf(buffer, "%d%d", _id, diff + 1);
-    // Serial.println(buffer);
+    switch(diff){
+      case -1:
+      case 1:
+        if(_changed){
+          // the latest has not been seen, accumulate the diff
+          _diff += diff;
+        } else {
+          _changed = true;
+          _diff = diff;
+        }
+        break;
+
+      case 0:
+        _pressed = true;
+        break;
+        
+        case 2:
+        _long_pressed = true;
+        break;
+    }
+
+
 
 // accumulate the diffs while changed = true
 
-    if(_changed){
-      // the latest has not been seen, accumulate the diff
-      _diff += diff;
-
-    } else {
-      _changed = true;
-      _diff = diff;
-    }
   }
 
   bool changed(){
@@ -113,6 +126,18 @@ public:
   int diff(){
     _changed = false;
     return _diff;
+  }
+
+  int pressed(){
+    bool ret = _pressed;
+    _pressed = false;
+    return ret;
+  }
+
+  int long_pressed(){
+    bool ret = _long_pressed;
+    _long_pressed = false;
+    return ret;
   }
 
   const int DEBOUNCE_TIME = 50;
@@ -130,6 +155,8 @@ private:
   unsigned long valid_time;
 
   bool _changed;
+  bool _pressed;
+  bool _long_pressed;
   int _diff;
 };
 

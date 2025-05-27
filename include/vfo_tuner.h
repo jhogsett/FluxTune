@@ -12,23 +12,22 @@ public:
     VFO_Tuner(Mode * mode);
 
     virtual bool event_sink(int event, int count);
+    virtual bool event_sink(bool pressed, bool long_pressed);
 
     // virtual void step(unsigned long time);
 
-    virtual void update_display(HT16K33Disp *display);
 
+    void frequency_up(unsigned long steps);
 
-    void frequency_up(float steps);
+    void frequency_down(unsigned long steps);
 
-    void frequency_down(float steps);
+    void band_up(unsigned long steps);
 
-    void band_up(float steps);
+    void band_down(unsigned long steps);
 
-    void band_down(float steps);
+    void step_up(unsigned long steps);
 
-    void step_up(float steps);
-
-    void step_down(float steps);
+    void step_down(unsigned long steps);
 
 private:
 };
