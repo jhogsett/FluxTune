@@ -250,7 +250,7 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	simsignal1.begin(millis(), 200);
+	simsignal1.begin(millis(), 45);
 
 	set_application(APP_SIMRADIO, &display);
 

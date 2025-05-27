@@ -16,7 +16,9 @@ public:
 
     virtual void internal_step(unsigned long time);
 
-    bool _active;
+    void realize();
+
+    int _phase;
     float _frequency;
 };
 
