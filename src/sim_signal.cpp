@@ -130,7 +130,7 @@ void SimSignal::realize(){
 }
 
     WaveGen  *wavegen = (WaveGen*)_realizer;
-    if(active & _frequency <= 5000.0)
+    if(active && (_frequency <= 5000.0))
     	wavegen->set_frequency(_frequency);
     else
     	// wavegen->set_frequency(10000000.0);

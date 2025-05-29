@@ -37,6 +37,7 @@
 
 #include "sim_signal.h"
 
+#include "morse.h"
 
 #define CLKA 3
 #define DTA 2
@@ -254,8 +255,13 @@ void loop()
 
 	set_application(APP_SIMRADIO, &display);
 
+	start_morse("TEST", 13);
+
 	while(true){
         unsigned long time = millis();
+
+		step_morse(time);
+
         panel_leds.step(time);
 		simsignal1.step(time);
 		

@@ -61,6 +61,9 @@ void _send_word_space(int time){
     delay(time * WORD_SPACE_FACTOR);
 }
 
+// need async_ morse and start bit
+// maybe auto skip to start bit
+
 void _send_morse(int c, int time){
     byte morse = pgm_read_byte(morsedata + c);
     bool start_bit = false;
@@ -82,12 +85,8 @@ void _send_morse(int c, int time){
     }
 }
 
-void _send_morse_char(char c, int time){
+char _lookup_morse_char(char c){
     int offset = -1;
-    if(c == ' '){
-        _send_word_space(time);
-        return;
-    }
     if(c >= '0' && c <= 'z'){
         if(c >= '0' && c <= '9'){
             c -= '0';
@@ -99,10 +98,22 @@ void _send_morse_char(char c, int time){
             c -= 'a';
             offset = 0;
         }
-        if(offset >= 0){
-            _send_morse(c + offset, time);
-        }
     }
+    if(offset >= 0)
+        return c + offset;
+    else
+        return 0;
+}
+
+void _send_morse_char(char c, int time){
+    if(c == ' '){
+        _send_word_space(time);
+        return;
+    }
+
+    c = _lookup_morse_char(c);
+    if(c > 0)
+        _send_morse(c, time);
 }
 
 void send_morse(char c, int wpm){
@@ -121,5 +132,196 @@ void send_morse(const char *s, int wpm){
     for(int i = 0; i < l; i++){
         _send_morse_char(s[i], time);
         _send_char_space(time);
+    }
+}
+
+const char *async_str = NULL;
+int async_length;
+int async_element_del;
+byte async_phase;
+byte async_position;
+char async_char;
+byte async_morse;
+byte async_element;
+bool async_element_space;
+bool async_active;
+unsigned long async_next_event;
+bool async_space;
+
+#define PHASE_DONE 0
+#define PHASE_CHAR 1
+#define PHASE_SPACE 2
+#define PHASE_WORD_SPACE 3
+
+#define MAX_ELEMENT 6
+
+// returns true unless the start bit is not found
+bool start_step_element(unsigned long time){
+    Serial.println("start step element");
+    Serial.println(async_char);
+    async_morse = pgm_read_byte(morsedata + async_char);
+    for(async_element = 0; async_element < 7; async_element++){
+        async_morse = async_morse >> 1;
+        byte bit = async_morse & 0x1;
+        if(bit == 1){
+            async_next_event = time;
+            async_element = 0;
+            async_space = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+void start_morse(const char *s, int wpm){
+    Serial.println("start morse");
+    async_str = s;
+    async_length = strlen(s);
+    async_element_del = MORSE_TIME_FROM_WPM(wpm);
+    async_phase = PHASE_CHAR;
+    async_position = 0;
+    async_char = '\0';
+    async_morse = 0;
+    async_element = 0;
+    async_active = false;
+    async_next_event = 0L;
+    async_space = false;
+
+    async_element = 0;
+    async_char = async_str[async_position];
+
+    // if(async_char == ' '){
+    //     // _send_word_space(time);    
+    //     // start word space
+    //     async_phase = PHASE_SPACE;
+    //     return true;
+    // }
+
+    if(!start_step_element(millis()))
+        return;// false;
+
+    async_char = _lookup_morse_char(async_char);    
+
+    if(async_char > 0){
+        // _send_morse(c, time);
+        // start char
+        async_phase = PHASE_CHAR;
+    }    
+}    
+
+void async_debug(){
+    char buffer[80];
+    sprintf(buffer, "p:%d e:%d a:%d s:%d", async_position, async_element, async_active, async_space);
+    Serial.println(buffer);
+
+}
+
+#define STEP_ELEMENT_EARLY 0
+#define STEP_ELEMENT_ACTIVE 1
+#define STEP_ELEMENT_DONE 2
+
+// returns false after the character is done sending
+// early, active, done
+int step_element(unsigned long time){
+    // Serial.println("step element");
+    if(time < async_next_event){
+        // Serial.println("step element - early");
+        return STEP_ELEMENT_EARLY;
+    }
+    
+    async_debug();
+    
+    if(async_space){
+        Serial.println("step element - was handling element space");
+        // was handling element space, process next possible element
+        
+        async_space = false;
+        async_element++;
+
+
+        if(async_element >= 10)
+            while(true);
+
+
+        if(async_element >= 7){
+            Serial.println("step element - end of element");
+            return STEP_ELEMENT_DONE;
+        }
+    
+        async_morse = async_morse >> 1;
+        byte bit = async_morse & 0x1;
+    
+        async_active = true;
+        if(bit == 1){
+            Serial.println("DASH");
+            async_next_event = time + (3 * async_element_del);
+        } else{ 
+            Serial.println("DOT");
+            async_next_event = time + async_element_del;
+        }
+    } else {
+        Serial.println("step element - was element");
+        // was handling dot/dash, switch to element space
+        // Serial.println("SPACE");
+
+        async_space = true;
+        async_active = false;
+        async_next_event = time + async_element_del;
+    }
+
+    return STEP_ELEMENT_ACTIVE;
+}
+
+// returns false if past the end of the sending string
+bool step_position(unsigned long time){
+    int ret = step_element(time); 
+
+    if(ret == STEP_ELEMENT_EARLY)
+        return true;
+
+    // Serial.println("step position");
+    if(ret == STEP_ELEMENT_DONE){
+        Serial.println("step position 1");
+        async_position++;
+        if(async_position >= async_length)
+            return false;
+
+        async_element = 0;
+        async_char = async_str[async_position];
+
+        if(async_char == ' '){
+            // _send_word_space(time);
+            // start word space
+            async_phase = PHASE_SPACE;
+            return true;
+        }
+ 
+        if(!start_step_element(time))
+            return false;
+
+        async_char = _lookup_morse_char(async_char);
+
+        if(async_char > 0){
+            // _send_morse(c, time);
+            // start char
+            async_phase = PHASE_CHAR;
+        }
+    }
+    return true;
+}
+
+void step_morse(unsigned long time){
+    // Serial.println("step morse");
+    switch(async_phase){
+        case PHASE_DONE:
+            break;
+        case PHASE_CHAR:
+            if(!step_position(time))
+                async_phase = PHASE_DONE;
+            break;
+        case PHASE_SPACE:
+            break;
+        case PHASE_WORD_SPACE:
+            break;
     }
 }
