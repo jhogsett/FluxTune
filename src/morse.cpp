@@ -162,18 +162,11 @@ bool morse_active(){
 
 // returns true unless the start bit is not found
 bool start_step_element(unsigned long time){
-    // Serial.println("start step element");
-    // Serial.println("async_char should be low int:");
-    // Serial.println(int(async_char));
-
     async_morse = pgm_read_byte(morsedata + async_char);
-    // Serial.println(async_morse);
     
     for(async_element = 0; async_element < 7; async_element++){
-        // Serial.println(async_element);
         async_morse = async_morse >> 1;
         byte bit = async_morse & 0x1;
-        // Serial.println(bit);
         if(bit == 1){
             async_next_event = time;
             // async_element = 0;
@@ -182,12 +175,10 @@ bool start_step_element(unsigned long time){
             return true;
         }
     }
-    // Serial.println("false");
     return false;
 }
 
 void start_morse(const char *s, int wpm){
-    // Serial.println("start morse");
     async_str = s;
     async_length = strlen(s);
     async_element_del = MORSE_TIME_FROM_WPM(wpm);
@@ -204,18 +195,10 @@ void start_morse(const char *s, int wpm){
     async_element_done = true;
 
     async_char = async_str[async_position];
-    // Serial.println("------------------------------------------------");
-    // Serial.println(async_char);
-    // Serial.println("------------------------------------------------");
     
     if(async_char == ' '){
         async_phase = PHASE_SPACE;
 
-        // Serial.println(async_position);
-        // async_position++;
-        // Serial.println(async_position);
-        // async_char = async_str[async_position];
-        // async_char = _lookup_morse_char(async_char);    
         return;
     }
 
@@ -246,63 +229,42 @@ void async_debug(){
 // returns false after the character is done sending
 // early, active, done
 int step_element(unsigned long time){
-    // Serial.println("1111111111");
     if(async_element_done){
-        // Serial.println("step element - element done");
         return STEP_ELEMENT_DONE;
     }
 
-    // Serial.println("2222222");
 
-    // // Serial.println("step element");
     if(time < async_next_event){
-        // // Serial.println("step element - early");
         return STEP_ELEMENT_EARLY;
     }
-
-    // Serial.println("333333333");
     
     // async_debug();
     
     if(async_space){
-        // Serial.println("444444444");
-        // Serial.println("step element - was handling element space");
         
         async_space = false;
         async_element++;
 
         if(async_element >= 7){
-            // Serial.println("step element - end of element");
             async_element_done = true;
             return STEP_ELEMENT_DONE;
         }
 
-        // Serial.println("55555555");
 
         async_morse = async_morse >> 1;
         byte bit = async_morse & 0x1;
     
         async_active = true;
         if(bit == 1){
-            // Serial.println("-");
             async_next_event = time + (3 * async_element_del);
         } else{ 
-            // Serial.println(".");
             async_next_event = time + async_element_del;
         }
     } else {
-        // Serial.println("step element - was element");
-        // was handling dot/dash, switch to element space
-        // Serial.println("_");
-
-        // Serial.println("66666666");
-
         async_space = true;
         async_active = false;
         async_next_event = time + async_element_del;
     }
-
-    // Serial.println("777777777");
 
     return STEP_ELEMENT_ACTIVE;
 }
@@ -316,9 +278,7 @@ bool step_position(unsigned long time){
     if(ret == STEP_ELEMENT_EARLY)
         return true;
 
-    // // Serial.println("step position");
     if(ret == STEP_ELEMENT_DONE){
-        // Serial.println("step position 1");
         
         async_position++;
         if(async_position >= async_length)
@@ -328,10 +288,6 @@ bool step_position(unsigned long time){
         async_element_done = false;
 
         async_char = async_str[async_position];
-        // Serial.println("------------------------------------------------");
-        // Serial.println(async_char);
-        // Serial.println("------------------------------------------------");
-
         if(async_char == ' '){
             
             async_position++;
@@ -342,10 +298,6 @@ bool step_position(unsigned long time){
             async_element_done = false;
             
             async_char = async_str[async_position];
-            // Serial.println("------------------------------------------------");
-            // Serial.println(async_char);
-            // Serial.println("------------------------------------------------");
-            
             async_char = _lookup_morse_char(async_char);
             
             if(!start_step_element(time)){
@@ -358,33 +310,13 @@ bool step_position(unsigned long time){
             return true;
         }
 
-        // if(async_char == ' '){
-        //     Serial.println("FOUND SPACE");
-        //     // _send_word_space(time);
-        //     // start word space
-        //     async_phase = PHASE_SPACE;
-        //     return true;
-        // }
-
         async_char = _lookup_morse_char(async_char);
-        // Serial.println("looked up:");
-        // Serial.println(int(async_char));
-
-
-        // Serial.println("looked up char:");
-        // Serial.println(int(async_char));
 
         if(!start_step_element(time))
             return false;
 
-        // if(async_char > 0){
-        //     // _send_morse(c, time);
-        //     // start char
-        //     async_phase = PHASE_CHAR;
-        // }
         async_next_event = time + (3 * async_element_del);
         async_phase = PHASE_SPACE;
-        // Serial.println("CHAR SPACE");
     }
     return true;
 }
@@ -393,13 +325,11 @@ void step_space(unsigned long time){
     if(time < async_next_event){
         return;
     }
-    // Serial.println("SPACE3");
 
     async_phase = PHASE_CHAR;
 }
 
 bool step_morse(unsigned long time){
-    // // Serial.println("step morse");
     switch(async_phase){
         case PHASE_DONE:
             break;
@@ -408,7 +338,6 @@ bool step_morse(unsigned long time){
                 async_phase = PHASE_DONE;
             break;
         case PHASE_SPACE:
-            // Serial.println("SPACE2");
             step_space(time);
             break;
         case PHASE_WORD_SPACE:
