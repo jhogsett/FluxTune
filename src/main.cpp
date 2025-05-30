@@ -35,7 +35,7 @@
 #include "wavegen.h"
 #include "wave_out.h"
 
-#include "sim_signal.h"
+#include "sim_station.h"
 
 #include "async_morse.h"
 
@@ -76,11 +76,12 @@ MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
 
 WaveGen wavegen1(&AD1);
 WaveOut waveout1(&wavegen1);
-SimSignal simsignal1(&wavegen1);
+// SimSignal simsignal1(&wavegen1);
+SimStation simstation1(&wavegen1);
 
-VFO vfoa("VFO A",   7000000.0, 50, &simsignal1);
-VFO vfob("VFO B",  14300000.0, 500, &simsignal1);
-VFO vfoc("VFO C", 146520000.0, 5000, &simsignal1);
+VFO vfoa("VFO A",   7000000.0, 50, &simstation1);
+VFO vfob("VFO B",  14300000.0, 500, &simstation1);
+VFO vfoc("VFO C", 146520000.0, 5000, &simstation1);
 
 VFO vfod("CHAN 1", 1.0, 1L, &waveout1);
 VFO vfoe("CHAN 2", 100.0, 10L, &waveout1);
@@ -257,7 +258,8 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	simsignal1.begin(millis(), 45);
+	// simsignal1.begin(millis(), 45);
+	simstation1.begin(time);
 
 	set_application(APP_SIMRADIO, &display);
 
@@ -267,10 +269,10 @@ void loop()
 	morse1.start_morse("CQ CQ DE N6CCM N6CCM K              ", 5, true);
 	morse2.start_morse("CQ CQ DE N6CCM N6CCM K              ", 13, true);
 
-	AD1.setFrequency((MD_AD9833::channel_t)0, 709.0);
+	AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
 
-	AD2.setFrequency((MD_AD9833::channel_t)0, 907.0);
+	AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
 
 	// bool active = false;
@@ -279,46 +281,30 @@ void loop()
 	while(true){
         unsigned long time = millis();
 
-		switch(morse1.step_morse(time)){
-			case STEP_MORSE_TURN_ON:
-				AD1.setActiveFrequency((MD_AD9833::channel_t)0);
-				// AD1.setFrequency((MD_AD9833::channel_t)0, 900.0);
-				break;
-
-			case STEP_MORSE_TURN_OFF:
-				AD1.setActiveFrequency((MD_AD9833::channel_t)1);
-				// AD1.setFrequency((MD_AD9833::channel_t)0, 0.0);
-				break;
-		}
-
-		switch(morse2.step_morse(time)){
-			case STEP_MORSE_TURN_ON:
-				AD2.setActiveFrequency((MD_AD9833::channel_t)0);
-				break;
-
-			case STEP_MORSE_TURN_OFF:
-				AD2.setActiveFrequency((MD_AD9833::channel_t)1);
-				break;
-		}
-
-		// Serial.print(active ? "A" : "n");
-
-		// need to know if not sending, no need to set silent freq
-
-		// if(active){
-		// 	if(!freq){
+		// switch(morse1.step_morse(time)){
+		// 	case STEP_MORSE_TURN_ON:
 		// 		AD1.setActiveFrequency((MD_AD9833::channel_t)0);
-		// 		freq = true;
-		// 	}
-		// } else {
-		// 	if(freq){
+		// 		// AD1.setFrequency((MD_AD9833::channel_t)0, 900.0);
+		// 		break;
+
+		// 	case STEP_MORSE_TURN_OFF:
 		// 		AD1.setActiveFrequency((MD_AD9833::channel_t)1);
-		// 	freq = false;
-		// 	}
+		// 		// AD1.setFrequency((MD_AD9833::channel_t)0, 0.0);
+		// 		break;
+		// }
+
+		// switch(morse2.step_morse(time)){
+		// 	case STEP_MORSE_TURN_ON:
+		// 		AD2.setActiveFrequency((MD_AD9833::channel_t)0);
+		// 		break;
+
+		// 	case STEP_MORSE_TURN_OFF:
+		// 		AD2.setActiveFrequency((MD_AD9833::channel_t)1);
+		// 		break;
 		// }
 
         panel_leds.step(time);
-		simsignal1.step(time);
+		simstation1.step(time);
 		
 		encoder_handlerA.step();
 		encoder_handlerB.step();
@@ -370,8 +356,7 @@ void loop()
 		if(encoder_handlerA.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 			dispatcher->update_display(&display);
-			//@@@
-			// dispatcher->update_realization();
+			dispatcher->update_realization();
 		}
 
 		if(encoder_handlerB.changed()){
