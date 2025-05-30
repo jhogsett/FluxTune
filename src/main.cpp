@@ -256,7 +256,9 @@ void loop()
 
 	set_application(APP_SIMRADIO, &display);
 
-	start_morse("CQ CQ CQ DE N6CCM N6CCM K              ", 20, true);
+	AsyncMorse morse;
+	// start_morse("CQ CQ CQ DE N6CCM N6CCM K              ", 20, true);
+	morse.start_morse("CQ CQ DE N6CCM N6CCM K              ", 20, true);
 
 	AD1.setFrequency((MD_AD9833::channel_t)0, 700.0);
 	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
@@ -266,7 +268,7 @@ void loop()
 	// bool last_active = true;
 	while(true){
         unsigned long time = millis();
-		switch(step_morse(time)){
+		switch(morse.step_morse(time)){
 			case STEP_MORSE_TURN_ON:
 				AD1.setActiveFrequency((MD_AD9833::channel_t)0);
 				break;

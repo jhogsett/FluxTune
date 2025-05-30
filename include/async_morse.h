@@ -26,8 +26,26 @@ public:
 
     void start_morse(const char *s, int wpm, bool repeat);
     int step_morse(unsigned long time);
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 private:
+    char lookup_morse_char(char c);
+    bool start_step_element(unsigned long time);
+    void restart_morse();
+    int step_element(unsigned long time);
+    bool step_position(unsigned long time);
+    bool step_space(unsigned long time);
+
     const char *async_str = NULL;
     int async_length;
     int async_element_del;
