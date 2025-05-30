@@ -1,5 +1,4 @@
 #include <Arduino.h>
-// #include "morse.h"
 #include "async_morse.h"
 
 const unsigned char morsedata[] PROGMEM = {
@@ -41,6 +40,255 @@ const unsigned char morsedata[] PROGMEM = {
     0b01111100  // 9
     };
 
+// char lookup_morse_char(char c){
+//     int offset = -1;
+//     if(c >= '0' && c <= 'z'){
+//         if(c >= '0' && c <= '9'){
+//             c -= '0';
+//             offset = 26;
+//         } else if(c >= 'A' && c <= 'Z'){
+//             c -= 'A';
+//             offset = 0;
+//         } else if(c >= 'a' && c <= 'z'){
+//             c -= 'a';
+//             offset = 0;
+//         }
+//     }
+//     if(offset >= 0)
+//         return c + offset;
+//     else
+//         return 0;
+// }
+
+// // returns true unless the start bit is not found
+// bool start_step_element(unsigned long time){
+//     async_element_done = false;
+//     async_morse = pgm_read_byte(morsedata + async_char);
+    
+//     for(async_element = 0; async_element < 7; async_element++){
+//         async_morse = async_morse >> 1;
+//         byte bit = async_morse & 0x1;
+//         if(bit == 1){
+//             async_next_event = time;
+//             async_space = true;
+//             return true;
+//         }
+//     }
+//     return false;
+// }
+
+// void restart_morse(){
+//     async_phase = PHASE_CHAR;
+//     async_position = 0;
+//     async_morse = 0;
+
+//     async_element = 0;
+//     async_active = false;
+//     async_next_event = 0L;
+//     async_space = false;
+
+//     async_element_done = true;
+
+//     async_char = async_str[async_position];
+    
+//     if(async_char == ' '){
+//         async_phase = PHASE_SPACE;
+
+//         return;
+//     }
+
+//     async_char = lookup_morse_char(async_char);    
+
+//     if(!start_step_element(millis()))
+//         return;
+
+//     if(async_char > 0){
+//         async_phase = PHASE_CHAR;
+//     }    
+// }
+
+// void start_morse(const char *s, int wpm, bool repeat){
+//     async_str = s;
+//     async_length = strlen(s);
+//     async_element_del = MORSE_TIME_FROM_WPM(wpm);
+//     async_repeat = repeat;
+
+//     async_phase = PHASE_CHAR;
+//     async_position = 0;
+//     async_morse = 0;
+
+//     async_element = 0;
+//     async_active = false;
+//     async_next_event = 0L;
+//     async_space = false;
+
+//     async_element_done = true;
+
+//     async_char = async_str[async_position];
+    
+//     if(async_char == ' '){
+//         async_phase = PHASE_SPACE;
+
+//         return;
+//     }
+
+//     async_char = lookup_morse_char(async_char);    
+
+//     if(!start_step_element(millis()))
+//         return;
+
+//     if(async_char > 0){
+//         async_phase = PHASE_CHAR;
+//     }    
+// }    
+
+// int step_element(unsigned long time){
+//     if(async_phase != PHASE_CHAR)
+//         return STEP_ELEMENT_DONE;
+
+//     if(async_element_done){
+//         return STEP_ELEMENT_DONE;
+//     }
+
+//     if(time < async_next_event){
+//         return STEP_ELEMENT_EARLY;
+//     }
+    
+//     if(async_space){
+//         async_space = false;
+//         async_element++;
+
+//         if(async_element >= 7){
+//             async_element_done = true;
+//             return STEP_ELEMENT_DONE;
+//         }
+
+//         async_morse = async_morse >> 1;
+//         byte bit = async_morse & 0x1;
+    
+//         async_active = true;
+//         if(bit == 1){
+//             async_next_event = time + (3 * async_element_del);
+//         } else{ 
+//             async_next_event = time + async_element_del;
+//         }
+//     } else {
+//         async_space = true;
+//         async_active = false;
+//         async_next_event = time + async_element_del;
+//     }
+
+//     return STEP_ELEMENT_ACTIVE;
+// }
+
+// // returns false if past the end of the sending string
+// bool step_position(unsigned long time){
+//     int ret = step_element(time); 
+
+//     if(ret == STEP_ELEMENT_EARLY)
+//         return true;
+
+//     if(ret == STEP_ELEMENT_DONE){
+//         async_position++;
+//         if(async_position >= async_length)
+//             return false;
+        
+//         async_char = async_str[async_position];
+
+//         if(async_char == ' '){
+//             async_position++;
+//             async_char = async_str[async_position];
+
+//             if(async_char != ' '){
+//                 async_char = lookup_morse_char(async_char);
+//                 if(!start_step_element(time)){
+//                     return false;
+//                 }
+//             }
+
+//             async_phase = PHASE_SPACE;
+//             async_next_event = time + (7 * async_element_del);
+
+//             return true;
+//         }
+
+//         async_char = lookup_morse_char(async_char);
+
+//         if(!start_step_element(time))
+//             return false;
+
+//         async_next_event = time + (3 * async_element_del);
+//         async_phase = PHASE_SPACE;
+//     }
+//     return true;
+// }
+
+// bool step_space(unsigned long time){
+//     if(time < async_next_event){
+//         return true;
+//     }
+
+//     async_phase = PHASE_CHAR;
+
+//     return true;
+// }
+
+// int step_morse(unsigned long time){
+//     switch(async_phase){
+//         case PHASE_DONE:
+//             break;
+//         case PHASE_CHAR:
+//             if(!step_position(time)){
+//                 if(async_repeat){
+//                     restart_morse();
+//                 } else {
+//                     async_phase = PHASE_DONE;
+//                 }
+//             }
+//             break;
+//         case PHASE_SPACE:
+//             if(!step_space(time))
+//                 async_phase = PHASE_DONE;
+//             break;
+//         case PHASE_WORD_SPACE:
+//             break;
+//     }
+
+//     if(async_switched_on){
+//         if(async_active){
+//             return STEP_MORSE_LEAVE_ON;
+//         } else {
+//             async_switched_on = false;
+//             return STEP_MORSE_TURN_OFF;
+//         } 
+//     } else { // switched off
+//         if(!async_active){
+//             return STEP_MORSE_LEAVE_OFF;
+//         } else {
+//             async_switched_on = true;
+//             return STEP_MORSE_TURN_ON;
+//         }
+//     }
+
+//     // return async_active;
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const char *async_str = NULL;
 int async_length;
 int async_element_del;
@@ -54,13 +302,7 @@ bool async_element_done;
 bool async_active;
 unsigned long async_next_event;
 bool async_space;
-
-#define PHASE_DONE 0
-#define PHASE_CHAR 1
-#define PHASE_SPACE 2
-#define PHASE_WORD_SPACE 3
-
-#define MAX_ELEMENT 6
+bool async_switched_on;
 
 char lookup_morse_char(char c){
     int offset = -1;
@@ -80,10 +322,6 @@ char lookup_morse_char(char c){
         return c + offset;
     else
         return 0;
-}
-
-bool morse_active(){
-    return async_active;
 }
 
 // returns true unless the start bit is not found
@@ -147,8 +385,8 @@ void start_morse(const char *s, int wpm, bool repeat){
     async_active = false;
     async_next_event = 0L;
     async_space = false;
-
     async_element_done = true;
+    async_switched_on = false;
 
     async_char = async_str[async_position];
     
@@ -167,10 +405,6 @@ void start_morse(const char *s, int wpm, bool repeat){
         async_phase = PHASE_CHAR;
     }    
 }    
-
-#define STEP_ELEMENT_EARLY 0
-#define STEP_ELEMENT_ACTIVE 1
-#define STEP_ELEMENT_DONE 2
 
 int step_element(unsigned long time){
     if(async_phase != PHASE_CHAR)
@@ -210,8 +444,6 @@ int step_element(unsigned long time){
 
     return STEP_ELEMENT_ACTIVE;
 }
-
-
 
 // returns false if past the end of the sending string
 bool step_position(unsigned long time){
@@ -265,7 +497,7 @@ bool step_space(unsigned long time){
     return true;
 }
 
-bool async_switched_on = false;
+// bool async_switched_on = false;
 int step_morse(unsigned long time){
     switch(async_phase){
         case PHASE_DONE:

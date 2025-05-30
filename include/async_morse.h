@@ -3,13 +3,49 @@
 
 #define MORSE_TIME_FROM_WPM(w) (1000 / w)
 
+#define PHASE_DONE 0
+#define PHASE_CHAR 1
+#define PHASE_SPACE 2
+#define PHASE_WORD_SPACE 3
+
+#define MAX_ELEMENT 6
+
 #define STEP_MORSE_TURN_ON   1
 #define STEP_MORSE_TURN_OFF  2
 #define STEP_MORSE_LEAVE_ON  3
 #define STEP_MORSE_LEAVE_OFF 4
 
+#define STEP_ELEMENT_EARLY 0
+#define STEP_ELEMENT_ACTIVE 1
+#define STEP_ELEMENT_DONE 2
+
+class AsyncMorse
+{
+public:
+    AsyncMorse();
+
+    void start_morse(const char *s, int wpm, bool repeat);
+    int step_morse(unsigned long time);
+
+private:
+    const char *async_str = NULL;
+    int async_length;
+    int async_element_del;
+    bool async_repeat;
+    byte async_phase;
+    byte async_position;
+    char async_char;
+    byte async_morse;
+    byte async_element;
+    bool async_element_done;
+    bool async_active;
+    unsigned long async_next_event;
+    bool async_space;
+    bool async_switched_on;
+
+};
+
 extern void start_morse(const char *s, int wpm, bool repeat);
 extern int step_morse(unsigned long time);
-extern bool morse_active();
 
 #endif
