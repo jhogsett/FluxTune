@@ -260,28 +260,42 @@ void loop()
 	AD1.setFrequency((MD_AD9833::channel_t)0, 700.0);
 	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
 
-	bool active = false;
-	bool freq = false;
+	// bool active = false;
+	// bool freq = false;
 	// bool last_active = true;
 	while(true){
         unsigned long time = millis();
+		switch(step_morse(time)){
+			case STEP_MORSE_TURN_ON:
+				AD1.setActiveFrequency((MD_AD9833::channel_t)0);
+				break;
 
-		active = step_morse(time);
+			case STEP_MORSE_TURN_OFF:
+				AD1.setActiveFrequency((MD_AD9833::channel_t)1);
+				break;
+
+			case STEP_MORSE_LEAVE_ON:
+				break;
+
+			case STEP_MORSE_LEAVE_OFF:
+				break;
+		}
+
 		// Serial.print(active ? "A" : "n");
 
 		// need to know if not sending, no need to set silent freq
 
-		if(active){
-			if(!freq){
-				AD1.setActiveFrequency((MD_AD9833::channel_t)0);
-				freq = true;
-			}
-		} else {
-			if(freq){
-				AD1.setActiveFrequency((MD_AD9833::channel_t)1);
-			freq = false;
-			}
-		}
+		// if(active){
+		// 	if(!freq){
+		// 		AD1.setActiveFrequency((MD_AD9833::channel_t)0);
+		// 		freq = true;
+		// 	}
+		// } else {
+		// 	if(freq){
+		// 		AD1.setActiveFrequency((MD_AD9833::channel_t)1);
+		// 	freq = false;
+		// 	}
+		// }
 
         panel_leds.step(time);
 		simsignal1.step(time);

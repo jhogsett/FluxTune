@@ -21,8 +21,13 @@ extern void _send_morse_char(char c, int time = DEFAULT_MORSE_TIME);
 extern void send_morse(char c, int wpm = 0);
 extern void send_morse(const char *s, int wpm = 0);
 
+#define STEP_MORSE_TURN_ON   1
+#define STEP_MORSE_TURN_OFF  2
+#define STEP_MORSE_LEAVE_ON  3
+#define STEP_MORSE_LEAVE_OFF 4
+
 extern void start_morse(const char *s, int wpm);
-extern bool step_morse(unsigned long time);
+extern int step_morse(unsigned long time);
 extern bool morse_active();
 
 #endif

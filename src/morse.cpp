@@ -307,7 +307,8 @@ bool step_space(unsigned long time){
     return true;
 }
 
-bool step_morse(unsigned long time){
+int step_morse(unsigned long time){
+    bool switched_on = false;
     switch(async_phase){
         case PHASE_DONE:
             break;
@@ -323,5 +324,22 @@ bool step_morse(unsigned long time){
         case PHASE_WORD_SPACE:
             break;
     }
-    return async_active;
+
+    if(switched_on){
+        if(async_active){
+            return STEP_MORSE_LEAVE_ON;
+        } else {
+            switched_on = false;
+            return STEP_MORSE_TURN_OFF;
+        } 
+    } else { // switched off
+        if(!async_active){
+            return STEP_MORSE_LEAVE_OFF;
+        } else {
+            switched_on = true;
+            return STEP_MORSE_TURN_ON;
+        }
+    }
+
+    // return async_active;
 }
