@@ -255,11 +255,10 @@ void loop()
 
 	set_application(APP_SIMRADIO, &display);
 
-	// start_morse("K    ", 13);
 	start_morse("CQ DE N6CCM K    ", 13);
-	// start_morse("A B", 13);
 
-	// can't handle multiple spaces in a row
+	AD1.setFrequency((MD_AD9833::channel_t)0, 700.0);
+	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
 
 	bool active = false;
 	bool freq = false;
@@ -274,12 +273,12 @@ void loop()
 
 		if(active){
 			if(!freq){
-				AD1.setFrequency(0, 700.0);
+				AD1.setActiveFrequency((MD_AD9833::channel_t)0);
 				freq = true;
 			}
 		} else {
 			if(freq){
-			AD1.setFrequency(0, 0.1);
+				AD1.setActiveFrequency((MD_AD9833::channel_t)1);
 			freq = false;
 			}
 		}

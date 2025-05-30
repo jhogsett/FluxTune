@@ -143,7 +143,6 @@ byte async_position;
 char async_char;
 byte async_morse;
 byte async_element;
-// bool async_element_space;
 bool async_element_done;
 bool async_active;
 unsigned long async_next_event;
@@ -171,10 +170,6 @@ bool start_step_element(unsigned long time){
         if(bit == 1){
             async_next_event = time;
             async_space = true;
-
-            // try this above instead
-            // async_element_done = false;
-
             return true;
         }
     }
@@ -208,29 +203,17 @@ void start_morse(const char *s, int wpm){
     async_char = _lookup_morse_char(async_char);    
 
     if(!start_step_element(millis()))
-        return;// false;
-
+        return;
 
     if(async_char > 0){
-        // _send_morse(c, time);
-        // start char
         async_phase = PHASE_CHAR;
     }    
 }    
-
-void async_debug(){
-    char buffer[80];
-    sprintf(buffer, "p:%d e:%d a:%d s:%d", async_position, async_element, async_active, async_space);
-    // Serial.println(buffer);
-
-}
 
 #define STEP_ELEMENT_EARLY 0
 #define STEP_ELEMENT_ACTIVE 1
 #define STEP_ELEMENT_DONE 2
 
-// returns false after the character is done sending
-// early, active, done
 int step_element(unsigned long time){
     if(async_phase != PHASE_CHAR)
         return STEP_ELEMENT_DONE;
@@ -239,15 +222,11 @@ int step_element(unsigned long time){
         return STEP_ELEMENT_DONE;
     }
 
-
     if(time < async_next_event){
         return STEP_ELEMENT_EARLY;
     }
     
-    // async_debug();
-    
     if(async_space){
-        
         async_space = false;
         async_element++;
 
@@ -255,7 +234,6 @@ int step_element(unsigned long time){
             async_element_done = true;
             return STEP_ELEMENT_DONE;
         }
-
 
         async_morse = async_morse >> 1;
         byte bit = async_morse & 0x1;
@@ -289,23 +267,10 @@ bool step_position(unsigned long time){
         if(async_position >= async_length)
             return false;
         
-        // 1 done within start_step_element
-        // async_element = 0;
-        // async_element_done = false;
-
         async_char = async_str[async_position];
 
         if(async_char == ' '){
             async_position++;
-
-            // 3 may not be needed here
-            // if(async_position >= async_length)
-            //     return false;
-            
-            // 2 doesn't seem needed here
-            // async_element = 0;
-            // async_element_done = false;
-            
             async_char = async_str[async_position];
 
             if(async_char != ' '){
@@ -314,10 +279,6 @@ bool step_position(unsigned long time){
                     return false;
                 }
             }
-
-            // if(!start_step_element(time)){
-            //     return false;
-            // }
 
             async_phase = PHASE_SPACE;
             async_next_event = time + (7 * async_element_del);
@@ -343,9 +304,6 @@ bool step_space(unsigned long time){
 
     async_phase = PHASE_CHAR;
 
-    // if(!start_step_element(time))
-    //     return false;
-
     return true;
 }
 
@@ -367,10 +325,3 @@ bool step_morse(unsigned long time){
     }
     return async_active;
 }
-
-
-
-
-
-
-/////// needs to handle character spaces
