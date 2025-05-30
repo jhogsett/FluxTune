@@ -255,12 +255,17 @@ void loop()
 
 	set_application(APP_SIMRADIO, &display);
 
-	start_morse("TEST", 13);
+	start_morse("TEST", 5);
 
 	while(true){
         unsigned long time = millis();
 
 		step_morse(time);
+		// if(morse_active()){
+		// 	Serial.print("#");
+		// } else {
+		// 	// Serial.print(" ");
+		// }
 
         panel_leds.step(time);
 		simsignal1.step(time);
