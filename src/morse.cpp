@@ -162,6 +162,7 @@ bool morse_active(){
 
 // returns true unless the start bit is not found
 bool start_step_element(unsigned long time){
+    async_element_done = false;
     async_morse = pgm_read_byte(morsedata + async_char);
     
     for(async_element = 0; async_element < 7; async_element++){
@@ -169,9 +170,11 @@ bool start_step_element(unsigned long time){
         byte bit = async_morse & 0x1;
         if(bit == 1){
             async_next_event = time;
-            // async_element = 0;
             async_space = true;
-            async_element_done = false;
+
+            // try this above instead
+            // async_element_done = false;
+
             return true;
         }
     }
@@ -229,6 +232,9 @@ void async_debug(){
 // returns false after the character is done sending
 // early, active, done
 int step_element(unsigned long time){
+    if(async_phase != PHASE_CHAR)
+        return STEP_ELEMENT_DONE;
+
     if(async_element_done){
         return STEP_ELEMENT_DONE;
     }
@@ -279,30 +285,39 @@ bool step_position(unsigned long time){
         return true;
 
     if(ret == STEP_ELEMENT_DONE){
-        
         async_position++;
         if(async_position >= async_length)
             return false;
         
-        async_element = 0;
-        async_element_done = false;
+        // 1 done within start_step_element
+        // async_element = 0;
+        // async_element_done = false;
 
         async_char = async_str[async_position];
+
         if(async_char == ' '){
-            
             async_position++;
-            if(async_position >= async_length)
-            return false;
+
+            // 3 may not be needed here
+            // if(async_position >= async_length)
+            //     return false;
             
-            async_element = 0;
-            async_element_done = false;
+            // 2 doesn't seem needed here
+            // async_element = 0;
+            // async_element_done = false;
             
             async_char = async_str[async_position];
-            async_char = _lookup_morse_char(async_char);
-            
-            if(!start_step_element(time)){
-                return false;
+
+            if(async_char != ' '){
+                async_char = _lookup_morse_char(async_char);
+                if(!start_step_element(time)){
+                    return false;
+                }
             }
+
+            // if(!start_step_element(time)){
+            //     return false;
+            // }
 
             async_phase = PHASE_SPACE;
             async_next_event = time + (7 * async_element_del);
@@ -321,12 +336,17 @@ bool step_position(unsigned long time){
     return true;
 }
 
-void step_space(unsigned long time){
+bool step_space(unsigned long time){
     if(time < async_next_event){
-        return;
+        return true;
     }
 
     async_phase = PHASE_CHAR;
+
+    // if(!start_step_element(time))
+    //     return false;
+
+    return true;
 }
 
 bool step_morse(unsigned long time){
@@ -334,11 +354,13 @@ bool step_morse(unsigned long time){
         case PHASE_DONE:
             break;
         case PHASE_CHAR:
-            if(!step_position(time))
+            if(!step_position(time)){
                 async_phase = PHASE_DONE;
+            }
             break;
         case PHASE_SPACE:
-            step_space(time);
+            if(!step_space(time))
+                async_phase = PHASE_DONE;
             break;
         case PHASE_WORD_SPACE:
             break;

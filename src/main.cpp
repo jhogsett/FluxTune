@@ -255,7 +255,8 @@ void loop()
 
 	set_application(APP_SIMRADIO, &display);
 
-	start_morse("CQ CQ CQ DE N6CCM N6CCM K    ", 13);
+	// start_morse("K    ", 13);
+	start_morse("CQ DE N6CCM K    ", 13);
 	// start_morse("A B", 13);
 
 	// can't handle multiple spaces in a row
