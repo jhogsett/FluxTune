@@ -37,7 +37,7 @@
 
 #include "sim_signal.h"
 
-#include "morse.h"
+#include "async_morse.h"
 
 #define CLKA 3
 #define DTA 2
@@ -178,6 +178,7 @@ void setup(){
 
 	AD1.begin();
 	AD1.setFrequency((MD_AD9833::channel_t)0, 1000000.0);
+	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD1.setMode(MD_AD9833::MODE_SINE);
 }	
 
@@ -255,7 +256,7 @@ void loop()
 
 	set_application(APP_SIMRADIO, &display);
 
-	start_morse("CQ DE N6CCM K    ", 13);
+	start_morse("CQ CQ CQ DE N6CCM N6CCM K              ", 20, true);
 
 	AD1.setFrequency((MD_AD9833::channel_t)0, 700.0);
 	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);

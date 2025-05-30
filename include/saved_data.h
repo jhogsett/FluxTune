@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include "idle_mode.h"
-#include "morse.h"
+// #include "morse.h"
 #include "chime.h"
 
 // when adding new persisted play data, search for ##DATA
