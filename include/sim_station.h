@@ -7,7 +7,7 @@
 class SimStation : public Realization
 {
 public:
-    SimStation(Realizer *realizer);
+    SimStation(Realizer *realizer, float fixed_freq, const char *message, int wpm);
     
     virtual bool update(Mode *mode);
 
@@ -17,6 +17,7 @@ public:
 
     void realize();
 
+    float _fixed_freq;
     float _frequency;
     AsyncMorse _morse;
     bool _active;

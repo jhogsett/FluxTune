@@ -76,11 +76,15 @@ MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
 
 WaveGen wavegen1(&AD1);
 WaveOut waveout1(&wavegen1);
-// SimSignal simsignal1(&wavegen1);
-SimStation simstation1(&wavegen1);
+
+WaveGen wavegen2(&AD2);
+WaveOut waveout2(&wavegen2);
+
+SimStation simstation1(&wavegen1, 7010000.0, "CQ CQ DE N6CCM N6CCM K        ", 20);
+SimStation simstation2(&wavegen2, 14010000.0, "CQ CQ DE N6CCM N6CCM K        ", 13);
 
 VFO vfoa("VFO A",   7000000.0, 50, &simstation1);
-VFO vfob("VFO B",  14300000.0, 500, &simstation1);
+VFO vfob("VFO B",  14000000.0, 50, &simstation2);
 VFO vfoc("VFO C", 146520000.0, 5000, &simstation1);
 
 VFO vfod("CHAN 1", 1.0, 1L, &waveout1);
@@ -258,22 +262,22 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	// simsignal1.begin(millis(), 45);
-	simstation1.begin(time);
+	// simstation1.begin(time);
+	// simstation2.begin(time);
 
 	set_application(APP_SIMRADIO, &display);
 
-	AsyncMorse morse1;
-	AsyncMorse morse2;
-	// start_morse("CQ CQ CQ DE N6CCM N6CCM K              ", 20, true);
-	morse1.start_morse("CQ CQ DE N6CCM N6CCM K              ", 5, true);
-	morse2.start_morse("CQ CQ DE N6CCM N6CCM K              ", 13, true);
+	// AsyncMorse morse1;
+	// AsyncMorse morse2;
+	// // start_morse("CQ CQ CQ DE N6CCM N6CCM K              ", 20, true);
+	// morse1.start_morse("CQ CQ DE N6CCM N6CCM K              ", 5, true);
+	// morse2.start_morse("CQ CQ DE N6CCM N6CCM K              ", 13, true);
 
-	AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	// AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	// AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
 
-	AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	// AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	// AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
 
 	// bool active = false;
 	// bool freq = false;
@@ -304,7 +308,9 @@ void loop()
 		// }
 
         panel_leds.step(time);
+
 		simstation1.step(time);
+		simstation2.step(time);
 		
 		encoder_handlerA.step();
 		encoder_handlerB.step();
