@@ -65,12 +65,12 @@ EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 const uint8_t PIN_DATA = 11;  ///< SPI Data pin number
 const uint8_t PIN_CLK = 13;  	///< SPI Clock pin number
 const uint8_t PIN_FSYNC = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC2 = 9;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC2 = 12;  ///< SPI Load pin number (FSYNC in AD9833 usage)
 // const uint8_t PIN_FSYNC3 = 8;  ///< SPI Load pin number (FSYNC in AD9833 usage)
 // const uint8_t PIN_FSYNC4 = 7;  ///< SPI Load pin number (FSYNC in AD9833 usage)
 
 MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
-// MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
+MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
 // MD_AD9833	AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
 // MD_AD9833	AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
 
@@ -177,9 +177,14 @@ void setup(){
 	// dispatcher->set_mode(&display, 0);
 
 	AD1.begin();
-	AD1.setFrequency((MD_AD9833::channel_t)0, 1000000.0);
+	AD1.setFrequency((MD_AD9833::channel_t)0, 0.0);
 	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD1.setMode(MD_AD9833::MODE_SINE);
+
+	AD2.begin();
+	AD2.setFrequency((MD_AD9833::channel_t)0, 0.0);
+	AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD2.setMode(MD_AD9833::MODE_SINE);
 }	
 
 bool main_menu(){
@@ -256,31 +261,43 @@ void loop()
 
 	set_application(APP_SIMRADIO, &display);
 
-	AsyncMorse morse;
+	AsyncMorse morse1;
+	AsyncMorse morse2;
 	// start_morse("CQ CQ CQ DE N6CCM N6CCM K              ", 20, true);
-	morse.start_morse("CQ CQ DE N6CCM N6CCM K              ", 20, true);
+	morse1.start_morse("CQ CQ DE N6CCM N6CCM K              ", 5, true);
+	morse2.start_morse("CQ CQ DE N6CCM N6CCM K              ", 13, true);
 
-	AD1.setFrequency((MD_AD9833::channel_t)0, 700.0);
+	AD1.setFrequency((MD_AD9833::channel_t)0, 709.0);
 	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
+
+	AD2.setFrequency((MD_AD9833::channel_t)0, 907.0);
+	AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
 
 	// bool active = false;
 	// bool freq = false;
 	// bool last_active = true;
 	while(true){
         unsigned long time = millis();
-		switch(morse.step_morse(time)){
+
+		switch(morse1.step_morse(time)){
 			case STEP_MORSE_TURN_ON:
 				AD1.setActiveFrequency((MD_AD9833::channel_t)0);
+				// AD1.setFrequency((MD_AD9833::channel_t)0, 900.0);
 				break;
 
 			case STEP_MORSE_TURN_OFF:
 				AD1.setActiveFrequency((MD_AD9833::channel_t)1);
+				// AD1.setFrequency((MD_AD9833::channel_t)0, 0.0);
+				break;
+		}
+
+		switch(morse2.step_morse(time)){
+			case STEP_MORSE_TURN_ON:
+				AD2.setActiveFrequency((MD_AD9833::channel_t)0);
 				break;
 
-			case STEP_MORSE_LEAVE_ON:
-				break;
-
-			case STEP_MORSE_LEAVE_OFF:
+			case STEP_MORSE_TURN_OFF:
+				AD2.setActiveFrequency((MD_AD9833::channel_t)1);
 				break;
 		}
 

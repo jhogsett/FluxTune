@@ -27,17 +27,6 @@ public:
     void start_morse(const char *s, int wpm, bool repeat);
     int step_morse(unsigned long time);
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 private:
     char lookup_morse_char(char c);
     bool start_step_element(unsigned long time);
