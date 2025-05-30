@@ -255,98 +255,104 @@ void loop()
 
 	set_application(APP_SIMRADIO, &display);
 
-	start_morse("TEST", 5);
+	start_morse("CQ CQ CQ DE N6CCM N6CCM K", 35);
+	// start_morse("A B", 13);
 
 	bool active = false;
-	bool last_active = false;
+	bool freq = false;
+	// bool last_active = true;
 	while(true){
         unsigned long time = millis();
 
-		bool last_active = active;
-		bool active = step_morse(time);
+		active = step_morse(time);
+		// Serial.print(active ? "A" : "n");
 
-		if(active != last_active){
-			if(active){
+		if(active){
+			if(!freq){
 				AD1.setFrequency(0, 700.0);
-			} else {
-				AD1.setFrequency(0, 0.1);
+				freq = true;
+			}
+		} else {
+			if(freq){
+			AD1.setFrequency(0, 0.1);
+			freq = false;
 			}
 		}
-		
-        panel_leds.step(time);
-		simsignal1.step(time);
-		
-		encoder_handlerA.step();
-		encoder_handlerB.step();
 
-		// check for changing dispatchers
-		bool pressed = encoder_handlerB.pressed();
-		bool long_pressed = encoder_handlerB.long_pressed();
-		if(pressed || long_pressed){
-			if(pressed){
-				// char *title;
-				switch(current_dispatcher){
-					case 1:
-						// 
-						dispatcher = set_application(APP_WAVEGEN, &display); // &dispatcher2;
-						// current_dispatcher = 2;
-						// title = (FSTR("AudioOut"));
-						break;
-						
-						case 2:
-						// 
-						dispatcher = set_application(APP_SETTINGS, &display); // &dispatcher3;
-						// current_dispatcher = 3;
-						// title = (FSTR("Settings"));
-						break;
-						
-						case 3:
-						// 
-						dispatcher = set_application(APP_SIMRADIO, &display); // &dispatcher1;
-						// current_dispatcher = 1;
-						// title = (FSTR("SimRadio"));
-						break;
-				}
+        // panel_leds.step(time);
+		// simsignal1.step(time);
+		
+		// encoder_handlerA.step();
+		// encoder_handlerB.step();
 
-				purge_events();
+	// 	// check for changing dispatchers
+	// 	bool pressed = encoder_handlerB.pressed();
+	// 	bool long_pressed = encoder_handlerB.long_pressed();
+	// 	if(pressed || long_pressed){
+	// 		if(pressed){
+	// 			// char *title;
+	// 			switch(current_dispatcher){
+	// 				case 1:
+	// 					// 
+	// 					dispatcher = set_application(APP_WAVEGEN, &display); // &dispatcher2;
+	// 					// current_dispatcher = 2;
+	// 					// title = (FSTR("AudioOut"));
+	// 					break;
+						
+	// 					case 2:
+	// 					// 
+	// 					dispatcher = set_application(APP_SETTINGS, &display); // &dispatcher3;
+	// 					// current_dispatcher = 3;
+	// 					// title = (FSTR("Settings"));
+	// 					break;
+						
+	// 					case 3:
+	// 					// 
+	// 					dispatcher = set_application(APP_SIMRADIO, &display); // &dispatcher1;
+	// 					// current_dispatcher = 1;
+	// 					// title = (FSTR("SimRadio"));
+	// 					break;
+	// 			}
+
+	// 			purge_events();
 					
-				// display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-				// dispatcher->set_mode(&display, 0);
+	// 			// display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
+	// 			// dispatcher->set_mode(&display, 0);
 
-				// // empty outstanding events
-				// encoder_handlerA.changed();
-				// encoder_handlerB.changed();
-				// encoder_handlerA.pressed();
-				// encoder_handlerA.long_pressed();
-				// encoder_handlerB.pressed();
-				// encoder_handlerB.long_pressed();
-			}
-		}
+	// 			// // empty outstanding events
+	// 			// encoder_handlerA.changed();
+	// 			// encoder_handlerB.changed();
+	// 			// encoder_handlerA.pressed();
+	// 			// encoder_handlerA.long_pressed();
+	// 			// encoder_handlerB.pressed();
+	// 			// encoder_handlerB.long_pressed();
+	// 		}
+	// 	}
 
-		if(encoder_handlerA.changed()){
-			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
-			dispatcher->update_display(&display);
-			dispatcher->update_realization();
-		}
+	// 	if(encoder_handlerA.changed()){
+	// 		dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
+	// 		dispatcher->update_display(&display);
+	// 		dispatcher->update_realization();
+	// 	}
 
-		if(encoder_handlerB.changed()){
-			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
+	// 	if(encoder_handlerB.changed()){
+	// 		dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
 
-			purge_events();
+	// 		purge_events();
 
-			dispatcher->update_display(&display);
-			// dispatcher->update_realization(&wavegen1);
+	// 		dispatcher->update_display(&display);
+	// 		// dispatcher->update_realization(&wavegen1);
 
-			// after mode change
-			unsigned long endtime = millis() + PURGE_TIME;
-			while(millis() < endtime)
-				purge_events();
-		}
+	// 		// after mode change
+	// 		unsigned long endtime = millis() + PURGE_TIME;
+	// 		while(millis() < endtime)
+	// 			purge_events();
+	// 	}
 
-		pressed = encoder_handlerA.pressed();
-		long_pressed = encoder_handlerA.long_pressed();
-		if(pressed || long_pressed){
-			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, pressed, long_pressed);
-		}
+	// 	pressed = encoder_handlerA.pressed();
+	// 	long_pressed = encoder_handlerA.long_pressed();
+	// 	if(pressed || long_pressed){
+	// 		dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, pressed, long_pressed);
+	// 	}
 	}
 }

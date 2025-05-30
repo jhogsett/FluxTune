@@ -191,27 +191,35 @@ void start_morse(const char *s, int wpm){
     async_str = s;
     async_length = strlen(s);
     async_element_del = MORSE_TIME_FROM_WPM(wpm);
+
     async_phase = PHASE_CHAR;
     async_position = 0;
-    async_char = '\0';
     async_morse = 0;
+
     async_element = 0;
     async_active = false;
     async_next_event = 0L;
     async_space = false;
 
-    async_element = 0;
     async_element_done = true;
+
     async_char = async_str[async_position];
+    // Serial.println("------------------------------------------------");
+    // Serial.println(async_char);
+    // Serial.println("------------------------------------------------");
+    
+    if(async_char == ' '){
+        async_phase = PHASE_SPACE;
+
+        // Serial.println(async_position);
+        // async_position++;
+        // Serial.println(async_position);
+        // async_char = async_str[async_position];
+        // async_char = _lookup_morse_char(async_char);    
+        return;
+    }
+
     async_char = _lookup_morse_char(async_char);    
-
-    // if(async_char == ' '){
-    //     // _send_word_space(time);    
-    //     // start word space
-    //     async_phase = PHASE_SPACE;
-    //     return true;
-    // }
-
 
     if(!start_step_element(millis()))
         return;// false;
@@ -238,10 +246,13 @@ void async_debug(){
 // returns false after the character is done sending
 // early, active, done
 int step_element(unsigned long time){
+    // Serial.println("1111111111");
     if(async_element_done){
         // Serial.println("step element - element done");
         return STEP_ELEMENT_DONE;
     }
+
+    // Serial.println("2222222");
 
     // // Serial.println("step element");
     if(time < async_next_event){
@@ -249,9 +260,12 @@ int step_element(unsigned long time){
         return STEP_ELEMENT_EARLY;
     }
 
-    async_debug();
+    // Serial.println("333333333");
+    
+    // async_debug();
     
     if(async_space){
+        // Serial.println("444444444");
         // Serial.println("step element - was handling element space");
         
         async_space = false;
@@ -262,30 +276,38 @@ int step_element(unsigned long time){
             async_element_done = true;
             return STEP_ELEMENT_DONE;
         }
-    
+
+        // Serial.println("55555555");
+
         async_morse = async_morse >> 1;
         byte bit = async_morse & 0x1;
     
         async_active = true;
         if(bit == 1){
-            // Serial.println("DASH");
+            // Serial.println("-");
             async_next_event = time + (3 * async_element_del);
         } else{ 
-            // Serial.println("DOT");
+            // Serial.println(".");
             async_next_event = time + async_element_del;
         }
     } else {
         // Serial.println("step element - was element");
         // was handling dot/dash, switch to element space
-        // Serial.println("SPACE");
+        // Serial.println("_");
+
+        // Serial.println("66666666");
 
         async_space = true;
         async_active = false;
         async_next_event = time + async_element_del;
     }
 
+    // Serial.println("777777777");
+
     return STEP_ELEMENT_ACTIVE;
 }
+
+
 
 // returns false if past the end of the sending string
 bool step_position(unsigned long time){
@@ -300,22 +322,55 @@ bool step_position(unsigned long time){
         
         async_position++;
         if(async_position >= async_length)
-        return false;
+            return false;
         
         async_element = 0;
         async_element_done = false;
 
         async_char = async_str[async_position];
+        // Serial.println("------------------------------------------------");
+        // Serial.println(async_char);
+        // Serial.println("------------------------------------------------");
+
+        if(async_char == ' '){
+            
+            async_position++;
+            if(async_position >= async_length)
+            return false;
+            
+            async_element = 0;
+            async_element_done = false;
+            
+            async_char = async_str[async_position];
+            // Serial.println("------------------------------------------------");
+            // Serial.println(async_char);
+            // Serial.println("------------------------------------------------");
+            
+            async_char = _lookup_morse_char(async_char);
+            
+            if(!start_step_element(time)){
+                return false;
+            }
+
+            async_phase = PHASE_SPACE;
+            async_next_event = time + (7 * async_element_del);
+
+            return true;
+        }
+
+        // if(async_char == ' '){
+        //     Serial.println("FOUND SPACE");
+        //     // _send_word_space(time);
+        //     // start word space
+        //     async_phase = PHASE_SPACE;
+        //     return true;
+        // }
+
         async_char = _lookup_morse_char(async_char);
         // Serial.println("looked up:");
         // Serial.println(int(async_char));
-        if(async_char == ' '){
-            // _send_word_space(time);
-            // start word space
-            async_phase = PHASE_SPACE;
-            return true;
-        }
- 
+
+
         // Serial.println("looked up char:");
         // Serial.println(int(async_char));
 
@@ -338,6 +393,7 @@ void step_space(unsigned long time){
     if(time < async_next_event){
         return;
     }
+    // Serial.println("SPACE3");
 
     async_phase = PHASE_CHAR;
 }
@@ -352,6 +408,7 @@ bool step_morse(unsigned long time){
                 async_phase = PHASE_DONE;
             break;
         case PHASE_SPACE:
+            // Serial.println("SPACE2");
             step_space(time);
             break;
         case PHASE_WORD_SPACE:
