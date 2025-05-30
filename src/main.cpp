@@ -257,16 +257,22 @@ void loop()
 
 	start_morse("TEST", 5);
 
+	bool active = false;
+	bool last_active = false;
 	while(true){
         unsigned long time = millis();
 
-		step_morse(time);
-		// if(morse_active()){
-		// 	Serial.print("#");
-		// } else {
-		// 	// Serial.print(" ");
-		// }
+		bool last_active = active;
+		bool active = step_morse(time);
 
+		if(active != last_active){
+			if(active){
+				AD1.setFrequency(0, 700.0);
+			} else {
+				AD1.setFrequency(0, 0.1);
+			}
+		}
+		
         panel_leds.step(time);
 		simsignal1.step(time);
 		

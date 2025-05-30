@@ -22,7 +22,7 @@ extern void send_morse(char c, int wpm = 0);
 extern void send_morse(const char *s, int wpm = 0);
 
 extern void start_morse(const char *s, int wpm);
-extern void step_morse(unsigned long time);
+extern bool step_morse(unsigned long time);
 extern bool morse_active();
 
 #endif
