@@ -13,15 +13,19 @@ SimStation::SimStation(Realizer *realizer, float fixed_freq, const char *message
     _active = false;
 }
 
-#define MAX_AUDIBLE_FREQ 5000.0
-#define SPACE_FREQUENCY 0.1
+void SimStation::begin(unsigned long time){
+    WaveGen  *wavegen = (WaveGen*)_realizer;
+    wavegen->set_frequency(SPACE_FREQUENCY, false);
+}
 
 void SimStation::realize(){
     WaveGen  *wavegen = (WaveGen*)_realizer;
     if(_active && (_frequency <= MAX_AUDIBLE_FREQ)){
-    	wavegen->set_frequency(_frequency);
+    	// wavegen->set_frequency(_frequency);
+        wavegen->set_active_frequency(true);
     } else {
-    	wavegen->set_frequency(SPACE_FREQUENCY);
+        wavegen->set_active_frequency(false);
+    	// wavegen->set_frequency(SPACE_FREQUENCY);
     }
 }
 
@@ -30,6 +34,9 @@ bool SimStation::update(Mode *mode){
     VFO *vfo = (VFO*)mode;
     _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
     _frequency = abs(_frequency - _fixed_freq);
+
+    WaveGen  *wavegen = (WaveGen*)_realizer;
+    wavegen->set_frequency(_frequency);
 
     realize();
 

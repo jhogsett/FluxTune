@@ -4,6 +4,9 @@
 #include "async_morse.h"
 #include "realization.h"
 
+#define MAX_AUDIBLE_FREQ 5000.0
+#define SPACE_FREQUENCY 0.1
+
 class SimStation : public Realization
 {
 public:
@@ -11,11 +14,12 @@ public:
     
     virtual bool update(Mode *mode);
 
-    // virtual void begin(unsigned long time);
+    virtual void begin(unsigned long time);
     virtual bool step(unsigned long time);
     // virtual void end();
 
     void realize();
+
 
     float _fixed_freq;
     float _frequency;
