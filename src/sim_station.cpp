@@ -20,13 +20,24 @@ void SimStation::begin(unsigned long time){
 
 void SimStation::realize(){
     WaveGen  *wavegen = (WaveGen*)_realizer;
-    if(_active && (_frequency <= MAX_AUDIBLE_FREQ)){
-    	// wavegen->set_frequency(_frequency);
-        wavegen->set_active_frequency(true);
-    } else {
+
+    // Serial.println(_frequency);
+    if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
+        // Serial.println("out of range");
         wavegen->set_active_frequency(false);
-    	// wavegen->set_frequency(SPACE_FREQUENCY);
+        return;
     }
+
+    // Serial.println(_frequency);
+    wavegen->set_active_frequency(_active);
+
+    // if(_active && (_frequency <= MAX_AUDIBLE_FREQ)){
+    // 	// wavegen->set_frequency(_frequency);
+
+    // } else {
+    //     wavegen->set_active_frequency(false);
+    // 	// wavegen->set_frequency(SPACE_FREQUENCY);
+    // }
 }
 
 // returns true on successful update
@@ -38,6 +49,7 @@ bool SimStation::update(Mode *mode){
     WaveGen  *wavegen = (WaveGen*)_realizer;
     wavegen->set_frequency(_frequency);
 
+    // this may not be needed
     realize();
 
     return true;

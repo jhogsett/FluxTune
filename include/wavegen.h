@@ -10,4 +10,6 @@ public:
     void set_active_frequency(bool main);
 
     MD_AD9833 * _sig_gen;
+    float _frequency;
+    bool _main;
 };

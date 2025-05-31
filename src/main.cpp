@@ -182,12 +182,12 @@ void setup(){
 	// dispatcher->set_mode(&display, 0);
 
 	AD1.begin();
-	AD1.setFrequency((MD_AD9833::channel_t)0, 0.0);
+	AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD1.setMode(MD_AD9833::MODE_SINE);
 
 	AD2.begin();
-	AD2.setFrequency((MD_AD9833::channel_t)0, 0.0);
+	AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD2.setMode(MD_AD9833::MODE_SINE);
 }	

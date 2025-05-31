@@ -5,6 +5,7 @@
 #include "realization.h"
 
 #define MAX_AUDIBLE_FREQ 5000.0
+#define MIN_AUDIBLE_FREQ 0.1
 #define SPACE_FREQUENCY 0.1
 
 class SimStation : public Realization
@@ -25,6 +26,7 @@ public:
     float _frequency;
     AsyncMorse _morse;
     bool _active;
+    bool _changed;
 };
 
 #endif
