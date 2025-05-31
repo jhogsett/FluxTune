@@ -80,16 +80,20 @@ WaveOut waveout1(&wavegen1);
 WaveGen wavegen2(&AD2);
 WaveOut waveout2(&wavegen2);
 
-SimStation simstation1(&wavegen1, 7010000.0, "CQ CQ DE N6CCM N6CCM K        ", 20);
-SimStation simstation2(&wavegen2, 14010000.0, "CQ CQ DE N6CCM N6CCM K        ", 13);
+SimStation simstation1(&wavegen1, 7010000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
+SimStation simstation2(&wavegen2, 7009000.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
 
-VFO vfoa("VFO A",   7000000.0, 50, &simstation1);
-VFO vfob("VFO B",  14000000.0, 50, &simstation2);
-VFO vfoc("VFO C", 146520000.0, 5000, &simstation1);
+Realization *simstations[] = {&simstation1, &simstation2}; 
 
-VFO vfod("CHAN 1", 1.0, 1L, &waveout1);
-VFO vfoe("CHAN 2", 100.0, 10L, &waveout1);
-VFO vfof("CHAN 3", 1000000.0, 100L, &waveout1);
+VFO vfoa("VFO A",   7000000.0, 50, simstations, 2);
+VFO vfob("VFO B",  14000000.0, 50, simstations, 2);
+VFO vfoc("VFO C", 146520000.0, 5000, simstations, 2);
+
+Realization *waveouts[] = {&waveout1};
+
+VFO vfod("CHAN 1", 1.0, 1L, waveouts, 1);
+VFO vfoe("CHAN 2", 100.0, 10L, waveouts, 1);
+VFO vfof("CHAN 3", 1000000.0, 100L, waveouts, 1);
 
 Contrast contrast("Contrast");
 

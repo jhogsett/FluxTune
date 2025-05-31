@@ -10,7 +10,7 @@ class VFO : public Mode
 {
 public:
     // constructor
-    VFO(const char *title, float frequency, unsigned long step, Realization *realization);
+    VFO(const char *title, float frequency, unsigned long step, Realization **realizations, byte nrealizations);
     
     virtual void update_display(HT16K33Disp *display);
     virtual void update_realization();
@@ -18,7 +18,8 @@ public:
     unsigned long _frequency;
     byte _sub_frequency;
     unsigned long _step;
-    Realization *_realization;
+    Realization **_realizations;
+    byte _nrealizations;
 
 private:
 };
