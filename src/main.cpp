@@ -64,15 +64,15 @@ EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 // Pins for SPI comm with the AD9833 IC
 const uint8_t PIN_DATA = 11;  ///< SPI Data pin number
 const uint8_t PIN_CLK = 13;  	///< SPI Clock pin number
-const uint8_t PIN_FSYNC = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
-const uint8_t PIN_FSYNC2 = 12;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC3 = 8;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC4 = 7;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC1 = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC2 = 14;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC3 = 15;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC4 = 16;  ///< SPI Load pin number (FSYNC in AD9833 usage)
 
-MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
-MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
-// MD_AD9833	AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
-// MD_AD9833	AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
+MD_AD9833 AD1(PIN_DATA, PIN_CLK, PIN_FSYNC1); // Arbitrary SPI pins
+MD_AD9833 AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
+MD_AD9833 AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
+MD_AD9833 AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
 
 WaveGen wavegen1(&AD1);
 WaveOut waveout1(&wavegen1);
@@ -80,14 +80,22 @@ WaveOut waveout1(&wavegen1);
 WaveGen wavegen2(&AD2);
 WaveOut waveout2(&wavegen2);
 
-SimStation simstation1(&wavegen1, 7010000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
-SimStation simstation2(&wavegen2, 7009000.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
+WaveGen wavegen3(&AD3);
+WaveOut waveout3(&wavegen3);
 
-Realization *simstations[] = {&simstation1, &simstation2}; 
+WaveGen wavegen4(&AD4);
+WaveOut waveout4(&wavegen4);
 
-VFO vfoa("VFO A",   7000000.0, 50, simstations, 2);
-VFO vfob("VFO B",  14000000.0, 50, simstations, 2);
-VFO vfoc("VFO C", 146520000.0, 5000, simstations, 2);
+SimStation simstation1(&wavegen1, 7005000.0, "CQ CQ DE N20CCM N6CCM K    ", 20);
+SimStation simstation2(&wavegen2, 7005500.0, "CQ CQ DE N13CCM N6CCM K    ", 13);
+SimStation simstation3(&wavegen3, 7006000.0, "CQ CQ DE N8CCM N6CCM K    ", 8);
+SimStation simstation4(&wavegen4, 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 16);
+
+Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+
+VFO vfoa("VFO A",   7000000.0, 10, simstations, 4);
+VFO vfob("VFO B",  14000000.0, 10, simstations, 4);
+VFO vfoc("VFO C", 146520000.0, 5000, simstations, 4);
 
 Realization *waveouts[] = {&waveout1};
 
@@ -194,6 +202,16 @@ void setup(){
 	AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD2.setMode(MD_AD9833::MODE_SINE);
+
+	AD3.begin();
+	AD3.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	AD3.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD3.setMode(MD_AD9833::MODE_SINE);
+
+	AD4.begin();
+	AD4.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	AD4.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD4.setMode(MD_AD9833::MODE_SINE);
 }	
 
 bool main_menu(){
@@ -268,6 +286,8 @@ void loop()
 
 	simstation1.begin(time);
 	simstation2.begin(time);
+	simstation3.begin(time);
+	simstation4.begin(time);
 
 	set_application(APP_SIMRADIO, &display);
 
@@ -315,7 +335,9 @@ void loop()
 
 		simstation1.step(time);
 		simstation2.step(time);
-		
+		simstation3.step(time);
+		simstation4.step(time);
+
 		encoder_handlerA.step();
 		encoder_handlerB.step();
 

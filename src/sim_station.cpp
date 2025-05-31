@@ -44,7 +44,10 @@ void SimStation::realize(){
 bool SimStation::update(Mode *mode){
     VFO *vfo = (VFO*)mode;
     _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
+
     _frequency = abs(_frequency - _fixed_freq);
+    // _frequency = _frequency - _fixed_freq;
+    // _frequency *= 2.0;
 
     WaveGen  *wavegen = (WaveGen*)_realizer;
     wavegen->set_frequency(_frequency);

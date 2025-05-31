@@ -31,6 +31,7 @@ private:
     char lookup_morse_char(char c);
     bool start_step_element(unsigned long time);
     void restart_morse();
+    unsigned long compute_element_time(unsigned long time, byte element_count, bool is_space);
     int step_element(unsigned long time);
     bool step_position(unsigned long time);
     bool step_space(unsigned long time);

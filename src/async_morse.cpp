@@ -146,6 +146,20 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat){
     }    
 }    
 
+unsigned long AsyncMorse::compute_element_time(unsigned long time, byte element_count, bool is_space){
+    // int fist_adjustment;
+    // if(is_space){
+    //     fist_adjustment = int((async_element_del * 0.4) - (async_element_del * 0.2));
+    // } else {
+    //     fist_adjustment = int((async_element_del * 0.2) - (async_element_del * 0.1));
+    // }
+    // fist_adjustment = random(fist_adjustment) - (fist_adjustment / 2);
+    // Serial.println((fist_adjustment));
+    // return time + (element_count * async_element_del) + fist_adjustment;
+
+    return time + (element_count * async_element_del);
+}
+
 int AsyncMorse::step_element(unsigned long time){
     if(async_phase != PHASE_CHAR)
         return STEP_ELEMENT_DONE;
@@ -172,14 +186,14 @@ int AsyncMorse::step_element(unsigned long time){
     
         async_active = true;
         if(bit == 1){
-            async_next_event = time + (3 * async_element_del);
+            async_next_event = compute_element_time(time, 3, false);//  time + (3 * async_element_del);
         } else{ 
-            async_next_event = time + async_element_del;
+            async_next_event = compute_element_time(time, 1, false);//time + async_element_del;
         }
     } else {
         async_space = true;
         async_active = false;
-        async_next_event = time + async_element_del;
+        async_next_event = compute_element_time(time, 1, false);//time + async_element_del;
     }
 
     return STEP_ELEMENT_ACTIVE;
@@ -211,7 +225,7 @@ bool AsyncMorse::step_position(unsigned long time){
             }
 
             async_phase = PHASE_SPACE;
-            async_next_event = time + (7 * async_element_del);
+            async_next_event = compute_element_time(time, 7, true);//time + (7 * async_element_del);
 
             return true;
         }
@@ -221,7 +235,7 @@ bool AsyncMorse::step_position(unsigned long time){
         if(!start_step_element(time))
             return false;
 
-        async_next_event = time + (3 * async_element_del);
+        async_next_event = compute_element_time(time, 3, true);//time + (3 * async_element_del);
         async_phase = PHASE_SPACE;
     }
     return true;
