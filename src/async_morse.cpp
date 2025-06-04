@@ -287,8 +287,6 @@ int AsyncMorse::step_morse(unsigned long time){
             return STEP_MORSE_TURN_ON;
         }
     }
-
-    // return async_active;
 }
 
 

@@ -35,7 +35,8 @@
 #include "wavegen.h"
 #include "wave_out.h"
 
-#include "sim_station.h"
+// #include "sim_station.h"
+#include "sim_rtty.h"
 
 #include "async_morse.h"
 
@@ -86,10 +87,21 @@ WaveOut waveout3(&wavegen3);
 WaveGen wavegen4(&AD4);
 WaveOut waveout4(&wavegen4);
 
-SimStation simstation1(&wavegen1, 7005000.0, "CQ CQ DE N20CCM N6CCM K    ", 20);
-SimStation simstation2(&wavegen2, 7005500.0, "CQ CQ DE N13CCM N6CCM K    ", 13);
-SimStation simstation3(&wavegen3, 7006000.0, "CQ CQ DE N8CCM N6CCM K    ", 8);
-SimStation simstation4(&wavegen4, 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 16);
+// SimStation simstation1(&wavegen1, 7005000.0, "CQ CQ DE N20CCM N6CCM K    ", 20);
+// SimStation simstation2(&wavegen2, 7005500.0, "CQ CQ DE N13CCM N6CCM K    ", 13);
+// SimStation simstation3(&wavegen3, 7006000.0, "CQ CQ DE N8CCM N6CCM K    ", 8);
+// SimStation simstation4(&wavegen4, 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 16);
+
+// Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+
+// VFO vfoa("VFO A",   7000000.0, 10, simstations, 4);
+// VFO vfob("VFO B",  14000000.0, 10, simstations, 4);
+// VFO vfoc("VFO C", 146520000.0, 5000, simstations, 4);
+
+SimRTTY simstation1(&wavegen1, 7005000.0);
+SimRTTY simstation2(&wavegen2, 7006000.0);
+SimRTTY simstation3(&wavegen3, 7007000.0);
+SimRTTY simstation4(&wavegen4, 7008000.0);
 
 Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
