@@ -11,6 +11,7 @@ SimStation::SimStation(Realizer *realizer, float fixed_freq, const char *message
     _frequency = 0.0;
     _morse.start_morse(message, wpm, true);
     _active = false;
+    _enabled = false;
 }
 
 void SimStation::begin(unsigned long time){
@@ -22,9 +23,22 @@ void SimStation::realize(){
     WaveGen  *wavegen = (WaveGen*)_realizer;
 
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
-        wavegen->set_active_frequency(false);
+        if(_enabled){
+            _enabled = false;
+            wavegen->set_frequency(SILENT_FREQ, true);
+            wavegen->set_frequency(SILENT_FREQ, false);
+        }
         return;
+    } 
+        
+    if(!_enabled){
+        _enabled = true;
     }
+
+    // if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
+    //     wavegen->set_active_frequency(false);
+    //     return;
+    // }
 
     wavegen->set_active_frequency(_active);
 
@@ -42,12 +56,13 @@ bool SimStation::update(Mode *mode){
     VFO *vfo = (VFO*)mode;
     _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
 
-    _frequency = abs(_frequency - _fixed_freq);
-    // _frequency = _frequency - _fixed_freq;
-    // _frequency *= 2.0;
+    // _frequency = abs(_frequency - _fixed_freq);
+    _frequency = _frequency - _fixed_freq;
 
-    WaveGen  *wavegen = (WaveGen*)_realizer;
-    wavegen->set_frequency(_frequency);
+    if(_enabled){
+        WaveGen  *wavegen = (WaveGen*)_realizer;
+        wavegen->set_frequency(_frequency);
+    }
 
     realize();
 

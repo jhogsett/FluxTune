@@ -10,7 +10,7 @@ SimRTTY::SimRTTY(Realizer *realizer, float fixed_freq) : Realization(realizer){
     _frequency = 0.0;
     _rtty.start_rtty(true);
     _active = false;
-    _enabled = false; // needed since both frequencies are needed for signaling
+    _enabled = false;
 }
 
 void SimRTTY::begin(unsigned long time){
@@ -50,14 +50,17 @@ void SimRTTY::realize(){
 bool SimRTTY::update(Mode *mode){
     VFO *vfo = (VFO*)mode;
     _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
-    _frequency = abs(_frequency - _fixed_freq);
 
-    Serial.println(_frequency);
+    // _frequency = abs(_frequency - _fixed_freq);
+    _frequency = _frequency - _fixed_freq;
 
-    WaveGen  *wavegen = (WaveGen*)_realizer;
-    wavegen->set_frequency(_frequency, true);
-    wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
 
+    if(_enabled){
+        WaveGen  *wavegen = (WaveGen*)_realizer;
+        wavegen->set_frequency(_frequency, true);
+        wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
+    }
+    
     realize();
 
     return true;
