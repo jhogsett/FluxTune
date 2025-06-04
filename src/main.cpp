@@ -87,10 +87,10 @@ WaveOut waveout3(&wavegen3);
 WaveGen wavegen4(&AD4);
 WaveOut waveout4(&wavegen4);
 
-SimStation simstation1(&wavegen1, 7005000.0, "CQ CQ DE N6CCM N6CCM K    ", 8);
-SimStation simstation2(&wavegen2, 7006000.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
-SimStation simstation3(&wavegen3, 7007000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
-// SimStation simstation4(&wavegen4, 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 16);
+SimStation simstation1(&wavegen1, 7005000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+SimStation simstation2(&wavegen2, 7005500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
+SimStation simstation3(&wavegen3, 7006000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
+SimStation simstation4(&wavegen4, 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
 // Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
@@ -101,7 +101,7 @@ SimStation simstation3(&wavegen3, 7007000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
-SimRTTY simstation4(&wavegen4, 7008000.0);
+// SimRTTY simstation4(&wavegen4, 7008000.0);
 
 Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
@@ -409,7 +409,7 @@ void loop()
 			purge_events();
 
 			dispatcher->update_display(&display);
-			// dispatcher->update_realization(&wavegen1);
+			dispatcher->update_realization();
 
 			// after mode change
 			unsigned long endtime = millis() + PURGE_TIME;
