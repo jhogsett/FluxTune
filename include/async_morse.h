@@ -6,7 +6,7 @@
 #define PHASE_DONE 0
 #define PHASE_CHAR 1
 #define PHASE_SPACE 2
-#define PHASE_WORD_SPACE 3
+#define PHASE_WAIT 3
 
 #define MAX_ELEMENT 6
 
@@ -24,7 +24,7 @@ class AsyncMorse
 public:
     AsyncMorse();
 
-    void start_morse(const char *s, int wpm, bool repeat);
+    void start_morse(const char *s, int wpm, bool repeat, int wait_seconds);
     int step_morse(unsigned long time);
     
 private:
@@ -50,6 +50,7 @@ private:
     unsigned long async_next_event;
     bool async_space;
     bool async_switched_on;
+    int async_wait_seconds;
 
 };
 
