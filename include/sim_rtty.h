@@ -5,7 +5,7 @@
 #include "async_rtty.h"
 
 #define MAX_AUDIBLE_FREQ 5000.0
-#define MIN_AUDIBLE_FREQ 0.1
+#define MIN_AUDIBLE_FREQ 150.0
 
 #define MARK_FREQ_SHIFT 170.0
 #define SILENT_FREQ 0.1

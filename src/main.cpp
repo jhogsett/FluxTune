@@ -139,9 +139,6 @@ EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
 
 
-#define SILENT_FREQ 1000000.0
-
-
 #define APP_SIMRADIO 1
 #define APP_WAVEGEN 2
 #define APP_SETTINGS 3

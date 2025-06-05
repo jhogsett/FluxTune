@@ -5,7 +5,7 @@
 #include "realization.h"
 
 #define MAX_AUDIBLE_FREQ 5000.0
-#define MIN_AUDIBLE_FREQ 0.1
+#define MIN_AUDIBLE_FREQ 150.0
 #define SPACE_FREQUENCY 0.1
 #define SILENT_FREQ 0.1
 
