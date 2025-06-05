@@ -87,10 +87,10 @@ WaveOut waveout3(&wavegen3);
 WaveGen wavegen4(&AD4);
 WaveOut waveout4(&wavegen4);
 
-SimStation simstation1(&wavegen1, 7005000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
-SimStation simstation2(&wavegen2, 7005500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
-SimStation simstation3(&wavegen3, 7006000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
-SimStation simstation4(&wavegen4, 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+SimStation simstation1(&wavegen1);
+SimStation simstation2(&wavegen2);
+SimStation simstation3(&wavegen3);
+// SimStation simstation4(&wavegen4);
 
 // Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
@@ -101,7 +101,7 @@ SimStation simstation4(&wavegen4, 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
-// SimRTTY simstation4(&wavegen4, 7008000.0);
+SimRTTY simstation4(&wavegen4);
 
 Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
@@ -293,10 +293,12 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	simstation1.begin(time + random(1000));
-	simstation2.begin(time + random(1000));
-	simstation3.begin(time + random(1000));
-	simstation4.begin(time + random(1000));
+	simstation1.begin(time + random(1000), 7005000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+	simstation2.begin(time + random(1000), 7005500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
+	simstation3.begin(time + random(1000), 7006000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
+
+	simstation4.begin(time + random(1000), 7002000.0);
+	// simstation4.begin(time + random(1000), 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
 	set_application(APP_SIMRADIO, &display);
 

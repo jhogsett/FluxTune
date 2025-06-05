@@ -6,17 +6,17 @@
 #define WAIT_SECONDS 4
 
 // mode is expected to be a derivative of VFO
-SimStation::SimStation(Realizer *realizer, float fixed_freq, const char *message, int wpm) : Realization(realizer)
+SimStation::SimStation(Realizer *realizer) : Realization(realizer)
 {
     _realizer = realizer;
-    _fixed_freq = fixed_freq;
-    _frequency = 0.0;
-    _morse.start_morse(message, wpm, true, WAIT_SECONDS);
     _active = false;
     _enabled = false;
 }
 
-void SimStation::begin(unsigned long time){
+void SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm){
+    _fixed_freq = fixed_freq;
+    _frequency = 0.0;
+    _morse.start_morse(message, wpm, true, WAIT_SECONDS);
     WaveGen  *wavegen = (WaveGen*)_realizer;
     wavegen->set_frequency(SPACE_FREQUENCY, false);
 }

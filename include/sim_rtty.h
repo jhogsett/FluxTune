@@ -13,15 +13,13 @@
 class SimRTTY : public Realization
 {
 public:
-    SimRTTY(Realizer *realizer, float fixed_freq);
+    SimRTTY(Realizer *realizer);
+    
+    virtual void begin(unsigned long time, float fixed_freq);
     
     virtual bool update(Mode *mode);
 
-    virtual void begin(unsigned long time);
     virtual bool step(unsigned long time);
-    // virtual void end();
-
-    // virtual void internal_step(unsigned long time);
 
     void realize();
 

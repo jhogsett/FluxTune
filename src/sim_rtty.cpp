@@ -4,16 +4,16 @@
 #include "sim_rtty.h"
 
 // mode is expected to be a derivative of VFO
-SimRTTY::SimRTTY(Realizer *realizer, float fixed_freq) : Realization(realizer){
+SimRTTY::SimRTTY(Realizer *realizer) : Realization(realizer){
     _realizer = realizer;
-    _fixed_freq = fixed_freq;
     _frequency = 0.0;
     _rtty.start_rtty(true);
     _active = false;
     _enabled = false;
 }
 
-void SimRTTY::begin(unsigned long time){
+void SimRTTY::begin(unsigned long time, float fixed_freq){
+    _fixed_freq = fixed_freq;
     WaveGen  *wavegen = (WaveGen*)_realizer;
     wavegen->set_frequency(SILENT_FREQ, false);
     wavegen->set_frequency(SILENT_FREQ, true);
@@ -60,7 +60,7 @@ bool SimRTTY::update(Mode *mode){
         wavegen->set_frequency(_frequency, true);
         wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
     }
-    
+
     realize();
 
     return true;

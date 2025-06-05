@@ -12,13 +12,12 @@
 class SimStation : public Realization
 {
 public:
-    SimStation(Realizer *realizer, float fixed_freq, const char *message, int wpm);
+    SimStation(Realizer *realizer);
+    virtual void begin(unsigned long time, float fixed_freq, const char *message, int wpm);
     
     virtual bool update(Mode *mode);
 
-    virtual void begin(unsigned long time);
     virtual bool step(unsigned long time);
-    // virtual void end();
 
     void realize();
 
