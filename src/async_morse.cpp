@@ -116,7 +116,7 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
     async_length = strlen(s);
     async_element_del = MORSE_TIME_FROM_WPM(wpm);
     async_repeat = repeat;
-    async_wait_seconds = wait_seconds
+    async_wait_seconds = wait_seconds;
 
     async_phase = PHASE_CHAR;
     async_position = 0;
@@ -242,14 +242,29 @@ bool AsyncMorse::step_position(unsigned long time){
     return true;
 }
 
-bool AsyncMorse::step_space(unsigned long time){
+void AsyncMorse::step_space(unsigned long time){
     if(time < async_next_event){
-        return true;
+        return;
     }
 
     async_phase = PHASE_CHAR;
+}
 
-    return true;
+void AsyncMorse::start_wait(unsigned long time){
+    async_phase = PHASE_WAIT;
+    async_next_event = time + (async_wait_seconds * 1000);
+}
+
+void AsyncMorse::step_wait(unsigned long time){
+    if(time < async_next_event){
+        return;
+    }
+
+    if(async_repeat){
+        restart_morse();
+    } else {
+        async_phase = PHASE_DONE;
+    }
 }
 
 int AsyncMorse::step_morse(unsigned long time){
@@ -258,18 +273,17 @@ int AsyncMorse::step_morse(unsigned long time){
             break;
         case PHASE_CHAR:
             if(!step_position(time)){
-                if(async_repeat){
-                    restart_morse();
-                } else {
-                    async_phase = PHASE_WAIT;
-                }
+                if(async_repeat)
+                    start_wait(time);
+                else
+                    async_phase = PHASE_DONE;
             }
             break;
         case PHASE_SPACE:
-            if(!step_space(time))
-                async_phase = PHASE_DONE;
+            step_space(time);
             break;
         case PHASE_WAIT:
+            step_wait(time);
             break;
     }
 

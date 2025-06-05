@@ -3,13 +3,15 @@
 #include "wavegen.h"
 #include "sim_station.h"
 
+#define WAIT_SECONDS 4
+
 // mode is expected to be a derivative of VFO
 SimStation::SimStation(Realizer *realizer, float fixed_freq, const char *message, int wpm) : Realization(realizer)
 {
     _realizer = realizer;
     _fixed_freq = fixed_freq;
     _frequency = 0.0;
-    _morse.start_morse(message, wpm, true);
+    _morse.start_morse(message, wpm, true, WAIT_SECONDS);
     _active = false;
     _enabled = false;
 }

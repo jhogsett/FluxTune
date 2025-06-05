@@ -34,7 +34,9 @@ private:
     unsigned long compute_element_time(unsigned long time, byte element_count, bool is_space);
     int step_element(unsigned long time);
     bool step_position(unsigned long time);
-    bool step_space(unsigned long time);
+    void step_space(unsigned long time);
+    void start_wait(unsigned long time);
+    void step_wait(unsigned long time);
 
     const char *async_str = NULL;
     int async_length;
