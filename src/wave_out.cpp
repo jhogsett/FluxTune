@@ -1,11 +1,12 @@
 
 #include "vfo.h"
 #include "wavegen.h"
+#include "realizer_pool.h"
 #include "wave_out.h"
 
 // mode is expected to be a derivative of VFO
-WaveOut::WaveOut(Realizer *realizer) : Realization(realizer){
-    _realizer = realizer;
+WaveOut::WaveOut(RealizerPool *realizer_pool) : Realization(realizer_pool){
+    // _realizer = realizer;
 }
 
 // returns true on successful update

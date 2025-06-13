@@ -2,6 +2,7 @@
 #define __SIM_RTTY_H__
 
 #include "realization.h"
+#include "realizer_pool.h"
 #include "async_rtty.h"
 
 #define MAX_AUDIBLE_FREQ 5000.0
@@ -13,9 +14,9 @@
 class SimRTTY : public Realization
 {
 public:
-    SimRTTY(Realizer *realizer);
+    SimRTTY(RealizerPool *realizer_pool);
     
-    virtual void begin(unsigned long time, float fixed_freq);
+    virtual bool begin(unsigned long time, float fixed_freq);
     
     virtual bool update(Mode *mode);
 

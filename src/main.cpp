@@ -40,6 +40,8 @@
 
 #include "async_morse.h"
 
+#include "realizer_pool.h"
+
 #define CLKA 3
 #define DTA 2
 #define SWA 4
@@ -63,12 +65,12 @@ EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 
 
 // Pins for SPI comm with the AD9833 IC
-const uint8_t PIN_DATA = 11;  ///< SPI Data pin number
-const uint8_t PIN_CLK = 13;  	///< SPI Clock pin number
-const uint8_t PIN_FSYNC1 = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
-const uint8_t PIN_FSYNC2 = 14;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-const uint8_t PIN_FSYNC3 = 15;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-const uint8_t PIN_FSYNC4 = 16;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const byte PIN_DATA = 11;  ///< SPI Data pin number
+const byte PIN_CLK = 13;  	///< SPI Clock pin number
+const byte PIN_FSYNC1 = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
+const byte PIN_FSYNC2 = 14;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const byte PIN_FSYNC3 = 15;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const byte PIN_FSYNC4 = 16;  ///< SPI Load pin number (FSYNC in AD9833 usage)
 
 MD_AD9833 AD1(PIN_DATA, PIN_CLK, PIN_FSYNC1); // Arbitrary SPI pins
 MD_AD9833 AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
@@ -76,21 +78,23 @@ MD_AD9833 AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
 MD_AD9833 AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
 
 WaveGen wavegen1(&AD1);
-WaveOut waveout1(&wavegen1);
-
 WaveGen wavegen2(&AD2);
-WaveOut waveout2(&wavegen2);
-
 WaveGen wavegen3(&AD3);
-WaveOut waveout3(&wavegen3);
-
 WaveGen wavegen4(&AD4);
-WaveOut waveout4(&wavegen4);
 
-SimStation simstation1(&wavegen1);
-SimStation simstation2(&wavegen2);
-SimStation simstation3(&wavegen3);
-// SimStation simstation4(&wavegen4);
+Realizer *realizers[4] = {&wavegen1, &wavegen2, &wavegen3, &wavegen4};
+bool realizer_stats[4] = {false, false, false, false};
+RealizerPool realizer_pool(realizers, realizer_stats, 4);
+
+WaveOut waveout1(&realizer_pool);
+WaveOut waveout2(&realizer_pool);
+WaveOut waveout3(&realizer_pool);
+WaveOut waveout4(&realizer_pool);
+
+SimStation simstation1(&realizer_pool);
+SimStation simstation2(&realizer_pool);
+SimStation simstation3(&realizer_pool);
+SimStation simstation4(&realizer_pool);
 
 // Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
@@ -101,7 +105,7 @@ SimStation simstation3(&wavegen3);
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
-SimRTTY simstation4(&wavegen4);
+// SimRTTY simstation4(&realizer_pool);
 
 Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
@@ -297,8 +301,8 @@ void loop()
 	simstation2.begin(time + random(1000), 7005500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
 	simstation3.begin(time + random(1000), 7006000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
 
-	simstation4.begin(time + random(1000), 7002000.0);
-	// simstation4.begin(time + random(1000), 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+	// simstation4.begin(time + random(1000), 7002000.0);
+	simstation4.begin(time + random(1000), 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
 	set_application(APP_SIMRADIO, &display);
 

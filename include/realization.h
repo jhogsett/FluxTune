@@ -2,7 +2,7 @@
 #define __REALIZATION_H__
 
 #include "mode.h"
-#include "realizer.h"
+#include "realizer_pool.h"
 
 // handles realization using a realizer
 // 
@@ -12,15 +12,16 @@ class Mode;
 class Realization
 {
 public:
-    Realization(Realizer *realizer);
+    Realization(RealizerPool *realizer_pool);
 
     virtual bool update(Mode *mode);
 
-    virtual void begin(unsigned long time);
+    virtual bool begin(unsigned long time);
     virtual bool step(unsigned long time);
     virtual void end();
 
-    Realizer *_realizer;
+    RealizerPool *_realizer_pool;
+    int _realizer;
 };
 
 #endif

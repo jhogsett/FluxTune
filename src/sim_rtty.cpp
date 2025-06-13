@@ -1,20 +1,28 @@
 
 #include "vfo.h"
 #include "wavegen.h"
+#include "realizer_pool.h"
 #include "sim_rtty.h"
 
 // mode is expected to be a derivative of VFO
-SimRTTY::SimRTTY(Realizer *realizer) : Realization(realizer){
-    _realizer = realizer;
-    _frequency = 0.0;
+SimRTTY::SimRTTY(RealizerPool *realizer_pool) : Realization(realizer_pool){
+    // _realizer = realizer;
     _rtty.start_rtty(true);
     _active = false;
     _enabled = false;
 }
 
-void SimRTTY::begin(unsigned long time, float fixed_freq){
+bool SimRTTY::begin(unsigned long time, float fixed_freq){
     _fixed_freq = fixed_freq;
-    WaveGen  *wavegen = (WaveGen*)_realizer;
+    _frequency = 0.0;
+
+    // attempt to acquire a realizer
+    _realizer = _realizer_pool->get_realizer();
+    if(_realizer == -1)
+        return false;
+
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+
     wavegen->set_frequency(SILENT_FREQ, false);
     wavegen->set_frequency(SILENT_FREQ, true);
 

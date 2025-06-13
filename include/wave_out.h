@@ -2,11 +2,12 @@
 #define __WAVE_OUT_H__
 
 #include "realization.h"
+#include "realizer_pool.h"
 
 class WaveOut : public Realization
 {
 public:
-    WaveOut(Realizer *realizer);
+    WaveOut(RealizerPool *realizerPool);
     
     virtual bool update(Mode *mode);
 
