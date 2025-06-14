@@ -19,14 +19,18 @@ bool SimStation::begin(unsigned long time, float fixed_freq, const char *message
     _frequency = 0.0;
 
     // attempt to acquire a realizer
-    _realizer = _realizer_pool->get_realizer();
-    if(_realizer == -1)
+    // _realizer = _realizer_pool->get_realizer();
+    // if(_realizer == -1)
+    //     return false;
+    if(!Realization::begin(time))
         return false;
 
     _morse.start_morse(message, wpm, true, WAIT_SECONDS);
 
     WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
     wavegen->set_frequency(SPACE_FREQUENCY, false);
+
+    return true;
 }
 
 void SimStation::realize(){
@@ -71,7 +75,10 @@ bool SimStation::update(Mode *mode){
     _frequency = _frequency - _fixed_freq;
 
     if(_enabled){
-        WaveGen  *wavegen = (WaveGen*)_realizer;
+        // WaveGen  *wavegen = (WaveGen*)_realizer;
+
+        WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+
         wavegen->set_frequency(_frequency);
     }
 

@@ -17,8 +17,10 @@ bool SimRTTY::begin(unsigned long time, float fixed_freq){
     _frequency = 0.0;
 
     // attempt to acquire a realizer
-    _realizer = _realizer_pool->get_realizer();
-    if(_realizer == -1)
+    // _realizer = _realizer_pool->get_realizer();
+    // if(_realizer == -1)
+    //     return false;
+    if(!Realization::begin(time))
         return false;
 
     WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
@@ -28,12 +30,14 @@ bool SimRTTY::begin(unsigned long time, float fixed_freq){
 
     // this might turn on too early, maybe enable late
     // wavegen->set_active_frequency(true);
+    return true;
 }
 
 #define MAX_PHASE 36
 
 void SimRTTY::realize(){
-    WaveGen  *wavegen = (WaveGen*)_realizer;
+    // WaveGen  *wavegen = (WaveGen*)_realizer;
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
 
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
@@ -64,7 +68,8 @@ bool SimRTTY::update(Mode *mode){
 
 
     if(_enabled){
-        WaveGen  *wavegen = (WaveGen*)_realizer;
+        // WaveGen  *wavegen = (WaveGen*)_realizer;
+        WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency, true);
         wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
     }

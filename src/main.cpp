@@ -154,15 +154,15 @@ Realizer *realizers[4] = {&wavegen1, &wavegen2, &wavegen3, &wavegen4};
 bool realizer_stats[4] = {false, false, false, false};
 RealizerPool realizer_pool(realizers, realizer_stats, 4);
 
-WaveOut waveout1(&realizer_pool);
-WaveOut waveout2(&realizer_pool);
-WaveOut waveout3(&realizer_pool);
-WaveOut waveout4(&realizer_pool);
-
 SimStation simstation1(&realizer_pool);
 SimStation simstation2(&realizer_pool);
 SimStation simstation3(&realizer_pool);
 SimStation simstation4(&realizer_pool);
+
+WaveOut waveout1(&realizer_pool);
+WaveOut waveout2(&realizer_pool);
+WaveOut waveout3(&realizer_pool);
+WaveOut waveout4(&realizer_pool);
 
 // Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
@@ -246,7 +246,7 @@ void setup_buttons(){
 }
 
 void setup(){
-	Serial.begin(115200);
+	// Serial.begin(115200);
 	randomizer.randomize();
 
 	load_save_data();
@@ -365,12 +365,12 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
-	simstation1.begin(time + random(1000), 7005000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
-	simstation2.begin(time + random(1000), 7005500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
-	simstation3.begin(time + random(1000), 7006000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
+	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+	simstation2.begin(time + random(1000), 7002500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
+	simstation3.begin(time + random(1000), 7003000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
 
 	// simstation4.begin(time + random(1000), 7002000.0);
-	simstation4.begin(time + random(1000), 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+	simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
 	set_application(APP_SIMRADIO, &display);
 
