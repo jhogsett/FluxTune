@@ -1,28 +1,41 @@
 
 #include "vfo.h"
 #include "wavegen.h"
+#include "realizer_pool.h"
 #include "sim_station.h"
 
 #define WAIT_SECONDS 4
 
 // mode is expected to be a derivative of VFO
-SimStation::SimStation(Realizer *realizer) : Realization(realizer)
+SimStation::SimStation(RealizerPool *realizer_pool) : Realization(realizer_pool)
 {
-    _realizer = realizer;
+    // _realizer_pool = realizer_pool;
     _active = false;
     _enabled = false;
 }
 
-void SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm){
+bool SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm){
     _fixed_freq = fixed_freq;
     _frequency = 0.0;
+
+    // attempt to acquire a realizer
+    // _realizer = _realizer_pool->get_realizer();
+    // if(_realizer == -1)
+    //     return false;
+    if(!Realization::begin(time))
+        return false;
+
     _morse.start_morse(message, wpm, true, WAIT_SECONDS);
-    WaveGen  *wavegen = (WaveGen*)_realizer;
+
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
     wavegen->set_frequency(SPACE_FREQUENCY, false);
+
+    return true;
 }
 
 void SimStation::realize(){
-    WaveGen  *wavegen = (WaveGen*)_realizer;
+    // WaveGen  *wavegen = (WaveGen*)_realizer;
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
 
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
@@ -62,7 +75,10 @@ bool SimStation::update(Mode *mode){
     _frequency = _frequency - _fixed_freq;
 
     if(_enabled){
-        WaveGen  *wavegen = (WaveGen*)_realizer;
+        // WaveGen  *wavegen = (WaveGen*)_realizer;
+
+        WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+
         wavegen->set_frequency(_frequency);
     }
 
@@ -87,4 +103,9 @@ bool SimStation::step(unsigned long time){
     }
 
     return true;
+}
+
+void SimStation::end(){
+    if(_realizer != -1)
+        _realizer_pool->free_realizer(_realizer);
 }

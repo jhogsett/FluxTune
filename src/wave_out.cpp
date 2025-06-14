@@ -1,17 +1,19 @@
 
 #include "vfo.h"
 #include "wavegen.h"
+#include "realizer_pool.h"
 #include "wave_out.h"
 
 // mode is expected to be a derivative of VFO
-WaveOut::WaveOut(Realizer *realizer) : Realization(realizer){
-    _realizer = realizer;
+WaveOut::WaveOut(RealizerPool *realizer_pool) : Realization(realizer_pool){
+    // _realizer = realizer;
 }
 
 // returns true on successful update
 bool WaveOut::update(Mode *mode){
     VFO *vfo = (VFO*)mode;
-    WaveGen  *wavegen = (WaveGen*)_realizer;
+    // WaveGen  *wavegen = (WaveGen*)_realizer;
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
 
     float frequencyf = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
 
@@ -22,7 +24,12 @@ bool WaveOut::update(Mode *mode){
 
 // // returns true on successful begin
 // bool Realization::begin(unsigned long time){
-//     return false;
+//     // attempt to acquire a realizer
+//     _realizer = _realizer_pool->get_realizer();
+//     if(_realizer == -1)
+//         return false;
+
+//     return true;
 // }
 
 // // call periodically to keep realization dynamic

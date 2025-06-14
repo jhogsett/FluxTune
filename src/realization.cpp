@@ -1,9 +1,10 @@
 #include "mode.h"
-#include "realizer.h"
+#include "realizer_pool.h"
 #include "realization.h"
 
-Realization::Realization(Realizer *realizer){
-    _realizer = realizer;
+Realization::Realization(RealizerPool *realizer_pool){
+    _realizer_pool = realizer_pool;
+    _realizer = -1;
 }
 
 // returns true on successful update
@@ -12,10 +13,12 @@ bool Realization::update(Mode *mode){
 }
 
 // returns true on successful begin
-void Realization::begin(unsigned long time){
-    // _started = time;
-    // _period = period;
-    // _next_internal_step = time + _period;
+bool Realization::begin(unsigned long time){
+    // attempt to acquire a realizer
+    _realizer = _realizer_pool->get_realizer();
+    if(_realizer == -1)
+        return false;
+    return true;
 }
 
 // call periodically to keep realization dynamic
@@ -32,5 +35,6 @@ bool Realization::step(unsigned long time){
 // }
 
 void Realization::end(){
-
+    if(_realizer != -1)
+        _realizer_pool->free_realizer(_realizer);
 }

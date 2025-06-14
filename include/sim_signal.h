@@ -2,11 +2,12 @@
 #define __SIM_SIGNAL_H__
 
 #include "realization.h"
+#include "realizer_pool.h"
 
 class SimSignal : public Realization
 {
 public:
-    SimSignal(Realizer *realizer);
+    SimSignal(RealizerPool *realizer_pool);
     
     virtual bool update(Mode *mode);
 

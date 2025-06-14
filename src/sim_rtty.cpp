@@ -1,31 +1,43 @@
 
 #include "vfo.h"
 #include "wavegen.h"
+#include "realizer_pool.h"
 #include "sim_rtty.h"
 
 // mode is expected to be a derivative of VFO
-SimRTTY::SimRTTY(Realizer *realizer) : Realization(realizer){
-    _realizer = realizer;
-    _frequency = 0.0;
+SimRTTY::SimRTTY(RealizerPool *realizer_pool) : Realization(realizer_pool){
+    // _realizer = realizer;
     _rtty.start_rtty(true);
     _active = false;
     _enabled = false;
 }
 
-void SimRTTY::begin(unsigned long time, float fixed_freq){
+bool SimRTTY::begin(unsigned long time, float fixed_freq){
     _fixed_freq = fixed_freq;
-    WaveGen  *wavegen = (WaveGen*)_realizer;
+    _frequency = 0.0;
+
+    // attempt to acquire a realizer
+    // _realizer = _realizer_pool->get_realizer();
+    // if(_realizer == -1)
+    //     return false;
+    if(!Realization::begin(time))
+        return false;
+
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+
     wavegen->set_frequency(SILENT_FREQ, false);
     wavegen->set_frequency(SILENT_FREQ, true);
 
     // this might turn on too early, maybe enable late
     // wavegen->set_active_frequency(true);
+    return true;
 }
 
 #define MAX_PHASE 36
 
 void SimRTTY::realize(){
-    WaveGen  *wavegen = (WaveGen*)_realizer;
+    // WaveGen  *wavegen = (WaveGen*)_realizer;
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
 
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
@@ -56,7 +68,8 @@ bool SimRTTY::update(Mode *mode){
 
 
     if(_enabled){
-        WaveGen  *wavegen = (WaveGen*)_realizer;
+        // WaveGen  *wavegen = (WaveGen*)_realizer;
+        WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency, true);
         wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
     }
