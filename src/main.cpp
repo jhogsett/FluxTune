@@ -7,11 +7,11 @@
 // #include "buttons.h"
 #include "displays.h"
 #include "hardware.h"
-#include "idle_mode.h"
+// #include "idle_mode.h"
 #include "led_handler.h"
 #include "leds.h"
 // #include "motor.h"
-#include "options_mode.h"
+// #include "options_mode.h"
 #include "saved_data.h"
 // #include "prompts.h"
 #include "seeding.h"
@@ -41,6 +41,74 @@
 #include "async_morse.h"
 
 #include "realizer_pool.h"
+
+#include <PololuLedStrip.h>
+
+// extend visual apparent range by modulating last led's brightness
+// establish brightness baseline and ability to adjust overall brightness
+// apply a damping function
+
+
+// Create an ledStrip object and specify the pin it will use.
+PololuLedStrip<12> ledStrip;
+
+// Create a buffer for holding the colors (3 bytes per color).
+#define LED_COUNT 7
+rgb_color colors[LED_COUNT] = 
+{
+  { 0, 32, 0 }, 
+  { 0, 32, 0 }, 
+  { 0, 32, 0 }, 
+  { 0, 32, 0 }, 
+  { 32, 32, 0 }, 
+  { 32, 32, 0 }, 
+  { 32, 0, 0 } 
+};
+
+rgb_color empty[LED_COUNT] = 
+{
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 } 
+};
+
+
+#define INTERVAL 50
+unsigned long next_time = 0;
+int value = 50;
+
+void step_sm(unsigned long time)
+{
+  if(time < next_time)
+    return;
+  next_time = time + INTERVAL;
+
+  int r = random(11) - 5;
+
+  value += r;
+
+  if(value > 100)
+    value = 100;
+  if(value < 0)
+    value = 0;
+
+  int count = value / 8;
+  if(count > 7)
+    count = 7;
+
+  rgb_color dbuffer[LED_COUNT];
+  memcpy(dbuffer, colors, count * sizeof(rgb_color));
+  memcpy(dbuffer + count, empty, (7 - count) * sizeof(rgb_color));
+
+  // ledStrip.write(colors, count);
+  // ledStrip.write(empty, 7-count);
+  ledStrip.write(dbuffer, 7);
+}
+
 
 #define CLKA 3
 #define DTA 2
@@ -323,6 +391,8 @@ void loop()
 	// bool last_active = true;
 	while(true){
         unsigned long time = millis();
+
+		step_sm(time);
 
 		// switch(morse1.step_morse(time)){
 		// 	case STEP_MORSE_TURN_ON:
