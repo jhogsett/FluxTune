@@ -15,20 +15,11 @@ public:
     // pass array of realizer addresses, array of free/in-use bools, count of realizers 
     RealizationPool(Realization **realizations, bool *statuses,  int nrealizations);
 
-    // // returns -1 if not available otherwise realizer index into array
-    // int get_realization();
+    bool begin(unsigned long time);
+    bool step(unsigned long time);
+    void end();
 
-    // // multiplely gotten realizers must be freed individually
-    // void free_realization(int nrealization);
-
-    // Realization* access_realization(int nrealization);
-
-    void update_pool(Mode *mode);
-
-    // float ffrequency = float(_frequency) + (_sub_frequency / 10.0);
-
-    // // WaveGen *wavegen = (WaveGen *)realization;
-	// wavegen->_sig_gen->setFrequency((MD_AD9833::channel_t)0, float(_frequency));
+    void update(Mode *mode);
 
 private:
     Realization **_realizations;

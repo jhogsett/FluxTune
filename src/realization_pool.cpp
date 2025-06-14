@@ -15,6 +15,22 @@ RealizationPool::RealizationPool(Realization **realizations, bool *statuses,  in
     // }   
 }
 
+bool RealizationPool::begin(unsigned long time){
+    return true;
+}
+
+bool RealizationPool::step(unsigned long time){
+    for(byte i = 0; i < _nrealizations; i++){
+        if(!_realizations[i]->step(time))
+            return false;
+    }
+    return true;
+}
+
+void RealizationPool::end(){
+}
+
+
 // int RealizationPool::get_realization(){
 //     for(int i = 0; i < _nrealizations; i++){
 //         if(!_statuses[i]){
@@ -47,7 +63,7 @@ RealizationPool::RealizationPool(Realization **realizations, bool *statuses,  in
 //     return _realizers[nrealizer];
 // }
 
-void RealizationPool::update_pool(Mode *mode){
+void RealizationPool::update(Mode *mode){
     for(byte i = 0; i < _nrealizations; i++){
         _realizations[i]->update(mode);
     }

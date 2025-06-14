@@ -420,10 +420,12 @@ void loop()
 
         panel_leds.step(time);
 
-		simstation1.step(time);
-		simstation2.step(time);
-		simstation3.step(time);
-		simstation4.step(time);
+		realization_pool.step(time);
+
+		// simstation1.step(time);
+		// simstation2.step(time);
+		// simstation3.step(time);
+		// simstation4.step(time);
 
 		encoder_handlerA.step();
 		encoder_handlerB.step();

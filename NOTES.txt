@@ -1,3 +1,24 @@
+could exland realization pool to have more items
+as the pool is updated, it can start or stop items
+maybe there should be the overall pool of possible realizations,
+  and a fixed set of currently running realizations
+Realizations should not run forever but should have a number of times then stop and free up
+They should be able to generate their own random settings
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Mode
 - holds state info pertaining to the mode
 - has an associated Handler to make changes
