@@ -166,26 +166,28 @@ WaveOut waveout4(&realizer_pool);
 
 // Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
-// VFO vfoa("VFO A",   7000000.0, 10, simstations, 4);
-// VFO vfob("VFO B",  14000000.0, 10, simstations, 4);
-// VFO vfoc("VFO C", 146520000.0, 5000, simstations, 4);
+// VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
+// VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
+// VFO vfoc("VFO C", 146520000.0, 5000, &realization_pool);
 
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
 // SimRTTY simstation4(&realizer_pool);
 
-Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+Realization *realizations[4] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+bool realization_stats[4] = {false, false, false, false};
+RealizationPool realization_pool(realizations, realization_stats, 4);
 
-VFO vfoa("VFO A",   7000000.0, 10, simstations, 4);
-VFO vfob("VFO B",  14000000.0, 10, simstations, 4);
-VFO vfoc("VFO C", 146520000.0, 5000, simstations, 4);
+VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
+VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
+VFO vfoc("VFO C", 146520000.0, 5000, &realization_pool);
 
 Realization *waveouts[] = {&waveout1};
 
-VFO vfod("CHAN 1", 1.0, 1L, waveouts, 1);
-VFO vfoe("CHAN 2", 100.0, 10L, waveouts, 1);
-VFO vfof("CHAN 3", 1000000.0, 100L, waveouts, 1);
+VFO vfod("CHAN 1", 1.0, 1L, &realization_pool);
+VFO vfoe("CHAN 2", 100.0, 10L, &realization_pool);
+VFO vfof("CHAN 3", 1000000.0, 100L, &realization_pool);
 
 Contrast contrast("Contrast");
 
