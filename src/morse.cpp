@@ -61,6 +61,9 @@ void _send_word_space(int time){
     delay(time * WORD_SPACE_FACTOR);
 }
 
+// need async_ morse and start bit
+// maybe auto skip to start bit
+
 void _send_morse(int c, int time){
     byte morse = pgm_read_byte(morsedata + c);
     bool start_bit = false;
@@ -82,12 +85,8 @@ void _send_morse(int c, int time){
     }
 }
 
-void _send_morse_char(char c, int time){
+char _lookup_morse_char(char c){
     int offset = -1;
-    if(c == ' '){
-        _send_word_space(time);
-        return;
-    }
     if(c >= '0' && c <= 'z'){
         if(c >= '0' && c <= '9'){
             c -= '0';
@@ -99,25 +98,40 @@ void _send_morse_char(char c, int time){
             c -= 'a';
             offset = 0;
         }
-        if(offset >= 0){
-            _send_morse(c + offset, time);
-        }
     }
+    if(offset >= 0)
+        return c + offset;
+    else
+        return 0;
+}
+
+void _send_morse_char(char c, int time){
+    if(c == ' '){
+        _send_word_space(time);
+        return;
+    }
+
+    c = _lookup_morse_char(c);
+    if(c > 0)
+        _send_morse(c, time);
 }
 
 void send_morse(char c, int wpm){
     // if(wpm == 0)
     //     wpm = option_wpm;
-    // _send_morse_char(c, MORSE_TIME_FROM_WPM(wpm));
+
+    _send_morse_char(c, MORSE_TIME_FROM_WPM(wpm));
 }
 
 void send_morse(const char *s, int wpm){
     // if(wpm == 0)
     //     wpm = option_wpm;
-    // int time = MORSE_TIME_FROM_WPM(wpm);
-    // int l = strlen(s);
-    // for(int i = 0; i < l; i++){
-    //     _send_morse_char(s[i], time);
-    //     _send_char_space(time);
-    // }
+
+    int time = MORSE_TIME_FROM_WPM(wpm);
+    int l = strlen(s);
+    for(int i = 0; i < l; i++){
+        _send_morse_char(s[i], time);
+        _send_char_space(time);
+    }
 }
+

@@ -15,7 +15,7 @@ bool WaveOut::update(Mode *mode){
 
     float frequencyf = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
 
-	wavegen->_sig_gen->setFrequency((MD_AD9833::channel_t)0, frequencyf);
+	wavegen->set_frequency(frequencyf);
 
     return true;
 }

@@ -7,11 +7,11 @@
 // #include "buttons.h"
 #include "displays.h"
 #include "hardware.h"
-#include "idle_mode.h"
+// #include "idle_mode.h"
 #include "led_handler.h"
 #include "leds.h"
 // #include "motor.h"
-#include "options_mode.h"
+// #include "options_mode.h"
 #include "saved_data.h"
 // #include "prompts.h"
 #include "seeding.h"
@@ -34,6 +34,78 @@
 
 #include "wavegen.h"
 #include "wave_out.h"
+
+#include "sim_station.h"
+#include "sim_rtty.h"
+
+#include "async_morse.h"
+
+#include <PololuLedStrip.h>
+
+// extend visual apparent range by modulating last led's brightness
+// establish brightness baseline and ability to adjust overall brightness
+// apply a damping function
+
+
+// Create an ledStrip object and specify the pin it will use.
+PololuLedStrip<12> ledStrip;
+
+// Create a buffer for holding the colors (3 bytes per color).
+#define LED_COUNT 7
+rgb_color colors[LED_COUNT] = 
+{
+  { 0, 32, 0 }, 
+  { 0, 32, 0 }, 
+  { 0, 32, 0 }, 
+  { 0, 32, 0 }, 
+  { 32, 32, 0 }, 
+  { 32, 32, 0 }, 
+  { 32, 0, 0 } 
+};
+
+rgb_color empty[LED_COUNT] = 
+{
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 }, 
+  { 0, 0, 0 } 
+};
+
+
+#define INTERVAL 50
+unsigned long next_time = 0;
+int value = 50;
+
+void step_sm(unsigned long time)
+{
+  if(time < next_time)
+    return;
+  next_time = time + INTERVAL;
+
+  int r = random(11) - 5;
+
+  value += r;
+
+  if(value > 100)
+    value = 100;
+  if(value < 0)
+    value = 0;
+
+  int count = value / 8;
+  if(count > 7)
+    count = 7;
+
+  rgb_color dbuffer[LED_COUNT];
+  memcpy(dbuffer, colors, count * sizeof(rgb_color));
+  memcpy(dbuffer + count, empty, (7 - count) * sizeof(rgb_color));
+
+  // ledStrip.write(colors, count);
+  // ledStrip.write(empty, 7-count);
+  ledStrip.write(dbuffer, 7);
+}
 
 
 #define CLKA 3
@@ -61,26 +133,55 @@ EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 // Pins for SPI comm with the AD9833 IC
 const uint8_t PIN_DATA = 11;  ///< SPI Data pin number
 const uint8_t PIN_CLK = 13;  	///< SPI Clock pin number
-const uint8_t PIN_FSYNC = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC2 = 9;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC3 = 8;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-// const uint8_t PIN_FSYNC4 = 7;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC1 = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC2 = 14;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC3 = 15;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC4 = 16;  ///< SPI Load pin number (FSYNC in AD9833 usage)
 
-MD_AD9833	AD1(PIN_DATA, PIN_CLK, PIN_FSYNC); // Arbitrary SPI pins
-// MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
-// MD_AD9833	AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
-// MD_AD9833	AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
+MD_AD9833 AD1(PIN_DATA, PIN_CLK, PIN_FSYNC1); // Arbitrary SPI pins
+MD_AD9833 AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
+MD_AD9833 AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
+MD_AD9833 AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
 
 WaveGen wavegen1(&AD1);
 WaveOut waveout1(&wavegen1);
 
-VFO vfoa("VFO A",   7000000.0, 100, &waveout1);
-VFO vfob("VFO B",  14300000.0, 500, &waveout1);
-VFO vfoc("VFO C", 146520000.0, 5000, &waveout1);
+WaveGen wavegen2(&AD2);
+WaveOut waveout2(&wavegen2);
 
-VFO vfod("CHAN 1", 1.0, 1L, &waveout1);
-VFO vfoe("CHAN 2", 100.0, 10L, &waveout1);
-VFO vfof("CHAN 3", 1000000.0, 100L, &waveout1);
+WaveGen wavegen3(&AD3);
+WaveOut waveout3(&wavegen3);
+
+WaveGen wavegen4(&AD4);
+WaveOut waveout4(&wavegen4);
+
+SimStation simstation1(&wavegen1);
+SimStation simstation2(&wavegen2);
+SimStation simstation3(&wavegen3);
+// SimStation simstation4(&wavegen4);
+
+// Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+
+// VFO vfoa("VFO A",   7000000.0, 10, simstations, 4);
+// VFO vfob("VFO B",  14000000.0, 10, simstations, 4);
+// VFO vfoc("VFO C", 146520000.0, 5000, simstations, 4);
+
+// SimRTTY simstation1(&wavegen1, 7005000.0);
+// SimRTTY simstation2(&wavegen2, 7006000.0);
+// SimRTTY simstation3(&wavegen3, 7007000.0);
+SimRTTY simstation4(&wavegen4);
+
+Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+
+VFO vfoa("VFO A",   7000000.0, 10, simstations, 4);
+VFO vfob("VFO B",  14000000.0, 10, simstations, 4);
+VFO vfoc("VFO C", 146520000.0, 5000, simstations, 4);
+
+Realization *waveouts[] = {&waveout1};
+
+VFO vfod("CHAN 1", 1.0, 1L, waveouts, 1);
+VFO vfoe("CHAN 2", 100.0, 10L, waveouts, 1);
+VFO vfof("CHAN 3", 1000000.0, 100L, waveouts, 1);
 
 Contrast contrast("Contrast");
 
@@ -104,9 +205,6 @@ EventDispatcher dispatcher3(handlers3, 1);
 
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
-
-
-#define SILENT_FREQ 1000000.0
 
 
 #define APP_SIMRADIO 1
@@ -173,8 +271,24 @@ void setup(){
 	// dispatcher->set_mode(&display, 0);
 
 	AD1.begin();
-	AD1.setFrequency((MD_AD9833::channel_t)0, 1000000.0);
+	AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD1.setMode(MD_AD9833::MODE_SINE);
+
+	AD2.begin();
+	AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD2.setMode(MD_AD9833::MODE_SINE);
+
+	AD3.begin();
+	AD3.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	AD3.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD3.setMode(MD_AD9833::MODE_SINE);
+
+	AD4.begin();
+	AD4.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	AD4.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD4.setMode(MD_AD9833::MODE_SINE);
 }	
 
 bool main_menu(){
@@ -247,12 +361,64 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 
+	simstation1.begin(time + random(1000), 7005000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+	simstation2.begin(time + random(1000), 7005500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
+	simstation3.begin(time + random(1000), 7006000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
+
+	simstation4.begin(time + random(1000), 7002000.0);
+	// simstation4.begin(time + random(1000), 7006500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+
 	set_application(APP_SIMRADIO, &display);
 
+	// AsyncMorse morse1;
+	// AsyncMorse morse2;
+	// // start_morse("CQ CQ CQ DE N6CCM N6CCM K              ", 20, true);
+	// morse1.start_morse("CQ CQ DE N6CCM N6CCM K              ", 5, true);
+	// morse2.start_morse("CQ CQ DE N6CCM N6CCM K              ", 13, true);
+
+	// AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	// AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
+
+	// AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
+	// AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
+
+	// bool active = false;
+	// bool freq = false;
+	// bool last_active = true;
 	while(true){
         unsigned long time = millis();
+
+		step_sm(time);
+
+		// switch(morse1.step_morse(time)){
+		// 	case STEP_MORSE_TURN_ON:
+		// 		AD1.setActiveFrequency((MD_AD9833::channel_t)0);
+		// 		// AD1.setFrequency((MD_AD9833::channel_t)0, 900.0);
+		// 		break;
+
+		// 	case STEP_MORSE_TURN_OFF:
+		// 		AD1.setActiveFrequency((MD_AD9833::channel_t)1);
+		// 		// AD1.setFrequency((MD_AD9833::channel_t)0, 0.0);
+		// 		break;
+		// }
+
+		// switch(morse2.step_morse(time)){
+		// 	case STEP_MORSE_TURN_ON:
+		// 		AD2.setActiveFrequency((MD_AD9833::channel_t)0);
+		// 		break;
+
+		// 	case STEP_MORSE_TURN_OFF:
+		// 		AD2.setActiveFrequency((MD_AD9833::channel_t)1);
+		// 		break;
+		// }
+
         panel_leds.step(time);
-		
+
+		simstation1.step(time);
+		simstation2.step(time);
+		simstation3.step(time);
+		simstation4.step(time);
+
 		encoder_handlerA.step();
 		encoder_handlerB.step();
 
@@ -312,7 +478,7 @@ void loop()
 			purge_events();
 
 			dispatcher->update_display(&display);
-			// dispatcher->update_realization(&wavegen1);
+			dispatcher->update_realization();
 
 			// after mode change
 			unsigned long endtime = millis() + PURGE_TIME;

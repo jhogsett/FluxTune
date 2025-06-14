@@ -4,29 +4,23 @@
 WaveGen::WaveGen(MD_AD9833 * sig_gen)
 {
     _sig_gen = sig_gen;
+	_frequency = 0.0;
+	_main = false;
 }
 
-// // returns true on success begin
-// bool WaveGen::begin(unsigned long time, float frequency){
-// 	_sig_gen->begin();
-// 	_sig_gen->setFrequency((MD_AD9833::channel_t)0, frequency);
-// 	_sig_gen->setMode(MD_AD9833::MODE_SINE);
-//     return true;
-// }
+void WaveGen::set_frequency(float frequency, bool main){
+	if(frequency != _frequency || _main != main){
+		// Serial.println("set freq");
+		_sig_gen->setFrequency((MD_AD9833::channel_t)(main ? 0 : 1), frequency);
+		_frequency = frequency;
+		_main = main;
+	}
+}
 
-// // call periodically to keep realization dynamic
-// // returns true if it should keep going
-// bool WaveGen::step(unsigned long time){
-//     return false;
-// }
-
-// void WaveGen::internal_step(unsigned long time){
-// }
-
-// void WaveGen::end(){
-
-// }
-
-void WaveGen::update(float freqeuecy){
-
+void WaveGen::set_active_frequency(bool main){
+	if(_main != main){
+		// Serial.println("set act freq");
+		_sig_gen->setActiveFrequency((MD_AD9833::channel_t)(main ? 0 : 1));
+		_main = main;
+	}
 }

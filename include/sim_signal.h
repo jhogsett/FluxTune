@@ -1,19 +1,25 @@
-#include <MD_AD9833.h>
+#ifndef __SIM_SIGNAL_H__
+#define __SIM_SIGNAL_H__
+
 #include "realization.h"
 
 class SimSignal : public Realization
 {
 public:
-    SimSignal(MD_AD9833 * sig_gen);
+    SimSignal(Realizer *realizer);
+    
+    virtual bool update(Mode *mode);
 
-    virtual bool begin(unsigned long time, float frequency);
-    virtual bool step(unsigned long time);
-    virtual void end();
+    // virtual void begin(unsigned long time);
+    // virtual bool step(unsigned long time);
+    // virtual void end();
 
     virtual void internal_step(unsigned long time);
 
-    void update(float freqeuecy);
+    void realize();
 
-    MD_AD9833 * _sig_gen;
-
+    int _phase;
+    float _frequency;
 };
+
+#endif
