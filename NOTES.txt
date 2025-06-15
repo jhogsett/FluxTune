@@ -6,6 +6,35 @@ Realizations should not run forever but should have a number of times then stop 
 They should be able to generate their own random settings
 
 
+meter:
+
+allow setting to 0 through 255
+0=no LEDs lit
+255=all LEDs lit at full (current) brightness
+
+actually LEDs are 7
+256 / 7 = 36.5
+36 * 7 = 252
+
+512 / 7 = 73.1
+73 * 7 = 511
+
+match can stay in 0-255
+brightness will be applied post-math
+
+input: 0-255
+256 / 7 = 36
+
+quantize to 0 through 7 LEDs having presence
+
+(input << 1) % 73
+
+
+
+maybe base on 8 and don't show zeroth
+
+
+
 
 
 

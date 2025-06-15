@@ -56,13 +56,13 @@ PololuLedStrip<12> ledStrip;
 #define LED_COUNT 7
 rgb_color colors[LED_COUNT] = 
 {
-  { 0, 32, 0 }, 
-  { 0, 32, 0 }, 
-  { 0, 32, 0 }, 
-  { 0, 32, 0 }, 
-  { 32, 32, 0 }, 
-  { 32, 32, 0 }, 
-  { 32, 0, 0 } 
+  { 0, 15, 0 }, 
+  { 0, 15, 0 }, 
+  { 0, 15, 0 }, 
+  { 0, 15, 0 }, 
+  { 15, 15, 0 }, 
+  { 15, 15, 0 }, 
+  { 15, 0, 0 } 
 };
 
 rgb_color empty[LED_COUNT] = 
@@ -77,36 +77,59 @@ rgb_color empty[LED_COUNT] =
 };
 
 
-#define INTERVAL 50
+#define INTERVAL 100
 unsigned long next_time = 0;
-int value = 50;
+int value = 127;
 
 void step_sm(unsigned long time)
 {
-  if(time < next_time)
-    return;
-  next_time = time + INTERVAL;
+	if(time < next_time)
+		return;
+	next_time = time + INTERVAL;
 
-  int r = random(11) - 5;
+	int r = random(11) - 5;
+	value += r;
 
-  value += r;
+	if(value > 255)
+		value = 255;
+	if(value < 0)
+		value = 0;
 
-  if(value > 100)
-    value = 100;
-  if(value < 0)
-    value = 0;
+	int sample = value * 2;
+	int on_leds = (sample / 73) + 1;
+	int remain = ((sample % 73) * 16) / 73;
 
-  int count = value / 8;
-  if(count > 7)
-    count = 7;
+	// Serial.println(remain);
 
-  rgb_color dbuffer[LED_COUNT];
-  memcpy(dbuffer, colors, count * sizeof(rgb_color));
-  memcpy(dbuffer + count, empty, (7 - count) * sizeof(rgb_color));
+//   remain = remain / 73
+//   print(full_on)
+//   print(remain)
 
-  // ledStrip.write(colors, count);
-  // ledStrip.write(empty, 7-count);
-  ledStrip.write(dbuffer, 7);
+
+
+//   int count = value / 8;
+//   if(count > 7)
+//     count = 7;
+
+	// 
+
+	rgb_color dbuffer[LED_COUNT];
+	memcpy(dbuffer, colors, on_leds * sizeof(rgb_color));
+	memcpy(dbuffer + on_leds, empty, (LED_COUNT - on_leds) * sizeof(rgb_color));
+
+	// for the last copied LED, modify it according to the remain value
+	dbuffer[on_leds-1].red = (dbuffer[on_leds-1].red * remain) / 16;
+	dbuffer[on_leds-1].green = (dbuffer[on_leds-1].green * remain) / 16;
+	dbuffer[on_leds-1].blue = (dbuffer[on_leds-1].blue * remain) / 16;
+
+	// modify whole display per display contrast
+	for(byte i = 0; i < LED_COUNT; i++){
+		dbuffer[i].red = (dbuffer[i].red * option_contrast)	/ 1;
+		dbuffer[i].green = (dbuffer[i].green * option_contrast)	/ 1;
+		dbuffer[i].blue = (dbuffer[i].blue * option_contrast)	/ 1;
+	}
+
+	ledStrip.write(dbuffer, LED_COUNT);
 }
 
 
@@ -248,7 +271,7 @@ void setup_buttons(){
 }
 
 void setup(){
-	// Serial.begin(115200);
+	Serial.begin(115200);
 	randomizer.randomize();
 
 	load_save_data();
