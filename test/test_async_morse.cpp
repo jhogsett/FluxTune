@@ -252,6 +252,196 @@ void test_morse_repeat_vs_non_repeat(void) {
                                       "Repeat should have more activity than non-repeat");
 }
 
+void test_morse_complete_cycle_phases(void) {
+    // Test that a complete morse sequence goes through expected phases
+    morse->start_morse("A", 20, false, 0);
+    
+    bool completed = false;
+    for (unsigned long time = 0; time <= 1000; time += 5) {
+        int state = morse->step_morse(time);
+        // After sufficient time, should return to inactive state
+        if (time > 500 && state == STEP_MORSE_LEAVE_OFF) {
+            completed = true;
+        }
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(completed, "Morse should complete and go inactive");
+}
+
+void test_morse_wait_parameter(void) {
+    // Test different wait times in repeat mode
+    morse->start_morse("E", 20, true, 2); // 2 second wait
+    
+    int first_cycle_turn_ons = 0;
+    int second_cycle_turn_ons = 0;
+    
+    // Count first cycle (0-1000ms)
+    for (unsigned long time = 0; time <= 1000; time += 10) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            first_cycle_turn_ons++;
+        }
+    }
+    
+    // Count around second cycle (2000-3000ms, accounting for 2s wait)
+    for (unsigned long time = 2000; time <= 3000; time += 10) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            second_cycle_turn_ons++;
+        }
+    }
+    
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, first_cycle_turn_ons, "Should have activity in first cycle");
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, second_cycle_turn_ons, "Should repeat after wait period");
+}
+
+void test_morse_extreme_wpm_values(void) {
+    // Test very slow WPM
+    morse->start_morse("E", 1, false, 0); // 1 WPM
+    bool found_turn_on = false;
+    for (unsigned long time = 0; time <= 2000; time += 50) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            found_turn_on = true;
+            break;
+        }
+    }
+    TEST_ASSERT_TRUE_MESSAGE(found_turn_on, "Should work with very slow WPM");
+    
+    // Test very fast WPM  
+    morse->start_morse("E", 100, false, 0); // 100 WPM
+    found_turn_on = false;
+    for (unsigned long time = 0; time <= 100; time += 1) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            found_turn_on = true;
+            break;
+        }
+    }
+    TEST_ASSERT_TRUE_MESSAGE(found_turn_on, "Should work with very fast WPM");
+}
+
+void test_morse_multi_character_string(void) {
+    // Test "SOS" - should have 9 elements total (3+3+3)
+    morse->start_morse("SOS", 20, false, 0);
+    
+    int turn_on_count = 0;
+    for (unsigned long time = 0; time <= 3000; time += 5) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            turn_on_count++;
+        }
+    }
+    
+    TEST_ASSERT_EQUAL_INT_MESSAGE(9, turn_on_count, "SOS should have 9 elements (3+3+3)");
+}
+
+void test_morse_character_spacing(void) {
+    // Test that there are gaps between characters
+    morse->start_morse("EE", 20, false, 0); // Two E's
+    
+    bool found_gap = false;
+    bool found_first_turn_off = false;
+    
+    for (unsigned long time = 0; time <= 1000; time += 5) {
+        int state = morse->step_morse(time);
+        
+        if (state == STEP_MORSE_TURN_OFF) {
+            found_first_turn_off = true;
+        }
+        
+        // Look for extended LEAVE_OFF period (character spacing)
+        if (found_first_turn_off && state == STEP_MORSE_LEAVE_OFF) {
+            // Check if we stay in LEAVE_OFF for multiple time steps
+            int leave_off_count = 0;
+            for (unsigned long t2 = time; t2 <= time + 50 && t2 <= 1000; t2 += 5) {
+                if (morse->step_morse(t2) == STEP_MORSE_LEAVE_OFF) {
+                    leave_off_count++;
+                } else {
+                    break;
+                }
+            }
+            if (leave_off_count > 3) { // Extended gap indicates character spacing
+                found_gap = true;
+                break;
+            }
+        }
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(found_gap, "Should have spacing between characters");
+}
+
+// =====================================================
+// TIMING PRECISION TESTS
+// =====================================================
+
+void test_morse_timing_precision(void) {
+    // Test that dot and dash have correct 1:3 ratio
+    
+    // Measure dot duration (E = single dot)
+    morse->start_morse("E", 20, false, 0);
+    unsigned long dot_start = 0, dot_end = 0;
+    bool found_turn_on = false;
+    
+    for (unsigned long time = 0; time <= 200; time += 1) {
+        int state = morse->step_morse(time);
+        if (state == STEP_MORSE_TURN_ON && !found_turn_on) {
+            dot_start = time;
+            found_turn_on = true;
+        }
+        if (found_turn_on && state == STEP_MORSE_TURN_OFF) {
+            dot_end = time;
+            break;
+        }
+    }
+    
+    unsigned long dot_duration = dot_end - dot_start;
+    
+    // Measure dash duration (T = single dash)
+    morse->start_morse("T", 20, false, 0);
+    unsigned long dash_start = 0, dash_end = 0;
+    found_turn_on = false;
+    
+    for (unsigned long time = 0; time <= 200; time += 1) {
+        int state = morse->step_morse(time);
+        if (state == STEP_MORSE_TURN_ON && !found_turn_on) {
+            dash_start = time;
+            found_turn_on = true;
+        }
+        if (found_turn_on && state == STEP_MORSE_TURN_OFF) {
+            dash_end = time;
+            break;
+        }
+    }
+    
+    unsigned long dash_duration = dash_end - dash_start;
+    
+    // Dash should be approximately 3x dot duration
+    TEST_ASSERT_GREATER_THAN_MESSAGE(dot_duration * 2, dash_duration, "Dash should be longer than dot");
+    TEST_ASSERT_LESS_THAN_MESSAGE(dot_duration * 4, dash_duration, "Dash should not be too long");
+}
+
+void test_morse_state_transition_order(void) {
+    // Test that TURN_ON is always followed by LEAVE_ON, then TURN_OFF
+    morse->start_morse("E", 20, false, 0);
+    
+    int prev_state = STEP_MORSE_LEAVE_OFF;
+    bool valid_transitions = true;
+    
+    for (unsigned long time = 0; time <= 500; time += 5) {
+        int state = morse->step_morse(time);
+        
+        // Check for invalid transition patterns
+        if (prev_state == STEP_MORSE_TURN_ON && state != STEP_MORSE_LEAVE_ON) {
+            valid_transitions = false;
+            break;
+        }
+        if (prev_state == STEP_MORSE_TURN_OFF && state != STEP_MORSE_LEAVE_OFF) {
+            valid_transitions = false;
+            break;
+        }
+        
+        prev_state = state;
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(valid_transitions, "State transitions should follow valid patterns");
+}
+
 // Main test runner
 int main() {
     UNITY_BEGIN();
@@ -274,6 +464,15 @@ int main() {
     RUN_TEST(test_morse_case_insensitive);
     RUN_TEST(test_morse_invalid_characters);
     RUN_TEST(test_morse_repeat_vs_non_repeat);
+    RUN_TEST(test_morse_complete_cycle_phases);
+    RUN_TEST(test_morse_wait_parameter);
+    RUN_TEST(test_morse_extreme_wpm_values);
+    RUN_TEST(test_morse_multi_character_string);
+    RUN_TEST(test_morse_character_spacing);
+    
+    // Timing precision
+    RUN_TEST(test_morse_timing_precision);
+    RUN_TEST(test_morse_state_transition_order);
     
     return UNITY_END();
 }
