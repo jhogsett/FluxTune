@@ -6,7 +6,6 @@
 #else
 #include <Arduino.h>
 #endif
-// #include "bank.h"
 
 // shortcut for using strings stored in program memory
 #define FSTR(s) (load_f_string(F(s)))
