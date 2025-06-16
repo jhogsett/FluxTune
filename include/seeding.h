@@ -1,6 +1,7 @@
 #ifndef __SEEDING_H__
 #define __SEEDING_H__
 
+#include <Arduino.h>
 #include <random_seed.h>
 
 // LSB (noisiest bit) of an analog read on an unused analog pin

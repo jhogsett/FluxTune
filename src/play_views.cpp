@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include "basic_types.h"
 // #include "bank.h"
 // #include "betting.h"
 #include "buffers.h"

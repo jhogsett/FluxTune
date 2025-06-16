@@ -1,6 +1,6 @@
 
 
-#include <Arduino.h>
+#include "basic_types.h"
 #include "realization.h"
 #include "realization_pool.h"
 

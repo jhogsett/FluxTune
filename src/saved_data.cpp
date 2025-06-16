@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include "basic_types.h"
 #include <EEPROM.h>
 // #include "bank.h"
 #include "saved_data.h"

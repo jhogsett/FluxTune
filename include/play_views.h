@@ -1,7 +1,7 @@
 #ifndef __PLAY_VIEW_H
 #define __PLAY_VIEW_H
 
-#include <Arduino.h>
+#include "basic_types.h"
 #include "buffers.h"
 
 // number of times to show player's cash (or effective time of display if no scroll needed)
