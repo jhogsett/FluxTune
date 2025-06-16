@@ -1,4 +1,8 @@
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <Arduino.h>
+#endif
 #include "async_morse.h"
 
 const unsigned char morsedata[] PROGMEM = {

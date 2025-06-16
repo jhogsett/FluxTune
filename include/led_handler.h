@@ -1,7 +1,11 @@
 #ifndef __LED_HANDLER_H__
 #define __LED_HANDLER_H__
 
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <Arduino.h>
+#endif
 
 // Handles activation and animation of panel and button LEDs
 class LEDHandler

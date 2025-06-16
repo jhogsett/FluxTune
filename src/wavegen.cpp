@@ -1,4 +1,8 @@
+#ifdef NATIVE_BUILD
+#include "../native/platform.h"
+#else
 #include <MD_AD9833.h>
+#endif
 #include "wavegen.h"
 
 WaveGen::WaveGen(MD_AD9833 * sig_gen)

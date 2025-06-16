@@ -3,8 +3,12 @@
 
 // some code borrowed from https://github.com/akuzechie/HT16K33-Display-Library
 
+#ifdef PLATFORM_NATIVE
+#include "../../native/platform.h"
+#else
 #include <Arduino.h>
 #include <Wire.h>
+#endif
 
 #define DEFAULT_ADDRESS_ 0x70
 #define DEFAULT_NUM_DISPLAYS 1

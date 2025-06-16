@@ -1,4 +1,8 @@
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <Arduino.h>
+#endif
 #include "saved_data.h"
 // #include "speaker.h"
 #include "morse.h"

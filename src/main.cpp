@@ -1,8 +1,12 @@
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <Arduino.h>
 #include <Wire.h>
-
 #include <MD_AD9833.h>
-// #include <SPI.h>
+#include <Encoder.h>
+#include <PololuLedStrip.h>
+#endif
 
 #include "displays.h"
 #include "hardware.h"
@@ -13,7 +17,11 @@
 #include "utils.h"
 
 // #define ENCODER_DO_NOT_USE_INTERRUPTS
+#ifndef PLATFORM_NATIVE
+// These are already included in platform.h for native builds
 #include <Encoder.h>
+#include <PololuLedStrip.h>
+#endif
 #include "encoder_handler.h"
 
 #include "vfo.h"
@@ -33,7 +41,10 @@
 
 #include "realizer_pool.h"
 
+#ifndef PLATFORM_NATIVE
+// Already included in platform.h for native builds  
 #include <PololuLedStrip.h>
+#endif
 
 // extend visual apparent range by modulating last led's brightness
 // establish brightness baseline and ability to adjust overall brightness

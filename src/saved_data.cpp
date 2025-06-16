@@ -1,5 +1,10 @@
 #include "basic_types.h"
+#ifdef NATIVE_BUILD
+#include "../native/platform.h"
+#include <iostream>
+#else
 #include <EEPROM.h>
+#endif
 // #include "bank.h"
 #include "saved_data.h"
 
@@ -93,8 +98,13 @@ void save_data(){
 typedef void (*VoidFunc)(void);
 
 void reset_device(){
+#ifdef NATIVE_BUILD
+	// For native builds, just print a message instead of crashing
+	std::cout << "[MOCK] reset_device() called - would restart Arduino" << std::endl;
+#else
 	VoidFunc p = NULL;
 	p();
+#endif
 }
 
 bool reset_options(){

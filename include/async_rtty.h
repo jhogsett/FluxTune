@@ -1,7 +1,11 @@
 #ifndef __ASYNC_RTTY_H__
 #define __ASYNC_RTTY_H__
 
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <Arduino.h>
+#endif
 
 #define RTTY_TIME_BASIS 22
 #define RTTY_TIME_BASIS2 33
