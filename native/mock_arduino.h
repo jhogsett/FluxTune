@@ -37,14 +37,14 @@ typedef uint8_t byte;
 // Flash memory support for AVR
 #ifdef __AVR__
     #include <avr/pgmspace.h>
-#else
-    // Mock PROGMEM support for native compilation
+#else    // Mock PROGMEM support for native compilation
     #define PROGMEM
     #define PSTR(s) (s)
     #define F(s) ((const __FlashStringHelper*)(s))
     #define strcpy_P strcpy
     #define sprintf_P sprintf
     #define pgm_read_ptr(addr) (*(addr))
+    #define pgm_read_byte(addr) (*(const unsigned char*)(addr))
     typedef const char* __FlashStringHelper;
 #endif
 

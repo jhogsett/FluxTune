@@ -15,12 +15,13 @@ BUILD_DIR = build/test
 UNITY_SRC = $(UNITY_DIR)/unity.c
 
 # Common source files needed for tests
-COMMON_SOURCES = $(SRC_DIR)/utils.cpp $(SRC_DIR)/buffers.cpp $(SRC_DIR)/saved_data.cpp
+COMMON_SOURCES = $(SRC_DIR)/utils.cpp $(SRC_DIR)/buffers.cpp $(SRC_DIR)/saved_data.cpp $(SRC_DIR)/async_morse.cpp
 MOCK_SOURCES = $(NATIVE_DIR)/mock_arduino.cpp $(NATIVE_DIR)/mock_wire.cpp $(NATIVE_DIR)/mock_eeprom.cpp $(NATIVE_DIR)/mock_ht16k33disp.cpp
 
 # Test executables
 TEST_UTILS = $(BUILD_DIR)/test_utils.exe
 TEST_MORSE = $(BUILD_DIR)/test_morse.exe
+TEST_ASYNC_MORSE = $(BUILD_DIR)/test_async_morse.exe
 TEST_VFO = $(BUILD_DIR)/test_vfo.exe
 
 .PHONY: all test clean setup
@@ -32,7 +33,7 @@ setup:
 	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
 
 # Run all tests
-test: test-utils
+test: test-utils test-async-morse
 
 # Individual test targets
 test-utils: $(TEST_UTILS)
@@ -48,6 +49,13 @@ test-morse: $(TEST_MORSE)
 	@$(TEST_MORSE)
 
 $(TEST_MORSE): $(TEST_DIR)/test_morse.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
+	$(CC) $(CFLAGS) -o $@ $^
+
+test-async-morse: $(TEST_ASYNC_MORSE)
+	@echo Running async morse tests...
+	@$(TEST_ASYNC_MORSE)
+
+$(TEST_ASYNC_MORSE): $(TEST_DIR)/test_async_morse.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
 	$(CC) $(CFLAGS) -o $@ $^
 
 test-vfo: $(TEST_VFO)
