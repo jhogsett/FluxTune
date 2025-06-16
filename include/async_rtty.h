@@ -1,7 +1,13 @@
 #ifndef __ASYNC_RTTY_H__
 #define __ASYNC_RTTY_H__
 
-#include <Arduino.h>
+#ifdef UNIT_TEST_NATIVE
+#include "../test/mock_arduino_for_native.h" // For native builds
+#else
+  #ifndef UNIT_TEST_NATIVE_MOCK_ACTIVE
+    #include <Arduino.h> // For Arduino builds
+  #endif
+#endif
 
 #define RTTY_TIME_BASIS 22
 #define RTTY_TIME_BASIS2 33

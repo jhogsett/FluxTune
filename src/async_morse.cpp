@@ -1,4 +1,9 @@
-#include <Arduino.h>
+#ifdef UNIT_TEST_NATIVE
+#include "../test/mock_arduino_for_native.h" // Must be first for native mocks
+#else
+#include <Arduino.h> // For device compilation
+#endif
+
 #include "async_morse.h"
 
 const unsigned char morsedata[] PROGMEM = {

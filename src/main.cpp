@@ -240,6 +240,7 @@ int current_dispatcher = 1;
 #define APP_WAVEGEN 2
 #define APP_SETTINGS 3
 
+#ifndef UNIT_TEST // <--- Add this
 void setup_display(){
 	Wire.begin();
 
@@ -282,7 +283,7 @@ void setup(){
 
 
     // // if all three buttons are pressed, enable auto play
-    // if((digitalRead(GREEN_BUTTON) == HIGH) && (digitalRead(AMBER_BUTTON) == HIGH) && (digitalRead(RED_BUTTON) == HIGH)){
+    // if((digitalRead(GREEN_BUTTON) == HIGH) && (digitalRead(AMBER_BUTTON) == HIGH) && (digitalRead(RED_BUTTON) == HIGH)){\
     //     auto_play_enabled = true;
     // }
 
@@ -524,3 +525,4 @@ void loop()
 		}
 	}
 }
+#endif // <--- Add this

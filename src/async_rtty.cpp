@@ -1,4 +1,8 @@
+#ifdef UNIT_TEST_NATIVE
+#include "../test/mock_arduino_for_native.h"
+#else
 #include <Arduino.h>
+#endif
 #include "async_rtty.h"
 
 
