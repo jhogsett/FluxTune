@@ -180,7 +180,7 @@ RealizerPool realizer_pool(realizers, realizer_stats, 4);
 SimStation simstation1(&realizer_pool);
 SimStation simstation2(&realizer_pool);
 SimStation simstation3(&realizer_pool);
-SimStation simstation4(&realizer_pool);
+// SimStation simstation4(&realizer_pool);
 
 WaveOut waveout1(&realizer_pool);
 WaveOut waveout2(&realizer_pool);
@@ -196,7 +196,7 @@ WaveOut waveout4(&realizer_pool);
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
-// SimRTTY simstation4(&realizer_pool);
+SimRTTY simstation4(&realizer_pool);
 
 Realization *realizations[4] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 bool realization_stats[4] = {false, false, false, false};
@@ -394,8 +394,8 @@ void loop()
 	simstation2.begin(time + random(1000), 7002500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
 	simstation3.begin(time + random(1000), 7003000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
 
-	// simstation4.begin(time + random(1000), 7002000.0);
-	simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+	simstation4.begin(time + random(1000), 7004000.0);
+	// simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
 	set_application(APP_SIMRADIO, &display);
 
