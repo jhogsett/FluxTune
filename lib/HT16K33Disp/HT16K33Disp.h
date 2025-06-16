@@ -142,10 +142,10 @@ const uint16_t HT16K33Disp_FourteenSegmentASCII[96] = {
 class HT16K33Disp
 {
 public:
-	explicit HT16K33Disp(byte address = 0, byte num_displays = 1);
-	void set_address(byte address, byte num_displays);
+	explicit HT16K33Disp(uint8_t address = 0, uint8_t num_displays = 1);
+	void set_address(uint8_t address, uint8_t num_displays);
 
-	void write(byte digit, unsigned int data);
+	void write(uint8_t digit, unsigned int data);
 	void segments_test();
 	void clear();
 	int string_length(const char * string);
@@ -161,7 +161,7 @@ public:
 
 	uint16_t char_to_segments(char c, bool decimal_point = false);
 
-	void init(const byte *brightLevels);
+	void init(const uint8_t *brightLevels);
 
 	static const int DEFAULT_ADDRESS = DEFAULT_ADDRESS_;
 

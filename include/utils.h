@@ -9,8 +9,8 @@
 
 extern char * load_f_string(const __FlashStringHelper* f_string, char *override_buffer=NULL);
 extern void micros_to_ms(char * buffer, unsigned long micros);
-extern long time_to_seconds(byte second, byte minute, byte hour);
-extern void seconds_to_time(long seconds, byte &second, byte &minute, byte &hour);
+extern long time_to_seconds(uint8_t second, uint8_t minute, uint8_t hour);
+extern void seconds_to_time(long seconds, uint8_t &second, uint8_t &minute, uint8_t &hour);
 extern char *format_long(long num, long basis=0);
 extern bool title_prompt_int(const char * pattern, int data, bool show_leds = false, int show_time = 0);
 extern bool title_prompt_string(const char * pattern, const char * data, bool show_leds = false, int show_time = 0);

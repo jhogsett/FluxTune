@@ -16,7 +16,7 @@ public:
     virtual void update_realization();
 
     unsigned long _frequency;
-    byte _sub_frequency;
+    uint8_t _sub_frequency;
     unsigned long _step;
     RealizationPool *_realization_pool;
 

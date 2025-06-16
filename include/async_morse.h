@@ -31,7 +31,7 @@ private:
     char lookup_morse_char(char c);
     bool start_step_element(unsigned long time);
     void restart_morse();
-    unsigned long compute_element_time(unsigned long time, byte element_count, bool is_space);
+    unsigned long compute_element_time(unsigned long time, uint8_t element_count, bool is_space);
     int step_element(unsigned long time);
     bool step_position(unsigned long time);
     void step_space(unsigned long time);
@@ -42,11 +42,11 @@ private:
     int async_length;
     int async_element_del;
     bool async_repeat;
-    byte async_phase;
-    byte async_position;
+    uint8_t async_phase;
+    uint8_t async_position;
     char async_char;
-    byte async_morse;
-    byte async_element;
+    uint8_t async_morse;
+    uint8_t async_element;
     bool async_element_done;
     bool async_active;
     unsigned long async_next_event;

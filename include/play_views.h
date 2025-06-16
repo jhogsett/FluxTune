@@ -26,7 +26,7 @@ extern void display_purse(int delay=0);
 extern void display_win(unsigned long win, int delay=0);
 extern void display_jackpot(unsigned long win);
 // extern char *numeric_bet_str(long bet);
-extern char *standard_bet_str(byte bet);
+extern char *standard_bet_str(uint8_t bet);
 extern bool show_instr_long_press();
 extern int prompt_nice_or_rude();
 extern int prompt_wpm(int wpm);

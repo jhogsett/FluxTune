@@ -1,25 +1,13 @@
 #include <Arduino.h>
 #include <Wire.h>
-
 #include <MD_AD9833.h>
-// #include <SPI.h>
-
-// #include "buttons.h"
 #include "displays.h"
 #include "hardware.h"
-// #include "idle_mode.h"
 #include "led_handler.h"
 #include "leds.h"
-// #include "motor.h"
-// #include "options_mode.h"
 #include "saved_data.h"
-// #include "prompts.h"
 #include "seeding.h"
-// #include "slot_game.h"
-// #include "speaker.h"
-// #include "time_game.h"
 #include "utils.h"
-// #include "word_game.h"
 
 // #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
@@ -43,6 +31,8 @@
 #include "realizer_pool.h"
 
 #include <PololuLedStrip.h>
+
+#include <windowed_mean.h>
 
 // extend visual apparent range by modulating last led's brightness
 // establish brightness baseline and ability to adjust overall brightness
@@ -81,6 +71,7 @@ rgb_color empty[LED_COUNT] =
 unsigned long next_time = 0;
 int value = 127;
 
+WindowedMean mean(300, 127.0);
 void step_sm(unsigned long time)
 {
 	if(time < next_time)
@@ -89,16 +80,24 @@ void step_sm(unsigned long time)
 
 	int r = random(11) - 5;
 	value += r;
+	mean.sample(value);
 
-	if(value > 255)
-		value = 255;
-	if(value < 0)
-		value = 0;
+	int sample = int(mean.mean());
 
-	int sample = value * 2;
+	if(sample > 255)
+		sample = 255;
+	if(sample < 0)
+		sample = 0;
+
+	sample = value * 2;
 	int on_leds = (sample / 73) + 1;
 	int remain = ((sample % 73) * 16) / 73;
 
+	if(on_leds > 7)
+	    on_leds = 7;
+
+	// Serial.println();
+	// Serial.println(on_leds);
 	// Serial.println(remain);
 
 //   remain = remain / 73
@@ -123,7 +122,7 @@ void step_sm(unsigned long time)
 	dbuffer[on_leds-1].blue = (dbuffer[on_leds-1].blue * remain) / 16;
 
 	// modify whole display per display contrast
-	for(byte i = 0; i < LED_COUNT; i++){
+	for(uint8_t i = 0; i < LED_COUNT; i++){
 		dbuffer[i].red = (dbuffer[i].red * option_contrast)	/ 1;
 		dbuffer[i].green = (dbuffer[i].green * option_contrast)	/ 1;
 		dbuffer[i].blue = (dbuffer[i].blue * option_contrast)	/ 1;
@@ -156,12 +155,12 @@ EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
 
 
 // Pins for SPI comm with the AD9833 IC
-const byte PIN_DATA = 11;  ///< SPI Data pin number
-const byte PIN_CLK = 13;  	///< SPI Clock pin number
-const byte PIN_FSYNC1 = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
-const byte PIN_FSYNC2 = 14;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-const byte PIN_FSYNC3 = 15;  ///< SPI Load pin number (FSYNC in AD9833 usage)
-const byte PIN_FSYNC4 = 16;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_DATA = 11;  ///< SPI Data pin number
+const uint8_t PIN_CLK = 13;  	///< SPI Clock pin number
+const uint8_t PIN_FSYNC1 = 8; ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC2 = 14;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC3 = 15;  ///< SPI Load pin number (FSYNC in AD9833 usage)
+const uint8_t PIN_FSYNC4 = 16;  ///< SPI Load pin number (FSYNC in AD9833 usage)
 
 MD_AD9833 AD1(PIN_DATA, PIN_CLK, PIN_FSYNC1); // Arbitrary SPI pins
 MD_AD9833 AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
@@ -180,7 +179,8 @@ RealizerPool realizer_pool(realizers, realizer_stats, 4);
 SimStation simstation1(&realizer_pool);
 SimStation simstation2(&realizer_pool);
 SimStation simstation3(&realizer_pool);
-SimStation simstation4(&realizer_pool);
+
+// SimStation simstation4(&realizer_pool);
 
 WaveOut waveout1(&realizer_pool);
 WaveOut waveout2(&realizer_pool);
@@ -196,7 +196,7 @@ WaveOut waveout4(&realizer_pool);
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
-// SimRTTY simstation4(&realizer_pool);
+SimRTTY simstation4(&realizer_pool);
 
 Realization *realizations[4] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 bool realization_stats[4] = {false, false, false, false};
@@ -243,7 +243,7 @@ int current_dispatcher = 1;
 void setup_display(){
 	Wire.begin();
 
-	const byte display_brightnesses[] = {(unsigned char)option_contrast, (unsigned char)option_contrast};
+	const uint8_t display_brightnesses[] = {(unsigned char)option_contrast, (unsigned char)option_contrast};
 	display.init(display_brightnesses);
 	/* the duplicated displays do not need reinitialization
 	disp1.init(brightness+0);
@@ -253,7 +253,7 @@ void setup_display(){
 }
 
 void setup_leds(){
-	for(byte i = FIRST_LED; i <= LAST_LED; i++){
+	for(uint8_t i = FIRST_LED; i <= LAST_LED; i++){
 		pinMode(i, OUTPUT);
 		digitalWrite(i, LOW);
 	}
@@ -264,14 +264,14 @@ void setup_leds(){
 }
 
 void setup_buttons(){
-	// for(byte i = 0; i < NUM_BUTTONS; i++){
+	// for(uint8_t i = 0; i < NUM_BUTTONS; i++){
 	// 	pinMode(i + FIRST_BUTTON, 0x03); // INPUT_PULLDOWN ?!
 	// 	button_states[i] = false;
 	// }
 }
 
 void setup(){
-	Serial.begin(115200);
+	// Serial.begin(115200);
 	randomizer.randomize();
 
 	load_save_data();
@@ -394,8 +394,8 @@ void loop()
 	simstation2.begin(time + random(1000), 7002500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
 	simstation3.begin(time + random(1000), 7003000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
 
-	// simstation4.begin(time + random(1000), 7002000.0);
-	simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+	simstation4.begin(time + random(1000), 7004000.0);
+	// simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
 	set_application(APP_SIMRADIO, &display);
 

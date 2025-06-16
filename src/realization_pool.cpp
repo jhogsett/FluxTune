@@ -20,7 +20,7 @@ bool RealizationPool::begin(unsigned long time){
 }
 
 bool RealizationPool::step(unsigned long time){
-    for(byte i = 0; i < _nrealizations; i++){
+    for(uint8_t i = 0; i < _nrealizations; i++){
         if(!_realizations[i]->step(time))
             return false;
     }
@@ -64,7 +64,7 @@ void RealizationPool::end(){
 // }
 
 void RealizationPool::update(Mode *mode){
-    for(byte i = 0; i < _nrealizations; i++){
+    for(uint8_t i = 0; i < _nrealizations; i++){
         _realizations[i]->update(mode);
     }
 }

@@ -12,7 +12,7 @@ int option_contrast = DEFAULT_CONTRAST;
 // // long purse = DEFAULT_PURSE;
 // unsigned long best_time = DEFAULT_TIME;
 // bool option_clock_24h = false;
-// byte option_idle_mode = DEFAULT_IDLE_MODE;
+// uint8_t option_idle_mode = DEFAULT_IDLE_MODE;
 // // unsigned long bank = DEFAULT_BANK;
 // unsigned long best_time1 = DEFAULT_TIME;
 // unsigned long best_time2 = DEFAULT_TIME;
@@ -22,8 +22,8 @@ int option_contrast = DEFAULT_CONTRAST;
 // unsigned long option_idle_time = DEFAULT_IDLE_TIME;
 // long vig = DEFAULT_VIG;
 // bool option_vib_str;
-// byte option_clock_chime;
-// byte option_wpm;
+// uint8_t option_clock_chime;
+// uint8_t option_wpm;
 // bool auto_play_enabled;
 
 // ##DATA Add new persisted play data veriables above here

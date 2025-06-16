@@ -42,8 +42,8 @@
 
 // adjustments to match the panels LEDs to the display
 // #define LED_INTENSITY1 32 // Green panel LED is a bit brighter than the Amber and Red LEDs
-#define LED_INTENSITY1 40 // Red panel LED matched to Amber
-#define LED_INTENSITY2 40 // Amber panel LED matched to Red
+#define LED_INTENSITY1 64 // White panel LED matched to Amber
+#define LED_INTENSITY2 64 // Blue panel LED matched to Red
 
 // array used to pass the LED intensities to LED handlers
 extern const int led_intensities[];

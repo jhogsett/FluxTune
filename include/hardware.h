@@ -8,8 +8,8 @@
 #define NUM_PANEL_LEDS 2
 #define FIRST_PANEL_LED 9
 #define LAST_PANEL_LED 10
-#define GREEN_PANEL_LED 9
-#define AMBER_PANEL_LED 10
+#define WHITE_PANEL_LED 9
+#define BLUE_PANEL_LED 10
 
 // // Arduino Nano pins for the button LEDs
 // // digital pins

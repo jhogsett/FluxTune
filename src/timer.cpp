@@ -11,9 +11,9 @@
 #include "utils.h"
 #include "timer.h"
 
-byte timer_hour, timer_minute, timer_second;
+uint8_t timer_hour, timer_minute, timer_second;
 
-void render_timer_string(byte seconds, byte minutes, byte hours, bool running, bool going_up) {
+void render_timer_string(uint8_t seconds, uint8_t minutes, uint8_t hours, bool running, bool going_up) {
 	char indicator[5];
 	if (running)
         load_f_string(F("STOP"), indicator);
@@ -30,13 +30,13 @@ void render_timer_string(byte seconds, byte minutes, byte hours, bool running, b
 	}
 }
 
-void increment_timer(byte &second, byte &minute, byte &hour, byte seconds, byte minutes, byte hours) {
+void increment_timer(uint8_t &second, uint8_t &minute, uint8_t &hour, uint8_t seconds, uint8_t minutes, uint8_t hours) {
 	long total_seconds = time_to_seconds(second, minute, hour);
 	total_seconds += time_to_seconds(seconds, minutes, hours);
 	seconds_to_time(total_seconds, second, minute, hour);
 }
 
-bool decrement_timer(byte &second, byte &minute, byte &hour, int seconds, int minutes, int hours) {
+bool decrement_timer(uint8_t &second, uint8_t &minute, uint8_t &hour, int seconds, int minutes, int hours) {
 	long total_seconds = time_to_seconds(second, minute, hour);
 	total_seconds -= time_to_seconds(seconds, minutes, hours);
 	if (total_seconds < 0)
@@ -45,7 +45,7 @@ bool decrement_timer(byte &second, byte &minute, byte &hour, int seconds, int mi
 	return total_seconds > 0;
 }
 
-// bool timer_prompt(byte seconds, byte minutes, byte hours) {
+// bool timer_prompt(uint8_t seconds, uint8_t minutes, uint8_t hours) {
 // 	unsigned long time = millis();
 // 	unsigned long idle_timeout = time + option_idle_time;
 

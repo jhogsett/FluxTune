@@ -3,20 +3,20 @@
 
 // some code borrowed from https://github.com/akuzechie/HT16K33-Display-Library
 
-HT16K33Disp::HT16K33Disp(byte address, byte num_displays){
+HT16K33Disp::HT16K33Disp(uint8_t address, uint8_t num_displays){
 	set_address(address, num_displays);
 	_loop_running = false;
 }
 
-void HT16K33Disp::set_address(byte address, byte num_displays){
+void HT16K33Disp::set_address(uint8_t address, uint8_t num_displays){
 	_address = address;
 	_num_displays = num_displays;
 	_num_digits = _num_displays * NUM_DIGITS_PER_DISPLAY;
 }
 
 // point to an array of ints specifying brightness levels per display
-void HT16K33Disp::init(const byte *brightLevels){
-	for(byte i = 0; i < _num_displays; i++){
+void HT16K33Disp::init(const uint8_t *brightLevels){
+	for(uint8_t i = 0; i < _num_displays; i++){
 		Wire.beginTransmission(_address + i);
 		Wire.write(0x21); //normal operation mode
 		Wire.endTransmission(false);
@@ -30,7 +30,7 @@ void HT16K33Disp::init(const byte *brightLevels){
 	}
 }
 
-void HT16K33Disp::write(byte digit, unsigned int data){
+void HT16K33Disp::write(uint8_t digit, unsigned int data){
 	int display = digit / NUM_DIGITS_PER_DISPLAY;
 	digit -= (display * NUM_DIGITS_PER_DISPLAY);
 	Wire.beginTransmission(_address + display);
@@ -41,12 +41,12 @@ void HT16K33Disp::write(byte digit, unsigned int data){
 }
 
 void HT16K33Disp::segments_test(){
-	for(byte i = 0; i < _num_digits; i++)
+	for(uint8_t i = 0; i < _num_digits; i++)
 		write(i, (uint16_t) -1);
 }
 
 void HT16K33Disp::clear(){
-	for(byte i = 0; i < _num_digits; i++)
+	for(uint8_t i = 0; i < _num_digits; i++)
 		write(i, 0);
 }
 
@@ -70,7 +70,7 @@ int HT16K33Disp::string_length(const char * string){
 }
 
 void HT16K33Disp::show_string(const char * string, bool pad_blanks){
-	byte start = 0;
+	uint8_t start = 0;
 	// if(right_justify)
 	// {
 	// 	char diff = _num_digits - string_length(string);
@@ -85,7 +85,7 @@ void HT16K33Disp::show_string(const char * string, bool pad_blanks){
 	// 	    start = diff;
 	// }
 
-	for(byte j = start; j < _num_digits; j++)
+	for(uint8_t j = start; j < _num_digits; j++)
 	{
 		if(*string == 0)
 		{
@@ -110,7 +110,7 @@ void HT16K33Disp::show_string(const char * string, bool pad_blanks){
 }
 
 void HT16K33Disp::simple_show_string(const char * string){
-	for(byte i = 0; i < _num_digits; i++){
+	for(uint8_t i = 0; i < _num_digits; i++){
 		if(*string == 0)
 		    break;
 		if(*(string + 1) == '.')

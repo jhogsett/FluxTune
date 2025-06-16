@@ -65,11 +65,11 @@ void _send_word_space(int time){
 // maybe auto skip to start bit
 
 void _send_morse(int c, int time){
-    byte morse = pgm_read_byte(morsedata + c);
+    uint8_t morse = pgm_read_byte(morsedata + c);
     bool start_bit = false;
     for(int i = 0; i < 7; i++){
         morse = morse >> 1;
-        byte bit = morse & 0x1;
+        uint8_t bit = morse & 0x1;
 
         if(!start_bit){
             if(bit == 1){

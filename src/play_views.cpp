@@ -80,7 +80,7 @@ bool display_scores(){
 //     title_prompt_string(FSTR("** JACKPOT $%s"), format_long(win), true, ROUND_DELAY);
 // }
 
-// char *standard_bet_str(byte bet){
+// char *standard_bet_str(uint8_t bet){
 // 	if(bet == BET_ALL){
 // 		sprintf_P(copy_buffer, PSTR("ALL"));
 // 		return copy_buffer;

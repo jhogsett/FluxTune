@@ -95,8 +95,8 @@ void BillboardsHandler::process_billboard_switch(){
 	}
 }
 
-byte BillboardsHandler::run_times(){
-	byte times;
+uint8_t BillboardsHandler::run_times(){
+	uint8_t times;
 	if(_showing_home)
 		times = _home_times;
 	else

@@ -35,11 +35,11 @@ private:
     int async_length;
     int async_element_del;
     bool async_repeat;
-    byte async_phase;
-    byte async_position;
+    uint8_t async_phase;
+    uint8_t async_position;
     char async_char;
-    byte async_rtty;
-    byte async_element;
+    uint8_t async_rtty;
+    uint8_t async_element;
     bool async_element_done;
     bool async_active;
     unsigned long async_next_event;

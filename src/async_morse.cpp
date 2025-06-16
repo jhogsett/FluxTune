@@ -71,7 +71,7 @@ bool AsyncMorse::start_step_element(unsigned long time){
     
     for(async_element = 0; async_element < 7; async_element++){
         async_morse = async_morse >> 1;
-        byte bit = async_morse & 0x1;
+        uint8_t bit = async_morse & 0x1;
         if(bit == 1){
             async_next_event = time;
             async_space = true;
@@ -147,7 +147,7 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
     }    
 }    
 
-unsigned long AsyncMorse::compute_element_time(unsigned long time, byte element_count, bool is_space){
+unsigned long AsyncMorse::compute_element_time(unsigned long time, uint8_t element_count, bool is_space){
     // int fist_adjustment;
     // if(is_space){
     //     fist_adjustment = int((async_element_del * 0.4) - (async_element_del * 0.2));
@@ -183,7 +183,7 @@ int AsyncMorse::step_element(unsigned long time){
         }
 
         async_morse = async_morse >> 1;
-        byte bit = async_morse & 0x1;
+        uint8_t bit = async_morse & 0x1;
     
         async_active = true;
         if(bit == 1){

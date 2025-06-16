@@ -19,6 +19,6 @@ extern HT16K33Disp disp2;
 extern HT16K33Disp displays[];
 
 // used for matching the displays
-extern const byte display_brightnesses[];
+extern const uint8_t display_brightnesses[];
 
 #endif

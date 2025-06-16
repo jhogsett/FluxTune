@@ -6,4 +6,4 @@ HT16K33Disp disp1(0x70, 1);
 HT16K33Disp disp2(0x71, 1);
 // HT16K33Disp disp3(0x72, 1);
 HT16K33Disp displays[] = {disp1, disp2};
-// const byte display_brightnesses[] = {DISPLAY_BRIGHTNESS1, DISPLAY_BRIGHTNESS2};
+// const uint8_t display_brightnesses[] = {DISPLAY_BRIGHTNESS1, DISPLAY_BRIGHTNESS2};

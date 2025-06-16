@@ -12,7 +12,7 @@
 class EncoderHandler
 {
 public:
-  EncoderHandler(byte id, int clock_pin, int data_pin, int button_pin, byte pulses_per_detent=1){
+  EncoderHandler(uint8_t id, int clock_pin, int data_pin, int button_pin, uint8_t pulses_per_detent=1){
     _id = id;
     _button_pin = button_pin;
     _pulses_per_detent = pulses_per_detent;
@@ -144,14 +144,14 @@ public:
   const int REPEAT_TIME = 500;
 
 private:  
-  byte _id;
-  byte _button_pin;
-  byte _pulses_per_detent;
+  uint8_t _id;
+  uint8_t _button_pin;
+  uint8_t _pulses_per_detent;
   Encoder * pencoder;
   long old_dial_position;
   long old_encoded_position;
 
-  byte button_state;  
+  uint8_t button_state;  
   unsigned long valid_time;
 
   bool _changed;

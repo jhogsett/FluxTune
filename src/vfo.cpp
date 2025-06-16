@@ -55,7 +55,7 @@ void VFO::update_display(HT16K33Disp *display){
 
 void VFO::update_realization(){
     _realization_pool->update(this);
-    // for(byte i = 0; i < _nrealizations; i++){
+    // for(uint8_t i = 0; i < _nrealizations; i++){
     //     _realizations[i]->update(this);
     // }
 

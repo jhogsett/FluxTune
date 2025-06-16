@@ -18,7 +18,7 @@ public:
 	bool terminate_blanking(unsigned long time);
 	void process_display(HT16K33Disp * display, char **data);
 	void process_billboard_switch();
-	byte run_times();
+	uint8_t run_times();
 
 private:
 	char *_buffer;
@@ -26,12 +26,12 @@ private:
 	Billboard *_billboard;
 	const char * const* _templates;
 	int _blanking_time;
-	byte _home_times;
+	uint8_t _home_times;
 	bool _random;
 
 	bool _running;
-	byte _n_current_template;
-	byte _n_next_template;
+	uint8_t _n_current_template;
+	uint8_t _n_next_template;
 	bool _showing_home;
 	bool _blanking;
 	unsigned long _blanking_until;

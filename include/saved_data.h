@@ -57,7 +57,7 @@
 #define ROUND_DELAY 750
 
 
-extern byte save_data_version;
+extern uint8_t save_data_version;
 
 extern int option_contrast;
 
@@ -80,7 +80,7 @@ extern int option_contrast;
 // extern bool option_clock_24h;
 
 // // mode when mode none, sleep, clock
-// extern byte option_idle_mode;
+// extern uint8_t option_idle_mode;
 
 // Current bank
 // extern unsigned long bank;
@@ -102,9 +102,9 @@ extern int option_contrast;
 // Current vig
 // extern long vig;
 
-// extern byte option_clock_chime;
+// extern uint8_t option_clock_chime;
 
-// extern byte option_wpm;
+// extern uint8_t option_wpm;
 
 // extern bool auto_play_enabled;
 
@@ -113,7 +113,7 @@ extern int option_contrast;
 
 // Saved data structure version 1
 struct SavedData{
-	byte version;
+	uint8_t version;
 
 	int option_contrast;
 
@@ -124,7 +124,7 @@ struct SavedData{
 	// unsigned long best_time;
 
 	// bool option_clock_24h;
-	// byte option_idle_mode;
+	// uint8_t option_idle_mode;
 
 	// unsigned long bank;
 	// unsigned long best_time1;
@@ -137,9 +137,9 @@ struct SavedData{
 
 	// bool option_vib_str;
 
-	// byte option_clock_chime;
+	// uint8_t option_clock_chime;
 
-	// byte option_wpm;
+	// uint8_t option_wpm;
 
 	// bool auto_play_enabled;
 
