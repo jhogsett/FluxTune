@@ -18,19 +18,15 @@ include_directories(native)
 add_definitions(-DPLATFORM_NATIVE=1)
 
 # Source files
-set(SOURCES
-    # Core source files
+set(SOURCES    # Core source files
     src/buffers.cpp
-    src/chime.cpp
     src/contrast.cpp
     src/contrast_handler.cpp
     src/displays.cpp
     src/event_dispatcher.cpp
     src/leds.cpp
-    src/led_handler.cpp
-    src/mode.cpp
+    src/led_handler.cpp    src/mode.cpp
     src/mode_handler.cpp
-    src/morse.cpp
     src/option.cpp
     src/options_presenter.cpp
     src/option_handler.cpp

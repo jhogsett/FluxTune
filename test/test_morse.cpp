@@ -1,6 +1,6 @@
 #include "unity.h"
 #include "../native/platform.h"
-#include "morse.h"
+#include "async_morse.h"
 
 void setUp(void) {
     // Set up before each test
@@ -11,8 +11,8 @@ void tearDown(void) {
 }
 
 void test_morse_character_lookup(void) {
-    // Test basic morse code character conversion
-    // Note: These tests will need to be updated based on actual morse.h implementation
+    // Test basic async morse code functionality
+    // Note: These tests will need to be updated based on actual async_morse.h implementation
     
     // Test letter A (dot-dash)
     // char* result = get_morse_code('A');
@@ -22,8 +22,8 @@ void test_morse_character_lookup(void) {
     // result = get_morse_code('1');
     // TEST_ASSERT_EQUAL_STRING(".----", result);
     
-    // For now, just test that morse.h can be included
-    TEST_PASS_MESSAGE("Morse code tests - implementation needed");
+    // For now, just test that async_morse.h can be included
+    TEST_PASS_MESSAGE("Async morse code tests - implementation needed");
 }
 
 void test_morse_timing_calculations(void) {

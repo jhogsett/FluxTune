@@ -2,7 +2,6 @@
 #define __SAVED_DATA_H
 
 #include "basic_types.h"
-#include "chime.h"
 
 // when adding new persisted play data, search for ##DATA
 
