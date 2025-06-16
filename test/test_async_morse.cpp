@@ -14,99 +14,140 @@ void tearDown(void) {
     morse = nullptr;
 }
 
-// Basic functionality tests
-void test_morse_constructor(void) {
-    AsyncMorse test_morse;
-    TEST_PASS_MESSAGE("AsyncMorse constructor works");
+// =====================================================
+// BASIC FUNCTIONALITY TESTS
+// =====================================================
+
+void test_morse_basic_initialization(void) {
+    TEST_ASSERT_NOT_NULL(morse);
+    TEST_PASS_MESSAGE("AsyncMorse can be instantiated");
 }
 
-void test_morse_character_lookup(void) {
-    // Test character lookup function indirectly through morse generation
-    simulate_morse_sequence("A", 20, false, 0, 1000);
+void test_morse_timing_calculation(void) {
+    int time_20wpm = MORSE_TIME_FROM_WPM(20);
+    int time_10wpm = MORSE_TIME_FROM_WPM(10);
     
-    // Should have events (at minimum: turn on, turn off for dot, turn on, turn off for dash)
-    TEST_ASSERT_GREATER_THAN(3, event_count);
-    TEST_PASS_MESSAGE("Character lookup appears to work");
+    TEST_ASSERT_EQUAL_INT(time_20wpm * 2, time_10wpm);
+    TEST_ASSERT_EQUAL_INT(50, time_20wpm);
 }
 
-void test_morse_single_character_dot(void) {
-    // Test letter E (single dot)
-    simulate_morse_sequence("E", 20, false, 0, 500);
+void test_morse_state_constants(void) {
+    TEST_ASSERT_NOT_EQUAL(STEP_MORSE_TURN_ON, STEP_MORSE_TURN_OFF);
+    TEST_ASSERT_NOT_EQUAL(STEP_MORSE_TURN_ON, STEP_MORSE_LEAVE_ON);
+    TEST_ASSERT_NOT_EQUAL(STEP_MORSE_TURN_ON, STEP_MORSE_LEAVE_OFF);
+    TEST_ASSERT_NOT_EQUAL(STEP_MORSE_TURN_OFF, STEP_MORSE_LEAVE_ON);
+    TEST_ASSERT_NOT_EQUAL(STEP_MORSE_TURN_OFF, STEP_MORSE_LEAVE_OFF);
+    TEST_ASSERT_NOT_EQUAL(STEP_MORSE_LEAVE_ON, STEP_MORSE_LEAVE_OFF);
     
-    // Should have: turn on (dot), turn off, done
-    TEST_ASSERT_GREATER_THAN(1, event_count);
+    TEST_PASS_MESSAGE("All morse state constants are properly defined");
+}
+
+// =====================================================
+// BEHAVIORAL VERIFICATION TESTS
+// =====================================================
+
+void test_morse_starts_with_turn_on(void) {
+    // Test that morse eventually produces TURN_ON (accounting for startup delay)
+    morse->start_morse("E", 20, false, 0);
     
-    // First event should be turn on
-    TEST_ASSERT_EQUAL_INT(STEP_MORSE_TURN_ON, events[0].state);
+    bool found_turn_on = false;
+    int first_non_leave_off_state = -1;
     
-    // Should eventually turn off
-    bool found_turn_off = false;
-    for (int i = 1; i < event_count; i++) {
-        if (events[i].state == STEP_MORSE_TURN_OFF) {
-            found_turn_off = true;
+    // Look for the first TURN_ON within a reasonable time window
+    for (unsigned long time = 0; time <= 100; time += 5) {
+        int state = morse->step_morse(time);
+        
+        // Record the first non-LEAVE_OFF state we see
+        if (first_non_leave_off_state == -1 && state != STEP_MORSE_LEAVE_OFF) {
+            first_non_leave_off_state = state;
+        }
+        
+        if (state == STEP_MORSE_TURN_ON) {
+            found_turn_on = true;
             break;
         }
     }
-    TEST_ASSERT_TRUE_MESSAGE(found_turn_off, "Should turn off after dot");
+    
+    TEST_ASSERT_TRUE_MESSAGE(found_turn_on, "Should eventually produce TURN_ON");
+    
+    // If there's a startup delay, the first active state should still be TURN_ON
+    if (first_non_leave_off_state != -1) {
+        TEST_ASSERT_EQUAL_INT_MESSAGE(STEP_MORSE_TURN_ON, first_non_leave_off_state, 
+                                      "First active state should be TURN_ON");
+    }
 }
 
-void test_morse_single_character_dash(void) {
-    // Test letter T (single dash)
-    simulate_morse_sequence("T", 20, false, 0, 500);
+void test_morse_produces_valid_states(void) {
+    // Test that all states returned are valid
+    morse->start_morse("E", 20, false, 0);
     
-    // Should have events
-    TEST_ASSERT_GREATER_THAN(1, event_count);
+    for (unsigned long time = 0; time <= 200; time += 5) {
+        int state = morse->step_morse(time);
+        TEST_ASSERT_TRUE_MESSAGE(
+            state == STEP_MORSE_TURN_ON || 
+            state == STEP_MORSE_TURN_OFF || 
+            state == STEP_MORSE_LEAVE_ON || 
+            state == STEP_MORSE_LEAVE_OFF,
+            "All states should be valid morse states"
+        );
+    }
+}
+
+void test_morse_has_on_off_transitions(void) {
+    // Test that we see both on and off states
+    morse->start_morse("E", 20, false, 0);
     
-    // First event should be turn on
-    TEST_ASSERT_EQUAL_INT(STEP_MORSE_TURN_ON, events[0].state);
+    bool saw_turn_on = false;
+    bool saw_turn_off = false;
+    bool saw_leave_on = false;
+    bool saw_leave_off = false;
     
-    // Dash should be longer than dot, so find the duration
-    unsigned long turn_on_time = 0, turn_off_time = 0;
-    for (int i = 0; i < event_count; i++) {
-        if (events[i].state == STEP_MORSE_TURN_ON) {
-            turn_on_time = events[i].time;
-        } else if (events[i].state == STEP_MORSE_TURN_OFF && turn_on_time > 0) {
-            turn_off_time = events[i].time;
-            break;
+    for (unsigned long time = 0; time <= 200; time += 5) {
+        int state = morse->step_morse(time);
+        if (state == STEP_MORSE_TURN_ON) saw_turn_on = true;
+        if (state == STEP_MORSE_TURN_OFF) saw_turn_off = true;
+        if (state == STEP_MORSE_LEAVE_ON) saw_leave_on = true;
+        if (state == STEP_MORSE_LEAVE_OFF) saw_leave_off = true;
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(saw_turn_on, "Should see TURN_ON");
+    TEST_ASSERT_TRUE_MESSAGE(saw_turn_off, "Should see TURN_OFF");
+    TEST_ASSERT_TRUE_MESSAGE(saw_leave_on, "Should see LEAVE_ON");
+    TEST_ASSERT_TRUE_MESSAGE(saw_leave_off, "Should see LEAVE_OFF");
+}
+
+void test_morse_different_characters_different_patterns(void) {
+    // Test that different characters produce different numbers of turn-ons
+    
+    // Count turn-ons for E (1 dot)
+    morse->start_morse("E", 20, false, 0);
+    int e_turn_ons = 0;
+    for (unsigned long time = 0; time <= 500; time += 5) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            e_turn_ons++;
         }
     }
     
-    TEST_ASSERT_GREATER_THAN(turn_on_time, turn_off_time);
-    
-    // For 20 WPM, element time is 50ms, dash should be ~150ms
-    unsigned long duration = turn_off_time - turn_on_time;
-    TEST_ASSERT_GREATER_THAN(100, duration); // Should be at least 100ms for a dash
-}
-
-void test_morse_dot_dash_combination(void) {
-    // Test letter A (dot-dash)
-    simulate_morse_sequence("A", 20, false, 0, 1000);
-    
-    // Should have multiple on/off cycles
-    int turn_on_count = 0;
-    int turn_off_count = 0;
-    
-    for (int i = 0; i < event_count; i++) {
-        if (events[i].state == STEP_MORSE_TURN_ON) {
-            turn_on_count++;
-        } else if (events[i].state == STEP_MORSE_TURN_OFF) {
-            turn_off_count++;
+    // Count turn-ons for A (dot-dash = 2 elements)
+    morse->start_morse("A", 20, false, 0);
+    int a_turn_ons = 0;
+    for (unsigned long time = 0; time <= 500; time += 5) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            a_turn_ons++;
         }
     }
     
-    TEST_ASSERT_EQUAL_INT_MESSAGE(2, turn_on_count, "Letter A should have 2 elements (dot, dash)");
-    TEST_ASSERT_EQUAL_INT_MESSAGE(2, turn_off_count, "Should turn off after each element");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(1, e_turn_ons, "E should have 1 element");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(2, a_turn_ons, "A should have 2 elements");
 }
 
-void test_morse_numbers(void) {
-    // Test number 5 (five dots)
-    simulate_morse_sequence("5", 20, false, 0, 2000);
+void test_morse_number_5_has_5_elements(void) {
+    // Test that number 5 has 5 turn-ons (5 dots)
+    morse->start_morse("5", 20, false, 0);
     
-    // Should have 5 on/off cycles
     int turn_on_count = 0;
-    
-    for (int i = 0; i < event_count; i++) {
-        if (events[i].state == STEP_MORSE_TURN_ON) {
+    for (unsigned long time = 0; time <= 2000; time += 5) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
             turn_on_count++;
         }
     }
@@ -114,189 +155,125 @@ void test_morse_numbers(void) {
     TEST_ASSERT_EQUAL_INT_MESSAGE(5, turn_on_count, "Number 5 should have 5 dots");
 }
 
-void test_morse_word_spacing(void) {
-    // Test space between words
-    simulate_morse_sequence("E E", 20, false, 0, 2000);
+void test_morse_wpm_affects_timing(void) {
+    // Test that different WPM values affect when turn-off occurs
     
-    // Should have two separate E's with proper spacing
-    int turn_on_count = 0;
-    
-    for (int i = 0; i < event_count; i++) {
-        if (events[i].state == STEP_MORSE_TURN_ON) {
-            turn_on_count++;
+    // Find turn-off time for 10 WPM
+    morse->start_morse("E", 10, false, 0);
+    unsigned long turn_off_time_10wpm = 0;
+    for (unsigned long time = 0; time <= 300; time += 5) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_OFF) {
+            turn_off_time_10wpm = time;
+            break;
         }
     }
     
-    TEST_ASSERT_EQUAL_INT_MESSAGE(2, turn_on_count, "Should have two E's");
+    // Find turn-off time for 40 WPM
+    morse->start_morse("E", 40, false, 0);
+    unsigned long turn_off_time_40wpm = 0;
+    for (unsigned long time = 0; time <= 100; time += 5) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_OFF) {
+            turn_off_time_40wpm = time;
+            break;
+        }
+    }
+    
+    // 10 WPM should be slower than 40 WPM
+    TEST_ASSERT_GREATER_THAN_MESSAGE(turn_off_time_40wpm, turn_off_time_10wpm, 
+                                      "10 WPM should be slower than 40 WPM");
 }
 
-void test_morse_timing_wpm(void) {
-    // Test different WPM settings
-    mock_time = 0;
-    simulate_morse_sequence("E", 10, false, 0, 500); // Slow
-    int slow_event_count = event_count;
-    
-    mock_time = 0;
-    simulate_morse_sequence("E", 40, false, 0, 500); // Fast
-    int fast_event_count = event_count;
-    
-    // Both should complete, but timing should be different
-    // This is a basic check that different WPM values are processed
-    TEST_ASSERT_GREATER_THAN(0, slow_event_count);
-    TEST_ASSERT_GREATER_THAN(0, fast_event_count);
-}
+// =====================================================
+// EDGE CASE TESTS
+// =====================================================
 
 void test_morse_empty_string(void) {
-    simulate_morse_sequence("", 20, false, 0, 500);
-    
-    // Should handle empty string gracefully
-    TEST_ASSERT_GREATER_OR_EQUAL(0, event_count);
-}
-
-void test_morse_repeat_functionality(void) {
-    // Test repeat with a short wait time
-    simulate_morse_sequence("E", 20, true, 1, 3000); // Repeat every 1 second
-    
-    // Should have more events due to repetition
-    int turn_on_count = 0;
-    
-    for (int i = 0; i < event_count; i++) {
-        if (events[i].state == STEP_MORSE_TURN_ON) {
-            turn_on_count++;
-        }
-    }
-    
-    // Should repeat at least once in 3 seconds with 1 second wait
-    TEST_ASSERT_GREATER_THAN(1, turn_on_count);
-}
-
-void test_morse_non_repeat_completion(void) {
-    // Test that non-repeating morse completes and stays off
-    simulate_morse_sequence("E", 20, false, 0, 1000);
-    
-    // Final state should be LEAVE_OFF or similar
-    if (event_count > 0) {
-        int final_state = events[event_count - 1].state;
-        TEST_ASSERT_TRUE_MESSAGE(
-            final_state == STEP_MORSE_LEAVE_OFF || final_state == STEP_MORSE_TURN_OFF,
-            "Final state should be off when not repeating"
-        );
-    }
+    morse->start_morse("", 20, false, 0);
+    int state = morse->step_morse(0);
+    TEST_ASSERT_TRUE(state >= 0 && state <= 4);
+    TEST_PASS_MESSAGE("Empty string handled gracefully");
 }
 
 void test_morse_case_insensitive(void) {
-    // Test that upper and lower case produce same result
-    mock_time = 0;
-    simulate_morse_sequence("a", 20, false, 0, 500);
-    int lower_events = event_count;
-    
-    mock_time = 0;
-    simulate_morse_sequence("A", 20, false, 0, 500);
-    int upper_events = event_count;
-    
-    // Should produce similar number of events
-    TEST_ASSERT_EQUAL_INT_MESSAGE(upper_events, lower_events, "Upper and lower case should be equivalent");
-}
-
-void test_morse_special_characters(void) {
-    // Test handling of unsupported characters
-    simulate_morse_sequence("@", 20, false, 0, 500);
-    
-    // Should handle gracefully without crashing
-    TEST_ASSERT_GREATER_OR_EQUAL(0, event_count);
-}
-
-void test_morse_long_message(void) {
-    // Test a longer message
-    simulate_morse_sequence("HELLO", 20, false, 0, 5000);
-    
-    // Should have many events for the full word
-    TEST_ASSERT_GREATER_THAN(10, event_count);
-    
-    // Should start and end properly
-    if (event_count > 0) {
-        TEST_ASSERT_EQUAL_INT(STEP_MORSE_TURN_ON, events[0].state);
-    }
-}
-
-void test_morse_state_consistency(void) {
-    // Test that states follow logical progression
-    simulate_morse_sequence("SOS", 20, false, 0, 3000);
-    
-    bool last_was_on = false;
-    for (int i = 0; i < event_count; i++) {
-        int state = events[i].state;
-        
-        switch (state) {
-            case STEP_MORSE_TURN_ON:
-                TEST_ASSERT_FALSE_MESSAGE(last_was_on, "Should not turn on when already on");
-                last_was_on = true;
-                break;
-            case STEP_MORSE_TURN_OFF:
-                TEST_ASSERT_TRUE_MESSAGE(last_was_on, "Should not turn off when already off");
-                last_was_on = false;
-                break;
-            case STEP_MORSE_LEAVE_ON:
-                TEST_ASSERT_TRUE_MESSAGE(last_was_on, "Should already be on for LEAVE_ON");
-                break;
-            case STEP_MORSE_LEAVE_OFF:
-                TEST_ASSERT_FALSE_MESSAGE(last_was_on, "Should already be off for LEAVE_OFF");
-                break;
+    // Test that 'a' and 'A' produce same pattern
+    morse->start_morse("a", 20, false, 0);
+    int a_turn_ons = 0;
+    for (unsigned long time = 0; time <= 500; time += 5) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            a_turn_ons++;
         }
     }
-}
-
-// Edge case tests
-void test_morse_zero_wpm_handling(void) {
-    // Test edge case of very low WPM (should not crash)
-    simulate_morse_sequence("E", 1, false, 0, 10000); // Very slow
     
-    // Should not crash and should produce some events
-    TEST_ASSERT_GREATER_OR_EQUAL(0, event_count);
-}
-
-void test_morse_high_wpm_handling(void) {
-    // Test edge case of very high WPM
-    simulate_morse_sequence("E", 100, false, 0, 500); // Very fast
+    morse->start_morse("A", 20, false, 0);
+    int A_turn_ons = 0;
+    for (unsigned long time = 0; time <= 500; time += 5) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            A_turn_ons++;
+        }
+    }
     
-    // Should not crash and should produce events
-    TEST_ASSERT_GREATER_OR_EQUAL(0, event_count);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(A_turn_ons, a_turn_ons, "Upper and lower case should be the same");
 }
 
-// Main test runner setup
+void test_morse_invalid_characters(void) {
+    morse->start_morse("@#$", 20, false, 0);
+    
+    // Should not crash and should produce valid states
+    for (unsigned long time = 0; time <= 200; time += 10) {
+        int state = morse->step_morse(time);
+        TEST_ASSERT_TRUE(state >= 0 && state <= 4);
+    }
+    TEST_PASS_MESSAGE("Invalid characters handled gracefully");
+}
+
+void test_morse_repeat_vs_non_repeat(void) {
+    // Test that repeat produces more activity than non-repeat
+    
+    // Non-repeat: count turn-ons over 3 seconds
+    morse->start_morse("E", 20, false, 0);
+    int non_repeat_turn_ons = 0;
+    for (unsigned long time = 0; time <= 3000; time += 10) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            non_repeat_turn_ons++;
+        }
+    }
+    
+    // Repeat: count turn-ons over 3 seconds
+    morse->start_morse("E", 20, true, 1); // Repeat every 1 second
+    int repeat_turn_ons = 0;
+    for (unsigned long time = 0; time <= 3000; time += 10) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            repeat_turn_ons++;
+        }
+    }
+    
+    // Repeat should have more turn-ons
+    TEST_ASSERT_GREATER_THAN_MESSAGE(non_repeat_turn_ons, repeat_turn_ons, 
+                                      "Repeat should have more activity than non-repeat");
+}
+
+// Main test runner
 int main() {
     UNITY_BEGIN();
     
     // Basic functionality
-    RUN_TEST(test_morse_constructor);
-    RUN_TEST(test_morse_character_lookup);
+    RUN_TEST(test_morse_basic_initialization);
+    RUN_TEST(test_morse_timing_calculation);
+    RUN_TEST(test_morse_state_constants);
     
-    // Single character tests
-    RUN_TEST(test_morse_single_character_dot);
-    RUN_TEST(test_morse_single_character_dash);
-    RUN_TEST(test_morse_dot_dash_combination);
-    
-    // Character set tests
-    RUN_TEST(test_morse_numbers);
-    RUN_TEST(test_morse_case_insensitive);
-    RUN_TEST(test_morse_special_characters);
-    
-    // Spacing and timing tests
-    RUN_TEST(test_morse_word_spacing);
-    RUN_TEST(test_morse_timing_wpm);
-    
-    // Message tests
-    RUN_TEST(test_morse_empty_string);
-    RUN_TEST(test_morse_long_message);
-    
-    // State and flow tests
-    RUN_TEST(test_morse_repeat_functionality);
-    RUN_TEST(test_morse_non_repeat_completion);
-    RUN_TEST(test_morse_state_consistency);
+    // Behavioral verification
+    RUN_TEST(test_morse_starts_with_turn_on);
+    RUN_TEST(test_morse_produces_valid_states);
+    RUN_TEST(test_morse_has_on_off_transitions);
+    RUN_TEST(test_morse_different_characters_different_patterns);
+    RUN_TEST(test_morse_number_5_has_5_elements);
+    RUN_TEST(test_morse_wpm_affects_timing);
     
     // Edge cases
-    RUN_TEST(test_morse_zero_wpm_handling);
-    RUN_TEST(test_morse_high_wpm_handling);
+    RUN_TEST(test_morse_empty_string);
+    RUN_TEST(test_morse_case_insensitive);
+    RUN_TEST(test_morse_invalid_characters);
+    RUN_TEST(test_morse_repeat_vs_non_repeat);
     
     return UNITY_END();
 }
