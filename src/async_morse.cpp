@@ -77,6 +77,7 @@ bool AsyncMorse::start_step_element(unsigned long time){
         async_morse = async_morse >> 1;
         byte bit = async_morse & 0x1;
         if(bit == 1){
+            // Set next event to start immediately (time + 0) to eliminate startup delay
             async_next_event = time;
             async_space = true;
             return true;
@@ -130,6 +131,7 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
     async_active = false;
     async_next_event = 0L;
     async_space = false;
+    async_switched_on = false;  // Ensure clean initial state
 
     async_element_done = true;
 
@@ -137,31 +139,27 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
     
     if(async_char == ' '){
         async_phase = PHASE_SPACE;
-
         return;
     }
 
     async_char = lookup_morse_char(async_char);    
 
-    if(!start_step_element(millis()))
+    // Initialize with time 0 to eliminate startup delay
+    if(!start_step_element(0))
         return;
 
     if(async_char > 0){
         async_phase = PHASE_CHAR;
     }    
-}    
+}
 
 unsigned long AsyncMorse::compute_element_time(unsigned long time, byte element_count, bool is_space){
-    // int fist_adjustment;
-    // if(is_space){
-    //     fist_adjustment = int((async_element_del * 0.4) - (async_element_del * 0.2));
-    // } else {
-    //     fist_adjustment = int((async_element_del * 0.2) - (async_element_del * 0.1));
-    // }
-    // fist_adjustment = random(fist_adjustment) - (fist_adjustment / 2);
-    // Serial.println((fist_adjustment));
-    // return time + (element_count * async_element_del) + fist_adjustment;
-
+    // The is_space parameter indicates different timing contexts:
+    // - false: Element timing (dots and dashes) - use standard timing
+    // - true: Spacing timing (between elements, characters, words) - could use different timing characteristics
+    
+    // For now, both use the same base calculation, but this allows for future
+    // differentiation (like adding fist/timing variations for spaces vs elements)
     return time + (element_count * async_element_del);
 }
 

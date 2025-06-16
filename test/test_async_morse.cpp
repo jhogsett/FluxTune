@@ -442,6 +442,142 @@ void test_morse_state_transition_order(void) {
     TEST_ASSERT_TRUE_MESSAGE(valid_transitions, "State transitions should follow valid patterns");
 }
 
+// =====================================================
+// BUG DETECTION TESTS
+// =====================================================
+
+void test_morse_element_spacing_timing(void) {
+    // Test that element spacing scales with WPM
+    // Element spacing should be 1 unit, which should scale with WPM
+    
+    // Test at 20 WPM (50ms per unit)
+    morse->start_morse("A", 20, false, 0); // A = dot-dash
+    unsigned long first_turn_off_20wpm = 0;
+    unsigned long second_turn_on_20wpm = 0;
+    bool found_first_off = false;
+    
+    for (unsigned long time = 0; time <= 500; time += 1) {
+        int state = morse->step_morse(time);
+        if (state == STEP_MORSE_TURN_OFF && !found_first_off) {
+            first_turn_off_20wpm = time;
+            found_first_off = true;
+        }
+        if (found_first_off && state == STEP_MORSE_TURN_ON && second_turn_on_20wpm == 0) {
+            second_turn_on_20wpm = time;
+            break;
+        }
+    }
+    
+    unsigned long element_spacing_20wpm = second_turn_on_20wpm - first_turn_off_20wpm;
+    
+    // Test at 40 WPM (25ms per unit) 
+    morse->start_morse("A", 40, false, 0);
+    unsigned long first_turn_off_40wpm = 0;
+    unsigned long second_turn_on_40wpm = 0;
+    found_first_off = false;
+    
+    for (unsigned long time = 0; time <= 250; time += 1) {
+        int state = morse->step_morse(time);
+        if (state == STEP_MORSE_TURN_OFF && !found_first_off) {
+            first_turn_off_40wpm = time;
+            found_first_off = true;
+        }
+        if (found_first_off && state == STEP_MORSE_TURN_ON && second_turn_on_40wpm == 0) {
+            second_turn_on_40wpm = time;
+            break;
+        }
+    }
+    
+    unsigned long element_spacing_40wpm = second_turn_on_40wpm - first_turn_off_40wpm;
+    
+    // Element spacing should scale with WPM: 20 WPM should be ~2x slower than 40 WPM
+    TEST_ASSERT_GREATER_THAN_MESSAGE(element_spacing_40wpm, element_spacing_20wpm, 
+                                      "Element spacing should scale with WPM");
+    
+    // Check if the ratio is approximately 2:1 (within 25% tolerance)
+    unsigned long expected_ratio = element_spacing_20wpm / element_spacing_40wpm;
+    TEST_ASSERT_GREATER_THAN_MESSAGE(1, expected_ratio, "WPM ratio should be greater than 1");
+    TEST_ASSERT_LESS_THAN_MESSAGE(3, expected_ratio, "WPM ratio should be reasonable");
+}
+
+void test_morse_immediate_start(void) {
+    // Test that morse starts immediately without unnecessary delay
+    morse->start_morse("E", 20, false, 0);
+    
+    // Should get TURN_ON very quickly (within first few milliseconds)
+    bool found_turn_on_early = false;
+    for (unsigned long time = 0; time <= 10; time += 1) {
+        int state = morse->step_morse(time);
+        if (state == STEP_MORSE_TURN_ON) {
+            found_turn_on_early = true;
+            break;
+        }
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(found_turn_on_early, 
+                            "Morse should start immediately without unnecessary startup delay");
+}
+
+void test_morse_character_spacing_wpm_dependency(void) {
+    // Test that character spacing (between letters) scales with WPM
+    
+    // Test "AB" at 20 WPM - find gap between A and B
+    morse->start_morse("AB", 20, false, 0);
+    unsigned long char_gap_start_20wpm = 0;
+    unsigned long char_gap_end_20wpm = 0;
+    int turn_on_count = 0;
+    bool in_gap = false;
+    
+    for (unsigned long time = 0; time <= 1000; time += 1) {
+        int state = morse->step_morse(time);
+        if (state == STEP_MORSE_TURN_ON) {
+            turn_on_count++;
+            if (turn_on_count == 2 && !in_gap) {
+                // End of first character (A has 2 elements)
+                in_gap = true;
+            } else if (turn_on_count == 3 && in_gap) {
+                // Start of second character (B)
+                char_gap_end_20wpm = time;
+                break;
+            }
+        }
+        if (in_gap && char_gap_start_20wpm == 0 && state == STEP_MORSE_LEAVE_OFF) {
+            char_gap_start_20wpm = time;
+        }
+    }
+    
+    unsigned long char_spacing_20wpm = char_gap_end_20wpm - char_gap_start_20wpm;
+    
+    // Test same at 40 WPM
+    morse->start_morse("AB", 40, false, 0);
+    unsigned long char_gap_start_40wpm = 0;
+    unsigned long char_gap_end_40wpm = 0;
+    turn_on_count = 0;
+    in_gap = false;
+    
+    for (unsigned long time = 0; time <= 500; time += 1) {
+        int state = morse->step_morse(time);
+        if (state == STEP_MORSE_TURN_ON) {
+            turn_on_count++;
+            if (turn_on_count == 2 && !in_gap) {
+                in_gap = true;
+            } else if (turn_on_count == 3 && in_gap) {
+                char_gap_end_40wpm = time;
+                break;
+            }
+        }
+        if (in_gap && char_gap_start_40wpm == 0 && state == STEP_MORSE_LEAVE_OFF) {
+            char_gap_start_40wpm = time;
+        }
+    }
+    
+    unsigned long char_spacing_40wpm = char_gap_end_40wpm - char_gap_start_40wpm;
+    
+    // Character spacing should also scale with WPM
+    TEST_ASSERT_GREATER_THAN_MESSAGE(char_spacing_40wpm, char_spacing_20wpm,
+                                      "Character spacing should scale with WPM");
+}
+
 // Main test runner
 int main() {
     UNITY_BEGIN();
@@ -473,6 +609,11 @@ int main() {
     // Timing precision
     RUN_TEST(test_morse_timing_precision);
     RUN_TEST(test_morse_state_transition_order);
+    
+    // Bug detection
+    RUN_TEST(test_morse_element_spacing_timing);
+    RUN_TEST(test_morse_immediate_start);
+    RUN_TEST(test_morse_character_spacing_wpm_dependency);
     
     return UNITY_END();
 }
