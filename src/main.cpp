@@ -4,22 +4,13 @@
 #include <MD_AD9833.h>
 // #include <SPI.h>
 
-// #include "buttons.h"
 #include "displays.h"
 #include "hardware.h"
-// #include "idle_mode.h"
 #include "led_handler.h"
 #include "leds.h"
-// #include "motor.h"
-// #include "options_mode.h"
 #include "saved_data.h"
-// #include "prompts.h"
 #include "seeding.h"
-// #include "slot_game.h"
-// #include "speaker.h"
-// #include "time_game.h"
 #include "utils.h"
-// #include "word_game.h"
 
 // #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
@@ -321,8 +312,6 @@ void setup(){
 }	
 
 bool main_menu(){
-	// bool buttons[] = {false, true, true, true};
-	// return branch_prompt(FSTR("FluxTune"), NULL, NULL, NULL, NULL, buttons);
     return true;
 }
 

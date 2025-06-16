@@ -1,28 +1,29 @@
-# Arduino.h Dependency Removal Summary
+# FluxTune Codebase Cleanup Summary
 
 ## Overview
-Successfully implemented a selective approach to Arduino.h dependency removal:
-- Files that need Arduino functions (pinMode, digitalWrite, PROGMEM, etc.) continue to include Arduino.h
-- Files that only need the `byte` type now use a standard uint8_t typedef
-- Arduino.h remains in main.cpp as requested
+This document summarizes two major cleanup operations performed on the FluxTune codebase:
 
-## Approach
+1. **Arduino.h Dependency Removal** - Selective removal of Arduino.h dependencies
+2. **Arcade Game Code Removal** - Removal of leftover code from the original arcade game project
+
+## Arduino.h Dependency Removal
+
+### Approach
 Instead of creating a complete hardware abstraction layer, this simpler approach:
 1. Replaces Arduino's `byte` type with standard `uint8_t` 
 2. Keeps Arduino.h for files that use Arduino-specific functions
 3. Only removes Arduino.h from files that don't need Arduino functionality
 
-## Files Modified
+### Files Modified
 
-### New Header Files Created:
+#### New Header Files Created:
 1. **include/basic_types.h** - Provides standard type definitions
    - Defines `byte` type as `uint8_t` for compatibility
    - Lightweight header with minimal dependencies
 
-### Files That Continue Using Arduino.h:
+#### Files That Continue Using Arduino.h:
 **Header Files:**
 - include/utils.h (uses __FlashStringHelper, PROGMEM)
-- include/timer.h (uses PSTR, sprintf_P functions)
 - include/led_handler.h (uses digitalWrite, millis)
 - include/encoder_handler.h (uses pinMode, digitalRead, INPUT_PULLUP)
 - include/async_rtty.h (uses millis)
@@ -30,38 +31,69 @@ Instead of creating a complete hardware abstraction layer, this simpler approach
 
 **Source Files:**
 - src/utils.cpp (uses PROGMEM, strcpy_P, sprintf_P)
-- src/timer.cpp (uses sprintf_P, PSTR)
-- src/test_mode.cpp (uses digitalRead, millis)
-- src/speaker.cpp (uses delayMicroseconds)
 - src/morse.cpp (uses PROGMEM)
 - src/led_handler.cpp (uses digitalWrite, analogWrite, millis)
-- src/billboards_handler.cpp (uses pgm_read_ptr)
 - src/async_rtty.cpp (uses millis)
 - src/async_morse.cpp (uses PROGMEM, millis)
+- src/speaker.cpp (uses delayMicroseconds)
 
-### Files Now Using basic_types.h:
+#### Files Now Using basic_types.h:
 **Header Files:**
 - include/saved_data.h (only needs byte type)
-- include/play_views.h (only needs byte type)
 
 **Source Files:**
 - src/saved_data.cpp (only needs byte type)
-- src/play_views.cpp (only needs byte type)  
 - src/realizer_pool.cpp (only needs byte type)
 - src/realization_pool.cpp (only needs byte type)
 
 **Library Files:**
 - lib/Randomizer/random_seed.h (only needs byte type)
 
+## Arcade Game Code Removal
+
+### Files Removed:
+**Complete File Removal:**
+- include/billboard.h
+- include/billboards_handler.h  
+- include/timer.h
+- include/timer_mode.h
+- include/test_mode.h
+- src/billboard.cpp
+- src/billboards_handler.cpp
+- src/timer.cpp
+- src/timer_mode.cpp
+- src/test_mode.cpp
+
+### Code Cleanup:
+**include/hardware.h:**
+- Commented out arcade button definitions (GREEN_BUTTON, AMBER_BUTTON, RED_BUTTON, etc.)
+
+**include/utils.h:**
+- Removed prompt function declarations (title_prompt_int, title_prompt_string, etc.)
+
+**src/utils.cpp:**
+- Removed commented-out prompt function implementations
+- Removed unused include for "prompts.h"
+
+**include/saved_data.h:**
+- Removed idle mode and clock-related definitions
+- Removed commented-out arcade game variable declarations
+- Cleaned up SavedData structure
+
+**src/main.cpp:**
+- Removed commented-out arcade game includes
+- Removed commented-out branch_prompt reference
+- Cleaned up main_menu() function
+
+### Benefits:
+1. **Reduced Complexity**: Removed unused arcade game concepts
+2. **Cleaner Codebase**: Eliminated dead code and unused declarations
+3. **Focused Functionality**: Code now focused on FluxTune's VFO functionality
+4. **Easier Maintenance**: Less code to maintain and understand
+
 ### Files That Still Include Arduino.h:
 1. **src/main.cpp** - Kept as requested
 2. **lib/HT16K33Disp/*** - Hardware driver library that requires Arduino.h
 
-## Key Benefits:
-1. **Selective Optimization**: Only removes Arduino.h where it's not needed
-2. **Maintains Functionality**: All Arduino-specific features work unchanged  
-3. **Type Standardization**: Uses standard uint8_t instead of Arduino's byte type
-4. **Simple Maintenance**: Clear separation between Arduino-dependent and independent code
-
 ## Verification:
-All modified files compile without errors and maintain the same functionality.
+All modified files compile without errors and maintain the same functionality. The codebase is now cleaner and more focused on FluxTune's core VFO functionality.

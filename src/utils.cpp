@@ -2,7 +2,6 @@
 // #include "bank.h"
 #include "buffers.h"
 #include "saved_data.h"
-// #include "prompts.h"
 #include "utils.h"
 
 char * load_f_string(const __FlashStringHelper* f_string, char *override_buffer){
@@ -61,29 +60,8 @@ char *format_long(long num, long basis){
 		sprintf_P(copy_buffer, PSTR("%d,%03d"), thous*negate, units);
 	else
 		sprintf_P(copy_buffer, PSTR("%d"), units*negate);
-
 	return copy_buffer;
 }
-
-// bool title_prompt_int(const char * pattern, int data, bool show_leds, int show_time){
-// 	sprintf(display_buffer, pattern, data);
-// 	return title_prompt(display_buffer, 1, show_leds, show_time == 0 ? ROUND_DELAY : show_time);
-// }
-
-// bool title_prompt_string(const char * pattern, const char * data, bool show_leds, int show_time){
-// 	sprintf(display_buffer, pattern, data);
-// 	return title_prompt(display_buffer, 1, show_leds, show_time == 0 ? ROUND_DELAY : show_time);
-// }
-
-// bool title_prompt_string2(const char * pattern, const char * data1, const char * data2, bool show_leds, int show_time){
-// 	sprintf(display_buffer, pattern, data1, data2);
-// 	return title_prompt(display_buffer, 1, show_leds, show_time == 0 ? ROUND_DELAY : show_time);
-// }
-
-// bool title_prompt_string3(const char * pattern, const char * data1, const char * data2, const char * data3, bool show_leds, int show_time){
-// 	sprintf(display_buffer, pattern, data1, data2, data3);
-// 	return title_prompt(display_buffer, 1, show_leds, show_time == 0 ? ROUND_DELAY : show_time);
-// }
 
 void random_unique(int count, int max_value, int *result){
     for(int i = 0; i < count; i++){

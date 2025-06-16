@@ -2,8 +2,6 @@
 #define __SAVED_DATA_H
 
 #include "basic_types.h"
-// #include "idle_mode.h"
-// #include "morse.h"
 #include "chime.h"
 
 // when adding new persisted play data, search for ##DATA
@@ -35,18 +33,6 @@
 
 // the longest possible count of milliseconds
 #define DEFAULT_TIME ((unsigned long)-1)
-
-// default idle mode
-#define DEFAULT_IDLE_MODE IDLE_MODE_SLEEP
-
-// default milliseconds until device goes into idle mode
-#define DEFAULT_IDLE_TIME (5L * 60L * 1000L)
-
-// #define DEFAULT_VIG 0L
-
-// #define DEFAULT_VIB_STR false
-
-// #define DEFAULT_CLOCK_CHIME CHIME_NONE
 
 // #define DEFAULT_WPM DEFAULT_MORSE_WPM
 
@@ -85,31 +71,7 @@ extern int option_contrast;
 // Current bank
 // extern unsigned long bank;
 
-// Additional slots for best times (future use)
-// extern unsigned long best_time1;
-// extern unsigned long best_time2;
-// extern unsigned long best_time3;
-
-// Current house
-// extern long house;
-
-// Current gang
-// extern long gang;
-
-// Idle Time in milliseconds
-// extern unsigned long option_idle_time;
-
-// Current vig
-// extern long vig;
-
-// extern byte option_clock_chime;
-
-// extern byte option_wpm;
-
-// extern bool auto_play_enabled;
-
-// ##DATA Add 'extern's for new persisted play data veriables here
-
+// ##DATA Add 'extern's for new persisted play data variables here
 
 // Saved data structure version 1
 struct SavedData{
@@ -138,11 +100,6 @@ struct SavedData{
 	// bool option_vib_str;
 
 	// byte option_clock_chime;
-
-	// byte option_wpm;
-
-	// bool auto_play_enabled;
-
 	// ##DATA Add new persisted data types above here
 };
 
