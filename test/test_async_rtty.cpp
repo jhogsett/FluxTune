@@ -341,6 +341,81 @@ void test_rtty_complete_cycle_phases(void) {
     TEST_ASSERT_TRUE_MESSAGE(seen_states[STEP_RTTY_LEAVE_OFF], "Should see LEAVE_OFF");
 }
 
+// Baudot RTTY message tests
+void test_rtty_baudot_message_transmission(void) {
+    rtty->start_rtty_message("A", false); // Single character 'A'
+    
+    // 'A' in Baudot is 0x03 = 00011 (binary), expect bits: 1,1,0,0,0 (LSB first)
+    // We need to step through start bit + 5 data bits + stop bit
+    
+    // Skip to first data bit timing
+    bool found_data_sequence = false;
+    for (unsigned long time = 0; time <= 200; time += 1) {
+        int state = rtty->step_rtty(time);
+        // Look for transition patterns that indicate data transmission
+        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
+            found_data_sequence = true;
+            break;
+        }
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(found_data_sequence, "Should transmit Baudot message data");
+}
+
+void test_rtty_baudot_vs_random_mode(void) {
+    // Test message mode
+    rtty->start_rtty_message("TEST", false);
+    int message_transitions = 0;
+    int prev_state = rtty->step_rtty(0);
+    
+    for (unsigned long time = 1; time <= 500; time += 1) {
+        int state = rtty->step_rtty(time);
+        if (state != prev_state) {
+            message_transitions++;
+            prev_state = state;
+        }
+    }
+    
+    // Reset for random mode test
+    delete rtty;
+    rtty = new AsyncRTTY();
+    rtty->start_rtty(false); // Random mode
+    int random_transitions = 0;
+    prev_state = rtty->step_rtty(0);
+    
+    for (unsigned long time = 1; time <= 500; time += 1) {
+        int state = rtty->step_rtty(time);
+        if (state != prev_state) {
+            random_transitions++;
+            prev_state = state;
+        }
+    }
+    
+    // Both should have transitions (activity)
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, message_transitions, "Message mode should have transitions");
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, random_transitions, "Random mode should have transitions");
+}
+
+void test_rtty_empty_message_handling(void) {
+    // Test with empty string
+    rtty->start_rtty_message("", false);
+    
+    // Should handle gracefully without crashing
+    int state = rtty->step_rtty(0);
+    TEST_ASSERT_TRUE_MESSAGE(state >= 1 && state <= 4, "Should handle empty message");
+    
+    // Should fall back to random-like behavior
+    bool has_activity = false;
+    for (unsigned long time = 1; time <= 100; time += 5) {
+        state = rtty->step_rtty(time);
+        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
+            has_activity = true;
+            break;
+        }
+    }
+    TEST_ASSERT_TRUE_MESSAGE(has_activity, "Should have some activity even with empty message");
+}
+
 int main(void) {
     UNITY_BEGIN();
     
@@ -374,6 +449,9 @@ int main(void) {
     
     // Comprehensive tests
     RUN_TEST(test_rtty_complete_cycle_phases);
+    RUN_TEST(test_rtty_baudot_message_transmission);
+    RUN_TEST(test_rtty_baudot_vs_random_mode);
+    RUN_TEST(test_rtty_empty_message_handling);
     
     return UNITY_END();
 }

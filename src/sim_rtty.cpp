@@ -7,7 +7,7 @@
 // mode is expected to be a derivative of VFO
 SimRTTY::SimRTTY(RealizerPool *realizer_pool) : Realization(realizer_pool){
     // _realizer = realizer;
-    _rtty.start_rtty(true);
+    _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
     _active = false;
     _enabled = false;
 }
