@@ -40,6 +40,7 @@ private:
     void step_space(unsigned long time);
     void start_wait(unsigned long time);
     void step_wait(unsigned long time);
+    void handle_transmission_complete(unsigned long time);
 
     // ========================================
     // STATE VARIABLES

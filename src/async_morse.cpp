@@ -282,16 +282,23 @@ void AsyncMorse::step_wait(unsigned long time){
     }
 }
 
+// ========================================
+// TRANSMISSION COMPLETION HELPER
+// ========================================
+void AsyncMorse::handle_transmission_complete(unsigned long time) {
+    if(async_repeat) {
+        start_wait(time);
+    } else {
+        async_phase = PHASE_DONE;
+    }
+}
+
 int AsyncMorse::step_morse(unsigned long time){
     switch(async_phase){
         case PHASE_DONE:
-            break;
-        case PHASE_CHAR:
+            break;        case PHASE_CHAR:
             if(!step_position(time)){
-                if(async_repeat)
-                    start_wait(time);
-                else
-                    async_phase = PHASE_DONE;
+                handle_transmission_complete(time);
             }
             break;
         case PHASE_SPACE:
@@ -300,22 +307,12 @@ int AsyncMorse::step_morse(unsigned long time){
         case PHASE_WAIT:
             step_wait(time);
             break;
-    }
-
-    if(async_switched_on){
-        if(async_active){
-            return STEP_MORSE_LEAVE_ON;
-        } else {
-            async_switched_on = false;
-            return STEP_MORSE_TURN_OFF;
-        } 
-    } else { // switched off
-        if(!async_active){
-            return STEP_MORSE_LEAVE_OFF;
-        } else {
-            async_switched_on = true;
-            return STEP_MORSE_TURN_ON;
-        }
+    }    // Generate output signal based on current active state
+    if(async_active != async_switched_on) {
+        async_switched_on = async_active;
+        return async_active ? STEP_MORSE_TURN_ON : STEP_MORSE_TURN_OFF;
+    } else {
+        return async_active ? STEP_MORSE_LEAVE_ON : STEP_MORSE_LEAVE_OFF;
     }
 }
 
