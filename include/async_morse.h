@@ -28,6 +28,9 @@ public:
     int step_morse(unsigned long time);
     
 private:
+    // ========================================
+    // INTERNAL HELPER METHODS
+    // ========================================
     char lookup_morse_char(char c);
     bool start_step_element(unsigned long time);
     void restart_morse();
@@ -38,21 +41,30 @@ private:
     void start_wait(unsigned long time);
     void step_wait(unsigned long time);
 
-    const char *async_str = NULL;
-    int async_length;
-    int async_element_del;
-    bool async_repeat;
-    byte async_phase;
-    byte async_position;
-    char async_char;
-    byte async_morse;
-    byte async_element;
-    bool async_element_done;
-    bool async_active;
-    unsigned long async_next_event;
-    bool async_space;
-    bool async_switched_on;
-    int async_wait_seconds;
+    // ========================================
+    // STATE VARIABLES
+    // ========================================
+    
+    // Text configuration
+    const char *async_str = NULL;          // String being transmitted
+    int async_length;                      // Length of text string
+    int async_element_del;                 // Base timing unit in milliseconds (from WPM)
+    bool async_repeat;                     // Whether to repeat transmission
+    int async_wait_seconds;                // Seconds to wait between repeats
+    
+    // Current transmission state  
+    byte async_phase;                      // Current phase: PHASE_DONE, PHASE_CHAR, PHASE_SPACE, PHASE_WAIT
+    byte async_position;                   // Current position in text string
+    char async_char;                       // Morse table index for current character
+    byte async_morse;                      // Bit pattern for current character
+    byte async_element;                    // Current element within character (0-6)
+    bool async_element_done;               // True when current element is finished
+    
+    // Timing and output state
+    bool async_active;                     // True when transmitter should be ON
+    unsigned long async_next_event;        // Time when next state change occurs
+    bool async_space;                      // True when in gap between elements
+    bool async_switched_on;                // Tracks output transitions for TURN_ON/TURN_OFF
 
 };
 

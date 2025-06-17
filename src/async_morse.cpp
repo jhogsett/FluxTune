@@ -5,69 +5,86 @@
 #endif
 #include "async_morse.h"
 
+// ========================================
+// MORSE CODE LOOKUP TABLE  
+// ========================================
+// Each byte represents a morse character with bits indicating dot (0) or dash (1)
+// Bits are read from LSB to MSB, with unused high bits as padding
 const unsigned char morsedata[] PROGMEM = {
-    0b10100000, // A
-    0b00011000, // B
-    0b01011000, // C
-    0b00110000, // D
-    0b01000000, // E
-    0b01001000, // F
-    0b01110000, // G
-    0b00001000, // H
-    0b00100000, // I
-    0b11101000, // J
-    0b10110000, // K
-    0b00101000, // L
-    0b11100000, // M
-    0b01100000, // N
-    0b11110000, // O
-    0b01101000, // P
-    0b10111000, // Q
-    0b01010000, // R
-    0b00010000, // S
-    0b11000000, // T
-    0b10010000, // U
-    0b10001000, // V
-    0b11010000, // W
-    0b10011000, // X
-    0b11011000, // Y
-    0b00111000, // Z
-    0b11111100, // 0
-    0b11110100, // 1
-    0b11100100, // 2
-    0b11000100, // 3
-    0b10000100, // 4
-    0b00000100, // 5
-    0b00001100, // 6
-    0b00011100, // 7
-    0b00111100, // 8
-    0b01111100  // 9
-    };
+    0b10100000, // A  .-
+    0b00011000, // B  -...
+    0b01011000, // C  -.-.
+    0b00110000, // D  -..
+    0b01000000, // E  .
+    0b01001000, // F  ..-.
+    0b01110000, // G  --.
+    0b00001000, // H  ....
+    0b00100000, // I  ..
+    0b11101000, // J  .---
+    0b10110000, // K  -.-
+    0b00101000, // L  .-..
+    0b11100000, // M  --
+    0b01100000, // N  -.
+    0b11110000, // O  ---
+    0b01101000, // P  .--.
+    0b10111000, // Q  --.-
+    0b01010000, // R  .-.
+    0b00010000, // S  ...
+    0b11000000, // T  -
+    0b10010000, // U  ..-
+    0b10001000, // V  ...-
+    0b11010000, // W  .--
+    0b10011000, // X  -..-
+    0b11011000, // Y  -.--
+    0b00111000, // Z  --..
+    0b11111100, // 0  -----
+    0b11110100, // 1  .----
+    0b11100100, // 2  ..---
+    0b11000100, // 3  ...--
+    0b10000100, // 4  ....-
+    0b00000100, // 5  .....
+    0b00001100, // 6  -....
+    0b00011100, // 7  --...
+    0b00111100, // 8  ---..
+    0b01111100  // 9  ----.
+};
 
-AsyncMorse::AsyncMorse()
-{
-}    
+// ========================================
+// CONSTRUCTOR
+// ========================================
+AsyncMorse::AsyncMorse() {
+    // Initialize all state variables to safe defaults
+    // Most initialization happens in start_morse()
+}
 
+// ========================================
+// CHARACTER LOOKUP HELPER
+// ========================================    
 char AsyncMorse::lookup_morse_char(char c){
+    // Convert character to morse table index
+    // Returns: 0-25 for A-Z, 26-35 for 0-9, 0 for invalid characters
     int offset = -1;
     if(c >= '0' && c <= 'z'){
         if(c >= '0' && c <= '9'){
             c -= '0';
-            offset = 26;
+            offset = 26;  // Numbers start at index 26
         } else if(c >= 'A' && c <= 'Z'){
             c -= 'A';
-            offset = 0;
+            offset = 0;   // Letters start at index 0
         } else if(c >= 'a' && c <= 'z'){
-            c -= 'a';
-            offset = 0;
+            c -= 'a';     // Convert lowercase to uppercase
+            offset = 0;   // Letters start at index 0
         }
     }
     if(offset >= 0)
         return c + offset;
     else
-        return 0;
+        return 0;  // Invalid character
 }
 
+// ========================================
+// ELEMENT INITIALIZATION HELPER
+// ========================================
 // returns true unless the start bit is not found
 bool AsyncMorse::start_step_element(unsigned long time){
     async_element_done = false;

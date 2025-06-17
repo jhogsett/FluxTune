@@ -17,11 +17,11 @@
     #include <PololuLedStrip.h>
     #include <HT16K33Disp.h>
     
-#else
-    // Native platform (PC compilation)
+#else    // Native platform (PC compilation)
     #define PLATFORM_ARDUINO 0
     #define PLATFORM_NATIVE 1
-      // Use mock headers    #include "mock_arduino.h"
+    // Use mock headers
+    #include "mock_arduino.h"
     #include "mock_wire.h"
     #include "mock_eeprom.h"
     #include "mock_encoder.h"
