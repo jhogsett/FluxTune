@@ -2,16 +2,17 @@
 
 # Compiler settings
 CC = g++
-CFLAGS = -DNATIVE_BUILD -Iinclude -Inative -Iunity -std=c++11 -Wall
+CFLAGS = -DNATIVE_BUILD -DPLATFORM_NATIVE -I../include -I../native -Iunity/src -std=c++11 -Wall
+LDFLAGS = 
 
-# Directories
-SRC_DIR = src
-TEST_DIR = test
-UNITY_DIR = $(TEST_DIR)/unity
-NATIVE_DIR = native
-BUILD_DIR = build/test
+# Directories (relative to test directory)
+SRC_DIR = ../src
+TEST_DIR = .
+UNITY_DIR = unity/src
+NATIVE_DIR = ../native
+BUILD_DIR = build
 
-# Unity source (assumes Unity is downloaded to test/unity/)
+# Unity source
 UNITY_SRC = $(UNITY_DIR)/unity.c
 
 # Common source files needed for tests
@@ -24,8 +25,10 @@ TEST_MORSE = $(BUILD_DIR)/test_morse.exe
 TEST_ASYNC_MORSE = $(BUILD_DIR)/test_async_morse.exe
 TEST_VFO = $(BUILD_DIR)/test_vfo.exe
 
-.PHONY: all test clean setup
+.PHONY: all test clean setup help
+.DEFAULT_GOAL := all
 
+# Main targets
 all: setup test
 
 # Create build directory
@@ -33,41 +36,48 @@ setup:
 	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
 
 # Run all tests
-test: test-utils test-async-morse
+test: test-async-morse
+
+# Quick test - just compile and run AsyncMorse tests
+quick: $(TEST_ASYNC_MORSE)
+	@echo === Running AsyncMorse Tests ===
+	@$(TEST_ASYNC_MORSE)
 
 # Individual test targets
 test-utils: $(TEST_UTILS)
-	@echo Running utils tests...
+	@echo === Running utils tests ===
 	@$(TEST_UTILS)
 
-$(TEST_UTILS): $(TEST_DIR)/test_utils.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
-	$(CC) $(CFLAGS) -o $@ $^
-
-# Future test targets (templates)
-test-morse: $(TEST_MORSE)
-	@echo Running morse tests...
-	@$(TEST_MORSE)
-
-$(TEST_MORSE): $(TEST_DIR)/test_morse.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
-	$(CC) $(CFLAGS) -o $@ $^
-
 test-async-morse: $(TEST_ASYNC_MORSE)
-	@echo Running async morse tests...
+	@echo === Running AsyncMorse tests ===
 	@$(TEST_ASYNC_MORSE)
 
-$(TEST_ASYNC_MORSE): $(TEST_DIR)/test_async_morse.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
-	$(CC) $(CFLAGS) -o $@ $^
+# Build rules
+$(TEST_UTILS): test_utils.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
+	@echo Compiling utils tests...
+	@$(CC) $(CFLAGS) -o $@ $^
 
-test-vfo: $(TEST_VFO)
-	@echo Running VFO tests...
-	@$(TEST_VFO)
+$(TEST_ASYNC_MORSE): test_async_morse.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
+	@echo Compiling AsyncMorse tests...
+	@$(CC) $(CFLAGS) -o $@ $^
 
-$(TEST_VFO): $(TEST_DIR)/test_vfo.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
-	$(CC) $(CFLAGS) -o $@ $^
+$(TEST_MORSE): test_morse.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
+	@echo Compiling morse tests...
+	@$(CC) $(CFLAGS) -o $@ $^
+
+$(TEST_VFO): test_vfo.cpp $(UNITY_SRC) $(COMMON_SOURCES) $(MOCK_SOURCES) | setup
+	@echo Compiling VFO tests...
+	@$(CC) $(CFLAGS) -o $@ $^
+
+# Development targets
+compile-only: $(TEST_ASYNC_MORSE)
+	@echo Compilation successful!
 
 # Clean build artifacts
 clean:
+	@echo Cleaning build artifacts...
 	@if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
+	@if exist "*.exe" del /q "*.exe"
 
 # Setup Unity (download if needed)
 unity-setup:
@@ -86,12 +96,25 @@ unity-install:
 	@echo Unity framework installed!
 
 help:
+	@echo FluxTune Test Build System
+	@echo ========================
 	@echo Available targets:
-	@echo   test        - Run all tests
-	@echo   test-utils  - Run utility function tests
-	@echo   test-morse  - Run morse code tests
-	@echo   test-vfo    - Run VFO tests
-	@echo   clean       - Clean build artifacts
-	@echo   setup       - Create build directory
-	@echo   unity-setup - Check for Unity framework
+	@echo.
+	@echo   all           - Setup and run all tests (default)
+	@echo   test          - Run all tests
+	@echo   quick         - Quick compile and run AsyncMorse tests
+	@echo   compile-only  - Compile tests without running
+	@echo.
+	@echo   test-utils       - Run utility function tests
+	@echo   test-async-morse - Run AsyncMorse tests
+	@echo   test-morse       - Run morse code tests  
+	@echo   test-vfo         - Run VFO tests
+	@echo.
+	@echo   clean         - Clean build artifacts
+	@echo   setup         - Create build directory
+	@echo   unity-setup   - Check for Unity framework
 	@echo   unity-install - Download and install Unity framework
+	@echo.
+	@echo Example usage:
+	@echo   make quick           # Fast development cycle
+	@echo   make test-async-morse # Test specific module
