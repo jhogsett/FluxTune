@@ -171,12 +171,8 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
 }
 
 unsigned long AsyncMorse::compute_element_time(unsigned long time, byte element_count, bool is_space){
-    // The is_space parameter indicates different timing contexts:
-    // - false: Element timing (dots and dashes) - use standard timing
-    // - true: Spacing timing (between elements, characters, words) - could use different timing characteristics
-    
-    // For now, both use the same base calculation, but this allows for future
-    // differentiation (like adding fist/timing variations for spaces vs elements)
+    // Simple timing calculation - both elements and spacing use the same base timing
+    // The is_space parameter is kept for potential future timing enhancements
     return time + (element_count * async_element_del);
 }
 

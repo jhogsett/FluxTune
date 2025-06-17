@@ -1,3 +1,40 @@
+def mr(value):
+  value = value * 2
+  full_on = value / 73
+  #remain = value % 73
+  remain = ((value % 73) * 16) / 73;
+  print(int(full_on))
+  print(int(remain))
+
+
+
+cd test
+
+g++ -DNATIVE_BUILD -DPLATFORM_NATIVE -I../include -I../native -Iunity/src -std=c++11 -Wall -o test_phase2.exe test_async_morse.cpp unity/src/unity.c ../src/utils.cpp ../src/buffers.cpp ../src/saved_data.cpp ../src/async_morse.cpp ../native/mock_arduino.cpp ../native/mock_wire.cpp ../native/mock_eeprom.cpp ../native/mock_ht16k33disp.cpp
+
+.\test_current_phase1.exe
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 could exland realization pool to have more items
 as the pool is updated, it can start or stop items
 maybe there should be the overall pool of possible realizations,
