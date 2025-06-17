@@ -67,17 +67,6 @@ rgb_color colors[LED_COUNT] =
   { 15, 0, 0 } 
 };
 
-rgb_color empty[LED_COUNT] = 
-{
-  { 0, 0, 0 }, 
-  { 0, 0, 0 }, 
-  { 0, 0, 0 }, 
-  { 0, 0, 0 }, 
-  { 0, 0, 0 }, 
-  { 0, 0, 0 }, 
-  { 0, 0, 0 } 
-};
-
 // Global LED buffer to avoid stack allocation in step_sm()
 rgb_color led_buffer[LED_COUNT];
 
@@ -115,9 +104,9 @@ void step_sm(unsigned long time)
 //   if(count > 7)
 //     count = 7;
 	// 
-
 	memcpy(led_buffer, colors, on_leds * sizeof(rgb_color));
-	memcpy(led_buffer + on_leds, empty, (LED_COUNT - on_leds) * sizeof(rgb_color));
+	// Clear the remaining LEDs to off (black)
+	memset(led_buffer + on_leds, 0, (LED_COUNT - on_leds) * sizeof(rgb_color));
 
 	// for the last copied LED, modify it according to the remain value
 	led_buffer[on_leds-1].red = (led_buffer[on_leds-1].red * remain) / 16;
