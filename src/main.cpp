@@ -78,6 +78,8 @@ rgb_color empty[LED_COUNT] =
   { 0, 0, 0 } 
 };
 
+// Global LED buffer to avoid stack allocation in step_sm()
+rgb_color led_buffer[LED_COUNT];
 
 #define INTERVAL 100
 unsigned long next_time = 0;
@@ -112,26 +114,24 @@ void step_sm(unsigned long time)
 //   int count = value / 8;
 //   if(count > 7)
 //     count = 7;
-
 	// 
 
-	rgb_color dbuffer[LED_COUNT];
-	memcpy(dbuffer, colors, on_leds * sizeof(rgb_color));
-	memcpy(dbuffer + on_leds, empty, (LED_COUNT - on_leds) * sizeof(rgb_color));
+	memcpy(led_buffer, colors, on_leds * sizeof(rgb_color));
+	memcpy(led_buffer + on_leds, empty, (LED_COUNT - on_leds) * sizeof(rgb_color));
 
 	// for the last copied LED, modify it according to the remain value
-	dbuffer[on_leds-1].red = (dbuffer[on_leds-1].red * remain) / 16;
-	dbuffer[on_leds-1].green = (dbuffer[on_leds-1].green * remain) / 16;
-	dbuffer[on_leds-1].blue = (dbuffer[on_leds-1].blue * remain) / 16;
+	led_buffer[on_leds-1].red = (led_buffer[on_leds-1].red * remain) / 16;
+	led_buffer[on_leds-1].green = (led_buffer[on_leds-1].green * remain) / 16;
+	led_buffer[on_leds-1].blue = (led_buffer[on_leds-1].blue * remain) / 16;
 
 	// modify whole display per display contrast
 	for(byte i = 0; i < LED_COUNT; i++){
-		dbuffer[i].red = (dbuffer[i].red * option_contrast)	/ 1;
-		dbuffer[i].green = (dbuffer[i].green * option_contrast)	/ 1;
-		dbuffer[i].blue = (dbuffer[i].blue * option_contrast)	/ 1;
+		led_buffer[i].red = (led_buffer[i].red * option_contrast)	/ 1;
+		led_buffer[i].green = (led_buffer[i].green * option_contrast)	/ 1;
+		led_buffer[i].blue = (led_buffer[i].blue * option_contrast)	/ 1;
 	}
 
-	ledStrip.write(dbuffer, LED_COUNT);
+	ledStrip.write(led_buffer, LED_COUNT);
 }
 
 
