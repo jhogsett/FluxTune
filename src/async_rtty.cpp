@@ -4,7 +4,13 @@
 
 AsyncRTTY::AsyncRTTY()
 {
-}    
+    // Initialize all state variables to safe defaults
+    async_active = false;
+    async_switched_on = false;
+    async_element_done = true;
+    async_element = 0;
+    async_next_event = 0;
+}
 
 bool AsyncRTTY::start_step_element(unsigned long time){
     async_element_done = false;
@@ -14,15 +20,14 @@ bool AsyncRTTY::start_step_element(unsigned long time){
 
 void AsyncRTTY::start_rtty(bool repeat){
     async_repeat = repeat;
-    // async_element = 0;
     async_active = false;
+    async_switched_on = false;  // Ensure we start with a clean state
     async_next_event = 0L;
-
     async_element_done = true;
 
     if(!start_step_element(millis()))
         return;
-}    
+}
 
 
 unsigned long AsyncRTTY::compute_element_time(unsigned long time, bool stop_bit){
@@ -68,20 +73,12 @@ int AsyncRTTY::step_element(unsigned long time){
 int AsyncRTTY::step_rtty(unsigned long time){
     step_element(time);
 
-    if(async_switched_on){
-        if(async_active){
-            return STEP_RTTY_LEAVE_ON;
-        } else {
-            async_switched_on = false;
-            return STEP_RTTY_TURN_OFF;
-        } 
-    } else { // switched off
-        if(!async_active){
-            return STEP_RTTY_LEAVE_OFF;
-        } else {
-            async_switched_on = true;
-            return STEP_RTTY_TURN_ON;
-        }
+    // Generate output signal based on current active state
+    if(async_active != async_switched_on) {
+        async_switched_on = async_active;
+        return async_active ? STEP_RTTY_TURN_ON : STEP_RTTY_TURN_OFF;
+    } else {
+        return async_active ? STEP_RTTY_LEAVE_ON : STEP_RTTY_LEAVE_OFF;
     }
 }
 
