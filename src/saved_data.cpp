@@ -1,11 +1,11 @@
-#include "basic_types.h"
+#include "../include/basic_types.h"
 #ifdef NATIVE_BUILD
 #include "../native/platform.h"
 #include <iostream>
 #else
 #include <EEPROM.h>
 #endif
-#include "saved_data.h"
+#include "../include/saved_data.h"
 
 int option_contrast = DEFAULT_CONTRAST;
 

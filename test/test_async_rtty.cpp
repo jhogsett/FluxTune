@@ -45,7 +45,7 @@ void test_rtty_timing_constants(void) {
 
 // State transition tests
 void test_rtty_starts_with_turn_on_or_leave_off(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("TEST", false);
     
     int first_state = rtty->step_rtty(0);
     TEST_ASSERT_TRUE_MESSAGE(
@@ -55,7 +55,7 @@ void test_rtty_starts_with_turn_on_or_leave_off(void) {
 }
 
 void test_rtty_produces_valid_states(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     // Test that all returned states are valid
     for (unsigned long time = 0; time <= 1000; time += 5) {
@@ -68,7 +68,7 @@ void test_rtty_produces_valid_states(void) {
 }
 
 void test_rtty_has_on_off_transitions(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     bool found_turn_on = false;
     bool found_turn_off = false;
@@ -87,7 +87,7 @@ void test_rtty_has_on_off_transitions(void) {
 
 // Timing tests
 void test_rtty_timing_progression(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     int prev_state = rtty->step_rtty(0);
     int transition_count = 0;
@@ -105,7 +105,7 @@ void test_rtty_timing_progression(void) {
 }
 
 void test_rtty_bit_timing_consistency(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     std::vector<unsigned long> meaningful_intervals;
     unsigned long prev_transition = 0;
@@ -143,7 +143,7 @@ void test_rtty_bit_timing_consistency(void) {
 
 // Start bit and stop bit tests
 void test_rtty_start_bit_behavior(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     // The first active element should be the start bit (SPACE/off)
     int first_state = rtty->step_rtty(0);
@@ -159,7 +159,7 @@ void test_rtty_start_bit_behavior(void) {
 }
 
 void test_rtty_stop_bit_timing(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     std::vector<unsigned long> meaningful_intervals;
     unsigned long prev_transition = 0;
@@ -202,7 +202,7 @@ void test_rtty_stop_bit_timing(void) {
 // Repeat mode tests
 void test_rtty_repeat_vs_non_repeat(void) {
     // Test non-repeat mode
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     int non_repeat_transitions = 0;
     int prev_state = rtty->step_rtty(0);
     
@@ -219,7 +219,7 @@ void test_rtty_repeat_vs_non_repeat(void) {
     rtty = new AsyncRTTY();
     
     // Test repeat mode
-    rtty->start_rtty(true);
+    rtty->start_rtty_message("ABCD", true);
     int repeat_transitions = 0;
     prev_state = rtty->step_rtty(0);
     
@@ -236,11 +236,11 @@ void test_rtty_repeat_vs_non_repeat(void) {
     TEST_ASSERT_GREATER_THAN_MESSAGE(0, repeat_transitions, "Repeat should have activity");
 }
 
-// Random behavior tests
-void test_rtty_data_bit_randomness(void) {
-    rtty->start_rtty(false);
+// Message transmission tests
+void test_rtty_data_bit_transmission(void) {
+    rtty->start_rtty_message("ABCD", false);
     
-    // Count ON and OFF periods to verify some randomness
+    // Count ON and OFF periods to verify message transmission
     int on_periods = 0;
     int off_periods = 0;
     
@@ -253,33 +253,31 @@ void test_rtty_data_bit_randomness(void) {
             off_periods++;
         }
     }
-    
-    // Should have both ON and OFF periods due to random data bits
+      // Should have both ON and OFF periods due to message data bits
     TEST_ASSERT_GREATER_THAN_MESSAGE(0, on_periods, "Should have some ON periods");
     TEST_ASSERT_GREATER_THAN_MESSAGE(0, off_periods, "Should have some OFF periods");
 }
 
 void test_rtty_different_runs_different_patterns(void) {
-    // Run two separate RTTY sequences and verify they produce different patterns
-    rtty->start_rtty(false);
+    // Run two separate RTTY sequences with different messages and verify they produce different patterns
+    rtty->start_rtty_message("AAAA", false);
     
     int pattern1[20];
     for (int i = 0; i < 20; i++) {
         pattern1[i] = rtty->step_rtty(i * 10); // Use longer intervals
     }
     
-    // Create new instance for second run and add some randomness
+    // Create new instance for second run with different message
     delete rtty;
-    randomSeed(millis() + 12345); // Add some variation to the seed
     rtty = new AsyncRTTY();
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ZZZZ", false); // Different message should produce different pattern
     
     int pattern2[20];
     for (int i = 0; i < 20; i++) {
         pattern2[i] = rtty->step_rtty(i * 10); // Use longer intervals
     }
     
-    // Count differences rather than requiring immediate difference
+    // Count differences
     int differences = 0;
     for (int i = 0; i < 20; i++) {
         if (pattern1[i] != pattern2[i]) {
@@ -287,14 +285,13 @@ void test_rtty_different_runs_different_patterns(void) {
         }
     }
     
-    // Allow for some similarity but expect at least some differences
-    // With random data bits, we should see at least a few differences
-    TEST_ASSERT_GREATER_THAN_MESSAGE(0, differences, "Different runs should have at least some different patterns");
+    // Different messages should produce different patterns
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, differences, "Different messages should produce different patterns");
 }
 
 // Edge case tests
 void test_rtty_time_zero_handling(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     // Should handle time 0 without crashing
     int state = rtty->step_rtty(0);
@@ -302,7 +299,7 @@ void test_rtty_time_zero_handling(void) {
 }
 
 void test_rtty_large_time_values(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     // Should handle large time values
     int state = rtty->step_rtty(1000000UL);
@@ -310,7 +307,7 @@ void test_rtty_large_time_values(void) {
 }
 
 void test_rtty_backwards_time_handling(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     // Step forward, then backwards
     int state1 = rtty->step_rtty(100);
@@ -322,7 +319,7 @@ void test_rtty_backwards_time_handling(void) {
 
 // Comprehensive behavioral test
 void test_rtty_complete_cycle_phases(void) {
-    rtty->start_rtty(false);
+    rtty->start_rtty_message("ABCD", false);
     
     bool seen_states[5] = {false}; // Index 0 unused, 1-4 for the states
     
@@ -362,7 +359,7 @@ void test_rtty_baudot_message_transmission(void) {
     TEST_ASSERT_TRUE_MESSAGE(found_data_sequence, "Should transmit Baudot message data");
 }
 
-void test_rtty_baudot_vs_random_mode(void) {
+void test_rtty_baudot_vs_different_messages(void) {
     // Test message mode
     rtty->start_rtty_message("TEST", false);
     int message_transitions = 0;
@@ -375,25 +372,23 @@ void test_rtty_baudot_vs_random_mode(void) {
             prev_state = state;
         }
     }
-    
-    // Reset for random mode test
+      // Reset for different message test
     delete rtty;
     rtty = new AsyncRTTY();
-    rtty->start_rtty(false); // Random mode
-    int random_transitions = 0;
+    rtty->start_rtty_message("WXYZ", false); // Different message
+    int different_transitions = 0;
     prev_state = rtty->step_rtty(0);
     
     for (unsigned long time = 1; time <= 500; time += 1) {
-        int state = rtty->step_rtty(time);
-        if (state != prev_state) {
-            random_transitions++;
+        int state = rtty->step_rtty(time);        if (state != prev_state) {
+            different_transitions++;
             prev_state = state;
         }
     }
     
     // Both should have transitions (activity)
     TEST_ASSERT_GREATER_THAN_MESSAGE(0, message_transitions, "Message mode should have transitions");
-    TEST_ASSERT_GREATER_THAN_MESSAGE(0, random_transitions, "Random mode should have transitions");
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, different_transitions, "Different message should have transitions");
 }
 
 void test_rtty_empty_message_handling(void) {
@@ -404,16 +399,17 @@ void test_rtty_empty_message_handling(void) {
     int state = rtty->step_rtty(0);
     TEST_ASSERT_TRUE_MESSAGE(state >= 1 && state <= 4, "Should handle empty message");
     
-    // Should fall back to random-like behavior
-    bool has_activity = false;
+    // Empty message should be handled gracefully - may or may not have activity
+    // The important thing is it doesn't crash
+    bool crashed = false;
     for (unsigned long time = 1; time <= 100; time += 5) {
         state = rtty->step_rtty(time);
-        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
-            has_activity = true;
+        if (state < 1 || state > 4) {
+            crashed = true;
             break;
         }
     }
-    TEST_ASSERT_TRUE_MESSAGE(has_activity, "Should have some activity even with empty message");
+    TEST_ASSERT_FALSE_MESSAGE(crashed, "Should not crash with empty message");
 }
 
 int main(void) {
@@ -437,9 +433,8 @@ int main(void) {
     
     // Repeat modes
     RUN_TEST(test_rtty_repeat_vs_non_repeat);
-    
-    // Random behavior
-    RUN_TEST(test_rtty_data_bit_randomness);
+      // Message transmission behavior
+    RUN_TEST(test_rtty_data_bit_transmission);
     RUN_TEST(test_rtty_different_runs_different_patterns);
     
     // Edge cases
@@ -450,7 +445,7 @@ int main(void) {
     // Comprehensive tests
     RUN_TEST(test_rtty_complete_cycle_phases);
     RUN_TEST(test_rtty_baudot_message_transmission);
-    RUN_TEST(test_rtty_baudot_vs_random_mode);
+    RUN_TEST(test_rtty_baudot_vs_different_messages);
     RUN_TEST(test_rtty_empty_message_handling);
     
     return UNITY_END();

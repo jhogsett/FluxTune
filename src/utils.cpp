@@ -3,9 +3,9 @@
 #else
 #include <Arduino.h>
 #endif
-#include "buffers.h"
-#include "saved_data.h"
-#include "utils.h"
+#include "../include/buffers.h"
+#include "../include/saved_data.h"
+#include "../include/utils.h"
 
 char * load_f_string(const __FlashStringHelper* f_string, char *override_buffer){
 	const char *p = (const char PROGMEM *)f_string;
