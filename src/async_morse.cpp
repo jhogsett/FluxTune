@@ -111,11 +111,7 @@ void AsyncMorse::restart_morse(){
     async_element = 0;
     async_active = false;
     async_next_event = 0L;
-    async_space = false;
-
-    async_element_done = true;
-
-    async_char = async_str[async_position];
+    async_space = false;    async_element_done = true;    async_char = async_str[async_position];
     
     if(async_char == ' '){
         async_phase = PHASE_SPACE;
@@ -148,11 +144,7 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
     async_active = false;
     async_next_event = 0L;
     async_space = false;
-    async_switched_on = false;  // Ensure clean initial state
-
-    async_element_done = true;
-
-    async_char = async_str[async_position];
+    async_switched_on = false;  // Ensure clean initial state    async_element_done = true;    async_char = async_str[async_position];
     
     if(async_char == ' '){
         async_phase = PHASE_SPACE;
@@ -170,9 +162,12 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
     }    
 }
 
+// ========================================
+// TIMING HELPER
+// ========================================
 unsigned long AsyncMorse::compute_element_time(unsigned long time, byte element_count, bool is_space){
     // Simple timing calculation - both elements and spacing use the same base timing
-    // The is_space parameter is kept for potential future timing enhancements
+    // The is_space parameter is kept for potential future enhancements
     return time + (element_count * async_element_del);
 }
 
@@ -182,7 +177,9 @@ int AsyncMorse::step_element(unsigned long time){
 
     if(async_element_done){
         return STEP_ELEMENT_DONE;
-    }    if(!is_time_ready(time)){
+    }
+
+    if(time < async_next_event){
         return STEP_ELEMENT_EARLY;
     }
     
@@ -196,18 +193,16 @@ int AsyncMorse::step_element(unsigned long time){
         }
 
         async_morse = async_morse >> 1;
-        byte bit = async_morse & 0x1;
-    
-        async_active = true;
+        byte bit = async_morse & 0x1;        async_active = true;
         if(bit == 1){
-            async_next_event = compute_element_time(time, 3, false);//  time + (3 * async_element_del);
+            async_next_event = compute_element_time(time, 3, false);
         } else{ 
-            async_next_event = compute_element_time(time, 1, false);//time + async_element_del;
+            async_next_event = compute_element_time(time, 1, false);
         }
     } else {
         async_space = true;
         async_active = false;
-        async_next_event = compute_element_time(time, 1, false);//time + async_element_del;
+        async_next_event = compute_element_time(time, 1, false);
     }
 
     return STEP_ELEMENT_ACTIVE;
@@ -221,8 +216,7 @@ bool AsyncMorse::step_position(unsigned long time){
         return true;
 
     if(ret == STEP_ELEMENT_DONE){
-        async_position++;
-        if(async_position >= async_length)
+        async_position++;        if(async_position >= async_length)
             return false;
         
         async_char = async_str[async_position];
@@ -236,27 +230,23 @@ bool AsyncMorse::step_position(unsigned long time){
                 if(!start_step_element(time)){
                     return false;
                 }
-            }
-
-            async_phase = PHASE_SPACE;
-            async_next_event = compute_element_time(time, 7, true);//time + (7 * async_element_del);
+            }            async_phase = PHASE_SPACE;
+            async_next_event = compute_element_time(time, 7, true);
 
             return true;
-        }
-
-        async_char = lookup_morse_char(async_char);
+        }        async_char = lookup_morse_char(async_char);
 
         if(!start_step_element(time))
             return false;
 
-        async_next_event = compute_element_time(time, 3, true);//time + (3 * async_element_del);
+        async_next_event = compute_element_time(time, 3, true);
         async_phase = PHASE_SPACE;
     }
     return true;
 }
 
 void AsyncMorse::step_space(unsigned long time){
-    if(!is_time_ready(time)){
+    if(time < async_next_event){
         return;
     }
 
@@ -269,7 +259,7 @@ void AsyncMorse::start_wait(unsigned long time){
 }
 
 void AsyncMorse::step_wait(unsigned long time){
-    if(!is_time_ready(time)){
+    if(time < async_next_event){
         return;
     }
 
@@ -280,23 +270,16 @@ void AsyncMorse::step_wait(unsigned long time){
     }
 }
 
-// ========================================
-// TRANSMISSION COMPLETION HELPER
-// ========================================
-void AsyncMorse::handle_transmission_complete(unsigned long time) {
-    if(async_repeat) {
-        start_wait(time);
-    } else {
-        async_phase = PHASE_DONE;
-    }
-}
-
 int AsyncMorse::step_morse(unsigned long time){
     switch(async_phase){
         case PHASE_DONE:
-            break;        case PHASE_CHAR:
+            break;
+        case PHASE_CHAR:
             if(!step_position(time)){
-                handle_transmission_complete(time);
+                if(async_repeat)
+                    start_wait(time);
+                else
+                    async_phase = PHASE_DONE;
             }
             break;
         case PHASE_SPACE:
@@ -305,20 +288,24 @@ int AsyncMorse::step_morse(unsigned long time){
         case PHASE_WAIT:
             step_wait(time);
             break;
-    }    // Generate output signal based on current active state
-    if(async_active != async_switched_on) {
-        async_switched_on = async_active;
-        return async_active ? STEP_MORSE_TURN_ON : STEP_MORSE_TURN_OFF;
-    } else {
-        return async_active ? STEP_MORSE_LEAVE_ON : STEP_MORSE_LEAVE_OFF;
+    }
+
+    if(async_switched_on){
+        if(async_active){
+            return STEP_MORSE_LEAVE_ON;
+        } else {
+            async_switched_on = false;
+            return STEP_MORSE_TURN_OFF;
+        } 
+    } else { // switched off
+        if(!async_active){
+            return STEP_MORSE_LEAVE_OFF;
+        } else {
+            async_switched_on = true;
+            return STEP_MORSE_TURN_ON;
+        }
     }
 }
 
-// ========================================
-// TIMING HELPER
-// ========================================
-bool AsyncMorse::is_time_ready(unsigned long current_time) {
-    return current_time >= async_next_event;
-}
 
 
