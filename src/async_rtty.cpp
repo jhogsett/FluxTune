@@ -1,9 +1,5 @@
-#ifdef PLATFORM_NATIVE
 #include "../native/platform.h"
-#else
-#include <Arduino.h>
-#endif
-#include "async_rtty.h"
+#include "../include/async_rtty.h"
 
 
 AsyncRTTY::AsyncRTTY()
