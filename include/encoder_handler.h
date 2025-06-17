@@ -1,7 +1,11 @@
 #ifndef __ENCODER_HANDLER_H__
 #define __ENCODER_HANDLER_H__
 
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <Arduino.h>
+#endif
 #include <limits.h>
 
 #define UNPRESSED 0

@@ -1,14 +1,17 @@
+#ifdef NATIVE_BUILD
+#include "../native/platform.h"
+#else
 #include <MD_AD9833.h>
+#endif
 #include "wavegen.h"
 #include "vfo.h"
 
-VFO::VFO(const char *title, float frequency, unsigned long step, Realization **realizations, byte nrealizations) : Mode(title)
+VFO::VFO(const char *title, float frequency, unsigned long step, RealizationPool *realization_pool) : Mode(title)
 {
     _frequency = long(frequency);
     _sub_frequency = int((frequency - _frequency) * 10.0);
     _step = step;
-    _realizations = realizations;
-    _nrealizations = nrealizations;
+    _realization_pool = realization_pool;
 }
 
 // step needs to be in 0.1Hz units
@@ -55,9 +58,10 @@ void VFO::update_display(HT16K33Disp *display){
 }
 
 void VFO::update_realization(){
-    for(byte i = 0; i < _nrealizations; i++){
-        _realizations[i]->update(this);
-    }
+    _realization_pool->update(this);
+    // for(byte i = 0; i < _nrealizations; i++){
+    //     _realizations[i]->update(this);
+    // }
 
     // float ffrequency = float(_frequency) + (_sub_frequency / 10.0);
 

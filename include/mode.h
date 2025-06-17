@@ -1,7 +1,11 @@
 #ifndef __MODE_H__
 #define __MODE_H__
 
+#ifdef NATIVE_BUILD
+#include "../native/platform.h"
+#else
 #include <HT16K33Disp.h>
+#endif
 #include "realization.h"
 
 // generic mode, has data and methods specific to a mode

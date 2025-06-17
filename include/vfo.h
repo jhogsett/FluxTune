@@ -2,7 +2,7 @@
 #define __VFO_H__
 
 #include "mode.h"
-#include "realization.h"
+#include "realization_pool.h"
 
 // need to define a set of bands
 
@@ -10,7 +10,7 @@ class VFO : public Mode
 {
 public:
     // constructor
-    VFO(const char *title, float frequency, unsigned long step, Realization **realizations, byte nrealizations);
+    VFO(const char *title, float frequency, unsigned long step, RealizationPool *realization_pool);
     
     virtual void update_display(HT16K33Disp *display);
     virtual void update_realization();
@@ -18,8 +18,7 @@ public:
     unsigned long _frequency;
     byte _sub_frequency;
     unsigned long _step;
-    Realization **_realizations;
-    byte _nrealizations;
+    RealizationPool *_realization_pool;
 
 private:
 };

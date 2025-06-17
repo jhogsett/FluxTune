@@ -1,6 +1,11 @@
 #ifndef __SEEDING_H__
 #define __SEEDING_H__
 
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
+#include <Arduino.h>
+#endif
 #include <random_seed.h>
 
 // LSB (noisiest bit) of an analog read on an unused analog pin

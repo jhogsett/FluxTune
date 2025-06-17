@@ -1,4 +1,8 @@
+#ifdef NATIVE_BUILD
+#include "../native/platform.h"
+#else
 #include <HT16K33Disp.h>
+#endif
 #include "mode.h"
 
 Mode::Mode(const char *title){

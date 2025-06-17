@@ -1,6 +1,6 @@
 
 
-#include <Arduino.h>
+#include "basic_types.h"
 #include "realizer_pool.h"
 
 // pass array of realizer addresses, array of free/in-use bools, count of realizers 

@@ -1,4 +1,8 @@
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <MD_AD9833.h>
+#endif
 #include "realizer.h"
 
 class WaveGen : public Realizer

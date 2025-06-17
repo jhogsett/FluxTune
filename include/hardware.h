@@ -20,9 +20,7 @@
 // #define AMBER_BUTTON_LED 7
 // #define RED_BUTTON_LED 8
 
-// Arduino Nano pins for the 'any' button and three arcade buttons
-// The 'any' button is wired by diodes to the three other buttons
-// It is used to trigger the interupt service routine to process the button event
+// Arduino Nano pins for arcade buttons - not used in FluxTune
 // #define NUM_BUTTONS 4
 // #define FIRST_BUTTON 2
 // #define LAST_BUTTON 5

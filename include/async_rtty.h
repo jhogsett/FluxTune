@@ -1,7 +1,11 @@
 #ifndef __ASYNC_RTTY_H__
 #define __ASYNC_RTTY_H__
 
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <Arduino.h>
+#endif
 
 #define RTTY_TIME_BASIS 22
 #define RTTY_TIME_BASIS2 33
@@ -17,12 +21,20 @@
 #define STEP_ELEMENT_ACTIVE 1
 #define STEP_ELEMENT_DONE 2
 
+// Baudot RTTY code definitions
+#define BAUDOT_LTRS    0x1F  // Switch to letters mode
+#define BAUDOT_FIGS    0x1B  // Switch to figures mode  
+#define BAUDOT_SPACE   0x04  // Space character
+#define BAUDOT_CR      0x08  // Carriage return
+#define BAUDOT_LF      0x02  // Line feed
+
 class AsyncRTTY
 {
 public:
     AsyncRTTY();
 
     void start_rtty(bool repeat);
+    void start_rtty_message(const char* message, bool repeat); // New method for text transmission
     int step_rtty(unsigned long time);
     
 private:
@@ -30,9 +42,11 @@ private:
     // void restart_rtty();
     unsigned long compute_element_time(unsigned long time, bool stop_bit);
     int step_element(unsigned long time);
+    unsigned char get_baudot_code(char c);  // New method to get Baudot code for character
 
-    const char *async_str = NULL;
+    const char *async_str;
     int async_length;
+    int async_str_pos;      // Current position in string
     int async_element_del;
     bool async_repeat;
     byte async_phase;

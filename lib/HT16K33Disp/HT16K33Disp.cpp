@@ -1,4 +1,8 @@
+#ifdef PLATFORM_NATIVE
+#include "../../native/platform.h"
+#else
 #include <Arduino.h>
+#endif
 #include "HT16K33Disp.h"
 
 // some code borrowed from https://github.com/akuzechie/HT16K33-Display-Library

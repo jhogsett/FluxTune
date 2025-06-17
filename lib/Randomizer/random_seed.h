@@ -1,6 +1,10 @@
 #ifndef RANDOM_SEED_H
 #define RANDOM_SEED_H
-#include "Arduino.h"
+#ifdef PLATFORM_NATIVE
+#include "../../native/platform.h"
+#else
+#include "../../include/basic_types.h"
+#endif
 
 #define RANDOM_SEED_SAMPLES 16
 

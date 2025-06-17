@@ -1,28 +1,27 @@
+#ifdef PLATFORM_NATIVE
+#include "../native/platform.h"
+#else
 #include <Arduino.h>
 #include <Wire.h>
-
 #include <MD_AD9833.h>
-// #include <SPI.h>
+#include <Encoder.h>
+#include <PololuLedStrip.h>
+#endif
 
-// #include "buttons.h"
 #include "displays.h"
 #include "hardware.h"
-// #include "idle_mode.h"
 #include "led_handler.h"
 #include "leds.h"
-// #include "motor.h"
-// #include "options_mode.h"
 #include "saved_data.h"
-// #include "prompts.h"
 #include "seeding.h"
-// #include "slot_game.h"
-// #include "speaker.h"
-// #include "time_game.h"
 #include "utils.h"
-// #include "word_game.h"
 
 // #define ENCODER_DO_NOT_USE_INTERRUPTS
+#ifndef PLATFORM_NATIVE
+// These are already included in platform.h for native builds
 #include <Encoder.h>
+#include <PololuLedStrip.h>
+#endif
 #include "encoder_handler.h"
 
 #include "vfo.h"
@@ -42,7 +41,10 @@
 
 #include "realizer_pool.h"
 
+#ifndef PLATFORM_NATIVE
+// Already included in platform.h for native builds  
 #include <PololuLedStrip.h>
+#endif
 
 // extend visual apparent range by modulating last led's brightness
 // establish brightness baseline and ability to adjust overall brightness
@@ -56,13 +58,13 @@ PololuLedStrip<12> ledStrip;
 #define LED_COUNT 7
 rgb_color colors[LED_COUNT] = 
 {
-  { 0, 32, 0 }, 
-  { 0, 32, 0 }, 
-  { 0, 32, 0 }, 
-  { 0, 32, 0 }, 
-  { 32, 32, 0 }, 
-  { 32, 32, 0 }, 
-  { 32, 0, 0 } 
+  { 0, 15, 0 }, 
+  { 0, 15, 0 }, 
+  { 0, 15, 0 }, 
+  { 0, 15, 0 }, 
+  { 15, 15, 0 }, 
+  { 15, 15, 0 }, 
+  { 15, 0, 0 } 
 };
 
 rgb_color empty[LED_COUNT] = 
@@ -77,36 +79,59 @@ rgb_color empty[LED_COUNT] =
 };
 
 
-#define INTERVAL 50
+#define INTERVAL 100
 unsigned long next_time = 0;
-int value = 50;
+int value = 127;
 
 void step_sm(unsigned long time)
 {
-  if(time < next_time)
-    return;
-  next_time = time + INTERVAL;
+	if(time < next_time)
+		return;
+	next_time = time + INTERVAL;
 
-  int r = random(11) - 5;
+	int r = random(11) - 5;
+	value += r;
 
-  value += r;
+	if(value > 255)
+		value = 255;
+	if(value < 0)
+		value = 0;
 
-  if(value > 100)
-    value = 100;
-  if(value < 0)
-    value = 0;
+	int sample = value * 2;
+	int on_leds = (sample / 73) + 1;
+	int remain = ((sample % 73) * 16) / 73;
 
-  int count = value / 8;
-  if(count > 7)
-    count = 7;
+	// Serial.println(remain);
 
-  rgb_color dbuffer[LED_COUNT];
-  memcpy(dbuffer, colors, count * sizeof(rgb_color));
-  memcpy(dbuffer + count, empty, (7 - count) * sizeof(rgb_color));
+//   remain = remain / 73
+//   print(full_on)
+//   print(remain)
 
-  // ledStrip.write(colors, count);
-  // ledStrip.write(empty, 7-count);
-  ledStrip.write(dbuffer, 7);
+
+
+//   int count = value / 8;
+//   if(count > 7)
+//     count = 7;
+
+	// 
+
+	rgb_color dbuffer[LED_COUNT];
+	memcpy(dbuffer, colors, on_leds * sizeof(rgb_color));
+	memcpy(dbuffer + on_leds, empty, (LED_COUNT - on_leds) * sizeof(rgb_color));
+
+	// for the last copied LED, modify it according to the remain value
+	dbuffer[on_leds-1].red = (dbuffer[on_leds-1].red * remain) / 16;
+	dbuffer[on_leds-1].green = (dbuffer[on_leds-1].green * remain) / 16;
+	dbuffer[on_leds-1].blue = (dbuffer[on_leds-1].blue * remain) / 16;
+
+	// modify whole display per display contrast
+	for(byte i = 0; i < LED_COUNT; i++){
+		dbuffer[i].red = (dbuffer[i].red * option_contrast)	/ 1;
+		dbuffer[i].green = (dbuffer[i].green * option_contrast)	/ 1;
+		dbuffer[i].blue = (dbuffer[i].blue * option_contrast)	/ 1;
+	}
+
+	ledStrip.write(dbuffer, LED_COUNT);
 }
 
 
@@ -157,7 +182,7 @@ RealizerPool realizer_pool(realizers, realizer_stats, 4);
 SimStation simstation1(&realizer_pool);
 SimStation simstation2(&realizer_pool);
 SimStation simstation3(&realizer_pool);
-SimStation simstation4(&realizer_pool);
+// SimStation simstation4(&realizer_pool);
 
 WaveOut waveout1(&realizer_pool);
 WaveOut waveout2(&realizer_pool);
@@ -166,26 +191,28 @@ WaveOut waveout4(&realizer_pool);
 
 // Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
 
-// VFO vfoa("VFO A",   7000000.0, 10, simstations, 4);
-// VFO vfob("VFO B",  14000000.0, 10, simstations, 4);
-// VFO vfoc("VFO C", 146520000.0, 5000, simstations, 4);
+// VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
+// VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
+// VFO vfoc("VFO C", 146520000.0, 5000, &realization_pool);
 
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
-// SimRTTY simstation4(&realizer_pool);
+SimRTTY simstation4(&realizer_pool);
 
-Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+Realization *realizations[4] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+bool realization_stats[4] = {false, false, false, false};
+RealizationPool realization_pool(realizations, realization_stats, 4);
 
-VFO vfoa("VFO A",   7000000.0, 10, simstations, 4);
-VFO vfob("VFO B",  14000000.0, 10, simstations, 4);
-VFO vfoc("VFO C", 146520000.0, 5000, simstations, 4);
+VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
+VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
+VFO vfoc("VFO C", 146520000.0, 5000, &realization_pool);
 
 Realization *waveouts[] = {&waveout1};
 
-VFO vfod("CHAN 1", 1.0, 1L, waveouts, 1);
-VFO vfoe("CHAN 2", 100.0, 10L, waveouts, 1);
-VFO vfof("CHAN 3", 1000000.0, 100L, waveouts, 1);
+VFO vfod("CHAN 1", 1.0, 1L, &realization_pool);
+VFO vfoe("CHAN 2", 100.0, 10L, &realization_pool);
+VFO vfof("CHAN 3", 1000000.0, 100L, &realization_pool);
 
 Contrast contrast("Contrast");
 
@@ -246,7 +273,7 @@ void setup_buttons(){
 }
 
 void setup(){
-	// Serial.begin(115200);
+	Serial.begin(115200);
 	randomizer.randomize();
 
 	load_save_data();
@@ -296,8 +323,6 @@ void setup(){
 }	
 
 bool main_menu(){
-	// bool buttons[] = {false, true, true, true};
-	// return branch_prompt(FSTR("FluxTune"), NULL, NULL, NULL, NULL, buttons);
     return true;
 }
 
@@ -364,13 +389,12 @@ void loop()
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
-
 	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
 	simstation2.begin(time + random(1000), 7002500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
 	simstation3.begin(time + random(1000), 7003000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
 
-	// simstation4.begin(time + random(1000), 7002000.0);
-	simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+	simstation4.begin(time + random(1000), 7010000.0);
+	// simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
 	set_application(APP_SIMRADIO, &display);
 
@@ -418,10 +442,12 @@ void loop()
 
         panel_leds.step(time);
 
-		simstation1.step(time);
-		simstation2.step(time);
-		simstation3.step(time);
-		simstation4.step(time);
+		realization_pool.step(time);
+
+		// simstation1.step(time);
+		// simstation2.step(time);
+		// simstation3.step(time);
+		// simstation4.step(time);
 
 		encoder_handlerA.step();
 		encoder_handlerB.step();
