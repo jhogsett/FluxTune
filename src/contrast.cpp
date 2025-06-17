@@ -2,6 +2,7 @@
 #include "saved_data.h"
 #include "contrast.h"
 #include "utils.h"
+#include "buffers.h"
 
 Contrast::Contrast(const char *title) : Option(title)
 {
@@ -23,7 +24,6 @@ void Contrast::prev_option(){
 void Contrast::update_display(HT16K33Disp *display){
 	const byte display_brightnesses[] = {(unsigned char)option_contrast, (unsigned char)option_contrast};
 	display->init(display_brightnesses);
-    char buffer[9];
-    sprintf(buffer, "Level %d", option_contrast);
-    display->scroll_string(buffer, 1, 1);
+    sprintf(display_text_buffer, "Level %d", option_contrast);
+    display->scroll_string(display_text_buffer, 1, 1);
 }

@@ -1,5 +1,5 @@
 #include "../native/platform.h"
-#include "async_morse.h"
+#include "../include/async_morse.h"
 
 // ========================================
 // MORSE CODE LOOKUP TABLE  

@@ -6,4 +6,7 @@
 // string buffer used to load string data from program memory (F() strings)
 extern char fstring_buffer[FSTRING_BUFFER];
 
+// Global display buffer for VFO and other display updates (max 9 chars + null)
+extern char display_text_buffer[10];
+
 #endif

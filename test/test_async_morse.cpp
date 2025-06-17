@@ -1,6 +1,6 @@
 #include "unity/src/unity.h"
 #include "../native/platform.h"
-#include "async_morse.h"
+#include "../include/async_morse.h"
 
 // Test fixture
 AsyncMorse* morse;

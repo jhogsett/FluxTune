@@ -33,8 +33,7 @@ class AsyncRTTY
 public:
     AsyncRTTY();
 
-    void start_rtty(bool repeat);
-    void start_rtty_message(const char* message, bool repeat); // New method for text transmission
+    void start_rtty_message(const char* message, bool repeat);
     int step_rtty(unsigned long time);
     
 private:

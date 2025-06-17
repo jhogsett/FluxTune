@@ -63,20 +63,6 @@ bool AsyncRTTY::start_step_element(unsigned long time){
     return false;
 }
 
-void AsyncRTTY::start_rtty(bool repeat){
-    async_repeat = repeat;
-    async_active = false;
-    async_switched_on = false;  // Ensure we start with a clean state
-    async_next_event = 0L;
-    async_element_done = true;
-    async_str = NULL;  // Use random mode
-    async_length = 0;
-    async_str_pos = 0;
-
-    if(!start_step_element(millis()))
-        return;
-}
-
 void AsyncRTTY::start_rtty_message(const char* message, bool repeat) {
     async_repeat = repeat;
     async_active = false;
@@ -111,13 +97,12 @@ int AsyncRTTY::step_element(unsigned long time){
             async_active = false;
             async_next_event = compute_element_time(time, false);
             async_element++;
-            break;
-              case 1:
+            break;        case 1:
         case 2:
         case 3:
         case 4:
         case 5:
-            // Generate data bits - either from Baudot message or random
+            // Generate data bits from Baudot message
             if (async_str != NULL && async_str_pos < async_length) {
                 // Get current character and its Baudot code
                 char current_char = async_str[async_str_pos];
@@ -132,8 +117,8 @@ int AsyncRTTY::step_element(unsigned long time){
                     async_active = (BAUDOT_SPACE >> (async_element - 1)) & 1;
                 }
             } else {
-                // Random mode or end of message
-                async_active = (random(2) == 1 ? true : false);
+                // End of message or no message - transmit idle (all marks/ones)
+                async_active = true;
             }
             
             async_next_event = compute_element_time(time, false);
