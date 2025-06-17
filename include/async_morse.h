@@ -41,6 +41,7 @@ private:
     void start_wait(unsigned long time);
     void step_wait(unsigned long time);
     void handle_transmission_complete(unsigned long time);
+    bool is_time_ready(unsigned long current_time);
 
     // ========================================
     // STATE VARIABLES

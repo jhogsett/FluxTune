@@ -182,9 +182,7 @@ int AsyncMorse::step_element(unsigned long time){
 
     if(async_element_done){
         return STEP_ELEMENT_DONE;
-    }
-
-    if(time < async_next_event){
+    }    if(!is_time_ready(time)){
         return STEP_ELEMENT_EARLY;
     }
     
@@ -258,7 +256,7 @@ bool AsyncMorse::step_position(unsigned long time){
 }
 
 void AsyncMorse::step_space(unsigned long time){
-    if(time < async_next_event){
+    if(!is_time_ready(time)){
         return;
     }
 
@@ -271,7 +269,7 @@ void AsyncMorse::start_wait(unsigned long time){
 }
 
 void AsyncMorse::step_wait(unsigned long time){
-    if(time < async_next_event){
+    if(!is_time_ready(time)){
         return;
     }
 
@@ -314,6 +312,13 @@ int AsyncMorse::step_morse(unsigned long time){
     } else {
         return async_active ? STEP_MORSE_LEAVE_ON : STEP_MORSE_LEAVE_OFF;
     }
+}
+
+// ========================================
+// TIMING HELPER
+// ========================================
+bool AsyncMorse::is_time_ready(unsigned long current_time) {
+    return current_time >= async_next_event;
 }
 
 
