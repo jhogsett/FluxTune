@@ -1,0 +1,95 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Test: AsyncMorse Quick",
+            "type": "shell",
+            "command": "g++",            "args": [
+                "-DNATIVE_BUILD",
+                "-I../include",
+                "-I../native",
+                "-I../lib/HT16K33Disp",
+                "-I../lib/Randomizer",
+                "-Iunity/src",
+                "-Iunity/extras/fixture/src",
+                "-std=c++11",
+                "-Wall",
+                "-o",
+                "test_async_morse.exe",
+                "test_async_morse.cpp",
+                "../src/async_morse.cpp",
+                "../src/utils.cpp",
+                "../src/buffers.cpp",
+                "../src/saved_data.cpp",
+                "../native/mock_arduino.cpp",
+                "../native/mock_wire.cpp",
+                "../native/mock_eeprom.cpp",
+                "../native/mock_ht16k33disp.cpp",
+                "unity/src/unity.c"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/test"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Test: Run AsyncMorse",
+            "type": "shell",
+            "command": "./test_async_morse.exe",
+            "options": {
+                "cwd": "${workspaceFolder}/test"
+            },
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "dependsOn": "Test: AsyncMorse Quick"
+        },
+        {
+            "label": "Test: Build and Run AsyncMorse",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Test: AsyncMorse Quick",
+                "Test: Run AsyncMorse"
+            ]
+        },
+        {
+            "label": "Clean: Test Artifacts",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "if (Test-Path 'build') { Remove-Item -Recurse -Force 'build' }; if (Test-Path '*.exe') { Remove-Item -Force '*.exe' }"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/test"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}
