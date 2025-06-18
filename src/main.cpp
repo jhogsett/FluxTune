@@ -36,8 +36,10 @@
 
 #include "sim_station.h"
 #include "sim_rtty.h"
+#include "sim_beacon.h"
 
 #include "async_morse.h"
+#include "async_beacon.h"
 
 #include "realizer_pool.h"
 
@@ -170,7 +172,7 @@ RealizerPool realizer_pool(realizers, realizer_stats, 4);
 
 SimStation simstation1(&realizer_pool);
 SimStation simstation2(&realizer_pool);
-SimStation simstation3(&realizer_pool);
+// SimStation simstation3(&realizer_pool);  // Removed due to hardware limit of 4 AD9833s
 // SimStation simstation4(&realizer_pool);
 
 WaveOut waveout1(&realizer_pool);
@@ -188,8 +190,10 @@ WaveOut waveout4(&realizer_pool);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
 SimRTTY simstation4(&realizer_pool);
+SimBeacon simbeacon1(&realizer_pool);
 
-Realization *realizations[4] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
+// Only 4 realizations due to hardware limit of 4 AD9833 signal generators
+Realization *realizations[4] = {&simstation1, &simstation2, &simstation4, &simbeacon1}; 
 bool realization_stats[4] = {false, false, false, false};
 RealizationPool realization_pool(realizations, realization_stats, 4);
 
@@ -375,15 +379,15 @@ void purge_events(){
 
 void loop()
 {
-    display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-    unsigned long time = millis();
-    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
+    display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);    unsigned long time = millis();    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
 	simstation2.begin(time + random(1000), 7002500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
-	simstation3.begin(time + random(1000), 7003000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
+	// simstation3 removed due to hardware limit of 4 AD9833 signal generators
 
 	simstation4.begin(time + random(1000), 7010000.0);
 	// simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+		// Initialize beacon with a simple pattern at 7001500.0 Hz (1500 Hz offset from 7000 kHz)
+	simbeacon1.begin(time + random(1000), 7001500.0, BEACON_PATTERN_SIMPLE, 500, 1500);
 
 	set_application(APP_SIMRADIO, &display);
 

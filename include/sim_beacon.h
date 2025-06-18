@@ -1,15 +1,16 @@
-#ifndef __SIM_SIGNAL_H__
-#define __SIM_SIGNAL_H__
+#ifndef __SIM_BEACON_H__
+#define __SIM_BEACON_H__
 
-#include "sim_transmitter.h"
+#include "realization.h"
+#include "realizer_pool.h"
 #include "async_beacon.h"
 
 #define SILENT_FREQ 0.1
 
-class SimSignal : public SimTransmitter
+class SimBeacon : public Realization
 {
 public:
-    SimSignal(RealizerPool *realizer_pool);
+    SimBeacon(RealizerPool *realizer_pool);
     
     bool begin(unsigned long time, float frequency, uint8_t pattern_type, unsigned long on_time_ms, unsigned long off_time_ms);
     virtual bool update(class Mode *mode);

@@ -1,36 +1,40 @@
 #ifndef __SIM_RTTY_H__
 #define __SIM_RTTY_H__
 
-#include "realization.h"
-#include "realizer_pool.h"
+#include "sim_transmitter.h"
 #include "async_rtty.h"
 
-#define MAX_AUDIBLE_FREQ 5000.0
-#define MIN_AUDIBLE_FREQ 150.0
-
 #define MARK_FREQ_SHIFT 170.0
-#define SILENT_FREQ 0.1
 
-class SimRTTY : public Realization
+class SimRTTY : public SimTransmitter
 {
 public:
     SimRTTY(RealizerPool *realizer_pool);
     
-    virtual bool begin(unsigned long time, float fixed_freq);
-    
-    virtual bool update(Mode *mode);
-
+    bool begin(unsigned long time, float fixed_freq);
+    virtual bool update(class Mode *mode);
     virtual bool step(unsigned long time);
+    virtual void end();
+    
+    // Override restart to restore station parameters
+    virtual bool try_restart(unsigned long time);
+    
+    void set_message(const char *message);
 
-    void realize();
-
-    float _fixed_freq;
-    bool _enabled;
-    float _frequency;
+private:
+    // Keep remaining data members for now (removing _enabled as it's now inherited)
     AsyncRTTY _rtty;
-    bool _active;
-
+    const char *_message;
     int _phase;
+    
+    // Store initialization parameters for restart
+    float _init_fixed_freq;
+    const char *_init_message;
+    bool _init_params_set;
+    
+    // Track transmission cycles for auto-stopping
+    bool _transmission_complete;
+    void check_transmission_cycle();
 };
 
 #endif
