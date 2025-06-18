@@ -8,10 +8,23 @@ SimRTTY::SimRTTY(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
 {
     _message = "CQ CQ DE N6CCM K       ";
     _phase = 0;
+    
+    // Initialize restart parameters
+    _init_params_set = false;
+    _init_fixed_freq = 0.0;
+    _init_message = _message;
+    _transmission_complete = false;
 }
 
 bool SimRTTY::begin(unsigned long time, float fixed_freq)
-{    _fixed_freq = fixed_freq;
+{
+    // Store parameters for restart capability
+    _init_fixed_freq = fixed_freq;
+    _init_message = _message;
+    _init_params_set = true;
+    _transmission_complete = false;
+    
+    _fixed_freq = fixed_freq;
     _audible_frequency = 0.0;
       if (!Realization::begin(time))
         return false;
@@ -67,11 +80,13 @@ bool SimRTTY::step(unsigned long time)
             wavegen->set_active_frequency(true);  // Use SPACE frequency (channel 0)
             break;
     }
-    
-    _phase++;
+      _phase++;
     if (_phase >= MAX_PHASE) {
         _phase = 0;
     }
+    
+    // Track transmission cycles for auto-stopping
+    check_transmission_cycle();
     
     return Realization::step(time);
 }
@@ -91,4 +106,30 @@ void SimRTTY::set_message(const char *message)
 {
     _message = message;
     _rtty.start_rtty_message(message, true);
+}
+
+// Override restart to restore station parameters
+bool SimRTTY::try_restart(unsigned long time)
+{
+    if (_init_params_set && !is_active()) {
+        return begin(time, _init_fixed_freq);
+    }
+    return false;
+}
+
+// Track transmission cycles - for now this is a simple placeholder
+void SimRTTY::check_transmission_cycle()
+{
+    // Simple heuristic similar to SimStation
+    static unsigned long last_check = 0;
+    static bool was_transmitting = false;
+    
+    bool currently_transmitting = _enabled && is_active();
+    
+    if (was_transmitting && !currently_transmitting) {
+        _current_runs++;
+        _transmission_complete = true;
+    }
+    
+    was_transmitting = currently_transmitting;
 }
