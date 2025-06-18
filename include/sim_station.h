@@ -18,9 +18,7 @@ public:
 
     void realize();    virtual void end();
 
-    float _frequency;
     AsyncMorse _morse;
-    bool _active;
     bool _changed;
 };
 

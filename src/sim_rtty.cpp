@@ -6,9 +6,8 @@
 
 // mode is expected to be a derivative of VFO
 SimRTTY::SimRTTY(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool){
-    // Base class now initializes _fixed_freq and _enabled
+    // Base class now initializes all common variables
     _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
-    _active = false;
 }
 
 bool SimRTTY::begin(unsigned long time, float fixed_freq){

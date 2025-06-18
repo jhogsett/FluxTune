@@ -5,4 +5,6 @@ SimTransmitter::SimTransmitter(RealizerPool *realizer_pool) : Realization(realiz
     // Initialize common member variables
     _fixed_freq = 0.0;
     _enabled = false;
+    _frequency = 0.0;
+    _active = false;
 }
