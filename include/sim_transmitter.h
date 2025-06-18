@@ -10,17 +10,20 @@
 #define SILENT_FREQ 0.1
 
 /**
- * Empty base class for simulated transmitters.
- * This is the most minimal starting point for refactoring.
+ * Base class for simulated transmitters (CW/RTTY).
+ * Provides common functionality and interface for station simulation.
  */
 class SimTransmitter : public Realization
 {
 public:
     SimTransmitter(RealizerPool *realizer_pool);
+    virtual bool step(unsigned long time) = 0;  // Pure virtual - must be implemented by derived classes
+    virtual void end();  // Common cleanup logic
 
-protected:
-    // Common utility methods
+protected:    // Common utility methods
     bool check_frequency_bounds();  // Returns true if frequency is in audible range
+    bool common_begin(unsigned long time, float fixed_freq);  // Common initialization logic
+    void common_frequency_update(Mode *mode);  // Common frequency calculation (mode must be VFO)
     
     // Common member variables
     float _fixed_freq;  // Target frequency for this station

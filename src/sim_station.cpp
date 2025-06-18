@@ -13,14 +13,7 @@ SimStation::SimStation(RealizerPool *realizer_pool) : SimTransmitter(realizer_po
 }
 
 bool SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm){
-    _fixed_freq = fixed_freq;
-    _frequency = 0.0;
-
-    // attempt to acquire a realizer
-    // _realizer = _realizer_pool->get_realizer();
-    // if(_realizer == -1)
-    //     return false;
-    if(!Realization::begin(time))
+    if(!common_begin(time, fixed_freq))
         return false;
 
     _morse.start_morse(message, wpm, true, WAIT_SECONDS);
@@ -42,17 +35,10 @@ void SimStation::realize(){
 
 // returns true on successful update
 bool SimStation::update(Mode *mode){
-    VFO *vfo = (VFO*)mode;
-    _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
-
-    // _frequency = abs(_frequency - _fixed_freq);
-    _frequency = _frequency - _fixed_freq;
+    common_frequency_update(mode);
 
     if(_enabled){
-        // WaveGen  *wavegen = (WaveGen*)_realizer;
-
         WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
-
         wavegen->set_frequency(_frequency);
     }
 
@@ -74,12 +60,7 @@ bool SimStation::step(unsigned long time){
             _active = false;
             realize();
     		break;
-    }
-
-    return true;
+    }    return true;
 }
 
-void SimStation::end(){
-    if(_realizer != -1)
-        _realizer_pool->free_realizer(_realizer);
-}
+// Use base class end() method for cleanup

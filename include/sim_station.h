@@ -13,10 +13,9 @@ public:
     virtual bool begin(unsigned long time, float fixed_freq, const char *message, int wpm);
     
     virtual bool update(Mode *mode);
-
     virtual bool step(unsigned long time);
 
-    void realize();    virtual void end();
+    void realize();
 
     AsyncMorse _morse;
     bool _changed;
