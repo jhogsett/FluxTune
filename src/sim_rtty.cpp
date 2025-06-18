@@ -10,11 +10,10 @@ SimRTTY::SimRTTY(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool){
     _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
 }
 
-bool SimRTTY::begin(unsigned long time, float fixed_freq){
-    if(!common_begin(time, fixed_freq))
+bool SimRTTY::begin(unsigned long time, float fixed_freq){    if(!common_begin(time, fixed_freq))
         return false;
 
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
 
     wavegen->set_frequency(SILENT_FREQ, false);
     wavegen->set_frequency(SILENT_FREQ, true);
@@ -31,16 +30,14 @@ void SimRTTY::realize(){
         return;  // Out of audible range
     }
     
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     wavegen->set_active_frequency(_active);
 }
 
 // returns true on successful update
 bool SimRTTY::update(Mode *mode){
-    common_frequency_update(mode);
-
-    if(_enabled){
-        WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    common_frequency_update(mode);    if(_enabled){
+        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
         wavegen->set_frequency(_frequency, true);
         wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
     }
