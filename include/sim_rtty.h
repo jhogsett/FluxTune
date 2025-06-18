@@ -1,13 +1,12 @@
 #ifndef __SIM_RTTY_H__
 #define __SIM_RTTY_H__
 
-#include "realization.h"
-#include "realizer_pool.h"
+#include "sim_transmitter.h"
 #include "async_rtty.h"
 
 #define MARK_FREQ_SHIFT 170.0
 
-class SimRTTY : public Realization
+class SimRTTY : public SimTransmitter
 {
 public:
     SimRTTY(RealizerPool *realizer_pool);
@@ -19,9 +18,7 @@ public:
     void set_message(const char *message);
 
 private:
-    float _fixed_freq;
-    float _frequency;
-    bool _enabled;
+    // Keep remaining data members for now (removing _enabled as it's now inherited)
     AsyncRTTY _rtty;
     const char *_message;
     int _phase;

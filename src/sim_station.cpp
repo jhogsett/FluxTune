@@ -4,32 +4,24 @@
 #include "wavegen.h"
 
 #define WAIT_SECONDS 4
-#define MAX_AUDIBLE_FREQ 5000.0
-#define MIN_AUDIBLE_FREQ 150.0
-#define SILENT_FREQ 0.1
 
-SimStation::SimStation(RealizerPool *realizer_pool) : Realization(realizer_pool)
+SimStation::SimStation(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
 {
-    _fixed_freq = 0.0;
-    _frequency = 0.0;
-    _enabled = false;
     _message = nullptr;
     _wpm = 20;
     _message_set = false;
 }
 
 bool SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm)
-{
-    _fixed_freq = fixed_freq;
-    _frequency = 0.0;
+{    _fixed_freq = fixed_freq;
+    _audible_frequency = 0.0;
     _message = message;
     _wpm = wpm;
     _message_set = true;
-    
-    if (!Realization::begin(time))
+      if (!Realization::begin(time))
         return false;
     
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = get_wavegen();
     wavegen->set_frequency(SILENT_FREQ, false);
     wavegen->set_frequency(SILENT_FREQ, true);
     
@@ -43,18 +35,16 @@ bool SimStation::begin(unsigned long time, float fixed_freq, const char *message
 bool SimStation::update(Mode *mode)
 {
     VFO *vfo = (VFO*)mode;
-    _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
-    _frequency = _frequency - _fixed_freq;
+    _audible_frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
+    _audible_frequency = _audible_frequency - _fixed_freq;    WaveGen *wavegen = get_wavegen();
     
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
-    
-    if (_frequency <= MAX_AUDIBLE_FREQ && _frequency >= MIN_AUDIBLE_FREQ) {
+    if (_audible_frequency <= MAX_AUDIBLE_FREQ && _audible_frequency >= MIN_AUDIBLE_FREQ) {
         if (!_enabled) {
             _enabled = true;
         }
         // Set both frequencies for Morse keying
-        wavegen->set_frequency(_frequency, true);        // Active tone frequency
-        wavegen->set_frequency(SPACE_FREQUENCY, false);  // Silent frequency
+        wavegen->set_frequency(_audible_frequency, true);        // Active tone frequency
+        wavegen->set_frequency(SPACE_FREQUENCY, false);          // Silent frequency
     } else {
         if (_enabled) {
             _enabled = false;
@@ -68,11 +58,10 @@ bool SimStation::update(Mode *mode)
 
 bool SimStation::step(unsigned long time)
 {
-    if (!_enabled) {
-        return Realization::step(time);
+    if (!_enabled) {        return Realization::step(time);
     }
     
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = get_wavegen();
     
     int morse_result = _morse.step_morse(time);
     
@@ -93,7 +82,7 @@ bool SimStation::step(unsigned long time)
 void SimStation::end()
 {
     if (_enabled) {
-        WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+        WaveGen *wavegen = get_wavegen();
         wavegen->set_frequency(SILENT_FREQ, true);
         wavegen->set_frequency(SILENT_FREQ, false);
         _enabled = false;

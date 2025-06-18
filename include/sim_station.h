@@ -1,13 +1,12 @@
 #ifndef __SIM_STATION_H__
 #define __SIM_STATION_H__
 
-#include "realization.h"
-#include "realizer_pool.h"
+#include "sim_transmitter.h"
 #include "async_morse.h"
 
 #define SPACE_FREQUENCY 0.1
 
-class SimStation : public Realization
+class SimStation : public SimTransmitter
 {
 public:
     SimStation(RealizerPool *realizer_pool);
@@ -19,9 +18,7 @@ public:
     void set_message(const char *message, int wpm);
 
 private:
-    float _fixed_freq;
-    float _frequency;
-    bool _enabled;
+    // Keep remaining data members for now (removing _enabled as it's now inherited)
     AsyncMorse _morse;
     const char *_message;
     int _wpm;
