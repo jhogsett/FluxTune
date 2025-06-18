@@ -7,11 +7,12 @@
 // mode is expected to be a derivative of VFO
 SimRTTY::SimRTTY(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool){
     // Base class now initializes all common variables
-    _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
+    // Don't start transmission here - wait for begin() for proper timing
 }
 
 bool SimRTTY::begin(unsigned long time, float fixed_freq){    if(!common_begin(time, fixed_freq))
-        return false;
+        return false;    // Start RTTY transmission with repeat enabled
+    _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
 

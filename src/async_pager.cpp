@@ -21,7 +21,9 @@ void AsyncPager::start_pager_transmission(bool repeat)
     // Start with first tone immediately
     _current_state = PAGER_STATE_TONE_A;
     _transmitting = true;
-    _next_event_time = millis() + PAGER_TONE_DURATION;
+    
+    // Initialize to 0 like morse class - timing will be set on first step_pager call
+    _next_event_time = 0;
 }
 
 int AsyncPager::step_pager(unsigned long time)
@@ -30,17 +32,38 @@ int AsyncPager::step_pager(unsigned long time)
         return STEP_PAGER_LEAVE_OFF;
     }
     
+    // If this is the first call (next_event_time is 0), set up initial timing
+    if (_next_event_time == 0) {
+        _next_event_time = time + PAGER_TONE_DURATION;
+        return STEP_PAGER_TURN_ON;  // Start transmitting Tone A
+    }
+    
     // Check if it's time for a state change
     if (time < _next_event_time) {
         // Not time to change state yet
         return _transmitting ? STEP_PAGER_LEAVE_ON : STEP_PAGER_LEAVE_OFF;
-    }
-    
-    // Time to change state
+    }      // Time to change state
+    bool was_transmitting = _transmitting;
+    int old_state = _current_state;
     start_next_phase(time);
     
-    // Return appropriate step based on new state
-    return _transmitting ? STEP_PAGER_TURN_ON : STEP_PAGER_TURN_OFF;
+    // Check if pager became inactive after state change (no-repeat case)
+    if (!_active) {
+        return STEP_PAGER_LEAVE_OFF;
+    }
+    
+    // Return appropriate step based on transition
+    if (_transmitting && !was_transmitting) {
+        return STEP_PAGER_TURN_ON;     // OFF → ON
+    } else if (!_transmitting && was_transmitting) {
+        return STEP_PAGER_TURN_OFF;    // ON → OFF  
+    } else if (_transmitting && was_transmitting && _current_state != old_state) {
+        return STEP_PAGER_CHANGE_FREQ; // ON → ON with frequency change (Tone A → Tone B)
+    } else if (_transmitting) {
+        return STEP_PAGER_LEAVE_ON;    // ON → ON (no change)
+    } else {
+        return STEP_PAGER_LEAVE_OFF;   // OFF → OFF
+    }
 }
 
 void AsyncPager::start_next_phase(unsigned long time)

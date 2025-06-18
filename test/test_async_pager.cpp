@@ -1,6 +1,10 @@
 #include "unity.h"
 #include "../include/async_pager.h"
 
+// Unity setup/teardown functions
+void setUp(void) {}
+void tearDown(void) {}
+
 // Test helper to advance time and check state transitions
 void test_pager_basic_initialization() {
     AsyncPager pager;
@@ -12,18 +16,13 @@ void test_pager_basic_initialization() {
 
 void test_pager_transmission_cycle() {
     AsyncPager pager;
-    unsigned long time = 0;
-    
-    // Start transmission
+    unsigned long time = 0;    // Start transmission
     pager.start_pager_transmission(true);
-    
-    // Should start with Tone A
+      // Should start with Tone A
     TEST_ASSERT_EQUAL(PAGER_STATE_TONE_A, pager.get_current_state());
-    TEST_ASSERT_EQUAL(STEP_PAGER_LEAVE_ON, pager.step_pager(time));
-    
-    // Advance to end of Tone A
+    TEST_ASSERT_EQUAL(STEP_PAGER_TURN_ON, pager.step_pager(time));     // First call should turn on
     time += PAGER_TONE_DURATION;
-    TEST_ASSERT_EQUAL(STEP_PAGER_TURN_ON, pager.step_pager(time));  // Should transition to Tone B
+    TEST_ASSERT_EQUAL(STEP_PAGER_CHANGE_FREQ, pager.step_pager(time));  // Should change frequency to Tone B
     TEST_ASSERT_EQUAL(PAGER_STATE_TONE_B, pager.get_current_state());
     
     // Advance to end of Tone B  
@@ -42,12 +41,12 @@ void test_pager_repeat_cycle() {
     
     pager.start_pager_transmission(true);
     
-    // Complete one full cycle (Tone A + Tone B + minimum silence)
-    time += PAGER_TONE_DURATION * 2 + PAGER_SILENCE_MIN;
+    // Complete one full cycle (Tone A + Tone B + maximum possible silence)
+    time += PAGER_TONE_DURATION * 2 + PAGER_SILENCE_MAX + 1000; // Extra margin
     
     // Should start new cycle with Tone A
     int result = pager.step_pager(time);
-    TEST_ASSERT_TRUE(result == STEP_PAGER_TURN_ON || result == STEP_PAGER_LEAVE_ON);
+    TEST_ASSERT_EQUAL(STEP_PAGER_TURN_ON, result);
     TEST_ASSERT_EQUAL(PAGER_STATE_TONE_A, pager.get_current_state());
 }
 
@@ -57,8 +56,11 @@ void test_pager_no_repeat() {
     
     pager.start_pager_transmission(false); // No repeat
     
-    // Complete one full cycle
-    time += PAGER_TONE_DURATION * 2 + PAGER_SILENCE_MIN;
+    // First call should turn on
+    pager.step_pager(time);
+    
+    // Complete one full cycle  
+    time += PAGER_TONE_DURATION * 2 + PAGER_SILENCE_MAX + 1000; // Extra margin
     
     // Should stay silent (not repeat)
     TEST_ASSERT_EQUAL(STEP_PAGER_LEAVE_OFF, pager.step_pager(time));

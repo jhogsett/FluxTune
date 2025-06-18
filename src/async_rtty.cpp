@@ -67,14 +67,13 @@ void AsyncRTTY::start_rtty_message(const char* message, bool repeat) {
     async_repeat = repeat;
     async_active = false;
     async_switched_on = false;
-    async_next_event = 0L;
+    async_next_event = 0L;  // Initialize to 0 like morse class
     async_element_done = true;
     async_str = message;
     async_length = strlen(message);
     async_str_pos = 0;
 
-    if(!start_step_element(millis()))
-        return;
+    // Don't call start_step_element here - let step_rtty handle timing on first call
 }
 
 

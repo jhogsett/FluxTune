@@ -1,5 +1,26 @@
 # FluxTune Development Roadmap
 
+## Author's Vision
+- A simulated Ham Radio receiver, with frequency display, a large realistic tuning knob, a signal strength meter, a _mode change_ knob, a _volume control_ knob, two panel LEDs, and an audio speaker.
+- While turning the tuning knob, it should be possible to encounter simulated transmitting stations at different frequencies, with their apprent audible (listening) frequency changing as the tuning knob is turned, perfectly simulating the experience of tuning in stations on a real Ham Radio receiver.
+
+## Author's Hardware Description
+- The device and software is powered by an Arduino Nano and based on the Platformio foundation.
+- The simulated signal output is by way of four AD9833 digital signal generators that can be utilized independently. The devices use the SPI pins 11 and 13 as well as the "FSYNC" (or SPI Load) pins 8, A0 (14), A1 (15) and A2 (16). The outputs are coupled to an audio amplifier connected to the audio speaker.
+- The tuning and mode change knobs are connected to rotary encoder switches connected to the Arduino Nano (pins 2-4 and 5-7). When the mode change knob is _turned_ it modifies the current mode, for example, going from VFO A to VFO B. When the mode change knob is _pushed_ it changes modes entires, going from "SimRadio" to "Wave Gen" mode (for future use) and then to "Settings" mode (for setting the contrast).
+- The two panel LEDs are connected to the PWM-capable pins 9 and 10 to allow their brightness to be controlled.
+- The signal strength meter is a 3D-printed simulated panel meter powered by a strip of 7 WS-2812 addressable LEDs connected to pin 12.
+- The display uses two four-digit 14-segment alphanumeric displays powered by the HK16K33 LED driver chip and connected to the Arduino Nano via I2C pins A4 and A5. It's sequential I2C addresses 0x70 and 0x71 for a single 8-digit display
+
+## Author's Wish List
+- While tuning, it should be possible to continue to discover new stations. In the background, while the user is tuning, a _realization scheduler_ should be deactivating any no longer needed and out of range realizations (and freeing the related realizer resources), and activating new realizatins in time to tune into them and hear them while tuning. Ideally it should be hypothetically possible to turn the tuning knob continuously forever and always hear new stations popping up. Despite the limitation of only four signal generators, that ought to be enough to create a realistic experience like that.
+- It should be easy to add new types of transmitting stations with their own modulation types (within the limits of the AD9833 signal generator).
+- It should be possible to add whole new conceptual types of transmitting stations, for example a WWV simulation minus the speech, the sound of DTMF dialing like someone's making a call, pager signals like heard on a scanner, the "Russian Woodpecker".
+- The CW and RTTY stations should generate new random callsigns and content, within the limits of available Arduino memory space
+
+
+
+
 ## Overview
 This document outlines the planned development goals and technical improvements for the FluxTune project.
 

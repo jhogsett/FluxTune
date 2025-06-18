@@ -6,14 +6,14 @@
 SimPager::SimPager(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
 {
     // Base class initializes all common variables
-    // Start pager transmission with repeat enabled
-    _pager.start_pager_transmission(true);
+    // Pager transmission will be started in begin() method
 }
 
 bool SimPager::begin(unsigned long time, float fixed_freq)
 {
     if(!common_begin(time, fixed_freq))
-        return false;
+        return false;    // Start pager transmission with repeat enabled
+    _pager.start_pager_transmission(true);
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
 
@@ -53,6 +53,10 @@ void SimPager::realize()
                 wavegen->set_frequency(SILENT_FREQ, false);
                 break;
         }
+    } else {
+        // Explicitly set silent frequencies when inactive
+        wavegen->set_frequency(SILENT_FREQ, true);
+        wavegen->set_frequency(SILENT_FREQ, false);
     }
     
     wavegen->set_active_frequency(_active);
@@ -83,9 +87,13 @@ bool SimPager::step(unsigned long time)
             _active = false;
             realize();
             break;
+              case STEP_PAGER_CHANGE_FREQ:
+            // Transmitter stays on, but frequency needs to change
+            realize();
+            break;
             
-        // LEAVE_ON and LEAVE_OFF don't require action
-        // since _active state doesn't change
+        // LEAVE_ON and LEAVE_OFF don't require action since _active state doesn't change
+        // and no frequency update is needed during silence
     }
 
     return true;

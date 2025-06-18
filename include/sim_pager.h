@@ -5,8 +5,8 @@
 #include "sim_transmitter.h"
 
 // Pager tone frequencies (Hz offset from VFO)
-#define PAGER_TONE_A_OFFSET 600.0     // First tone frequency offset
-#define PAGER_TONE_B_OFFSET 1500.0    // Second tone frequency offset
+#define PAGER_TONE_A_OFFSET 700.0     // First tone frequency offset
+#define PAGER_TONE_B_OFFSET 1000.0    // Second tone frequency offset
 
 class SimPager : public SimTransmitter
 {

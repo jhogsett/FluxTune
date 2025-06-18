@@ -15,8 +15,9 @@
 // Pager step return values
 #define STEP_PAGER_TURN_ON   1        // Start transmitting (tone A or B)
 #define STEP_PAGER_TURN_OFF  2        // Stop transmitting (enter silence)
-#define STEP_PAGER_LEAVE_ON  3        // Continue transmitting
+#define STEP_PAGER_LEAVE_ON  3        // Continue transmitting (no change)
 #define STEP_PAGER_LEAVE_OFF 4        // Continue silence
+#define STEP_PAGER_CHANGE_FREQ 5      // Continue transmitting but change frequency
 
 // Pager transmission states
 #define PAGER_STATE_TONE_A   0        // Transmitting first tone
