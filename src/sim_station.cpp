@@ -14,11 +14,9 @@ SimStation::SimStation(RealizerPool *realizer_pool) : SimTransmitter(realizer_po
 
 bool SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm){
     if(!common_begin(time, fixed_freq))
-        return false;
+        return false;    _morse.start_morse(message, wpm, true, WAIT_SECONDS);
 
-    _morse.start_morse(message, wpm, true, WAIT_SECONDS);
-
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     wavegen->set_frequency(SPACE_FREQUENCY, false);
 
     return true;
@@ -29,16 +27,14 @@ void SimStation::realize(){
         return;  // Out of audible range
     }
     
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     wavegen->set_active_frequency(_active);
 }
 
 // returns true on successful update
 bool SimStation::update(Mode *mode){
-    common_frequency_update(mode);
-
-    if(_enabled){
-        WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    common_frequency_update(mode);    if(_enabled){
+        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
         wavegen->set_frequency(_frequency);
     }
 
