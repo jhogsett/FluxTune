@@ -40,28 +40,29 @@ void SimPager::realize()
     
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     
-    if(_active) {        // Set frequencies based on current pager state
+    if(_active) {
+        // Set frequencies based on current pager state
         switch(_pager.get_current_state()) {
             case PAGER_STATE_TONE_A:
-                // Transmit Tone A on both channels (or just one)
+                // Transmit Tone A (longer unsquelch tone)
                 wavegen->set_frequency(_frequency + _current_tone_a_offset, true);
                 wavegen->set_frequency(_frequency + _current_tone_a_offset, false);
                 break;
                 
             case PAGER_STATE_TONE_B:
-                // Transmit Tone B on both channels (or just one) 
+                // Transmit Tone B (shorter identification tone)
                 wavegen->set_frequency(_frequency + _current_tone_b_offset, true);
                 wavegen->set_frequency(_frequency + _current_tone_b_offset, false);
                 break;
                 
             default:
-                // Silent state - should not reach here when _active is true
+                // Silent state (GAP or SILENCE) - should not reach here when _active is true
                 wavegen->set_frequency(SILENT_FREQ, true);
                 wavegen->set_frequency(SILENT_FREQ, false);
                 break;
         }
     } else {
-        // Explicitly set silent frequencies when inactive
+        // Explicitly set silent frequencies when inactive (during GAP or SILENCE)
         wavegen->set_frequency(SILENT_FREQ, true);
         wavegen->set_frequency(SILENT_FREQ, false);
     }

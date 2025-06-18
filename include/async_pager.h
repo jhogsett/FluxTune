@@ -7,8 +7,10 @@
 #include <Arduino.h>
 #endif
 
-// Pager timing constants (in milliseconds)
-#define PAGER_TONE_DURATION 1000      // 1 second per tone
+// Pager timing constants (in milliseconds) - authentic two-tone sequential timing
+#define PAGER_TONE_A_DURATION 1500    // First tone: 1.5 seconds (longer for unsquelch)
+#define PAGER_TONE_B_DURATION 800     // Second tone: 0.8 seconds (shorter identification)
+#define PAGER_INTER_TONE_GAP 100      // Gap between tones: 100ms
 #define PAGER_SILENCE_MIN 3000        // Minimum 3 seconds silence (shortened for testing)
 #define PAGER_SILENCE_MAX 8000        // Maximum 8 seconds silence (shortened for testing)
 
@@ -20,9 +22,10 @@
 #define STEP_PAGER_CHANGE_FREQ 5      // Continue transmitting but change frequency
 
 // Pager transmission states
-#define PAGER_STATE_TONE_A   0        // Transmitting first tone
-#define PAGER_STATE_TONE_B   1        // Transmitting second tone  
-#define PAGER_STATE_SILENCE  2        // Silent period between transmissions
+#define PAGER_STATE_TONE_A   0        // Transmitting first tone (longer)
+#define PAGER_STATE_GAP      1        // Brief gap between tones
+#define PAGER_STATE_TONE_B   2        // Transmitting second tone (shorter)
+#define PAGER_STATE_SILENCE  3        // Silent period between transmissions
 
 class AsyncPager
 {

@@ -2,8 +2,7 @@
 #include "../include/async_pager.h"
 
 AsyncPager::AsyncPager()
-{
-    // Initialize all state variables to safe defaults
+{    // Initialize all state variables to safe defaults
     _active = false;
     _repeat = false;
     _transmitting = false;
@@ -31,10 +30,9 @@ int AsyncPager::step_pager(unsigned long time)
     if (!_active || !_initialized) {
         return STEP_PAGER_LEAVE_OFF;
     }
-    
-    // If this is the first call (next_event_time is 0), set up initial timing
+      // If this is the first call (next_event_time is 0), set up initial timing
     if (_next_event_time == 0) {
-        _next_event_time = time + PAGER_TONE_DURATION;
+        _next_event_time = time + PAGER_TONE_A_DURATION;
         return STEP_PAGER_TURN_ON;  // Start transmitting Tone A
     }
     
@@ -42,7 +40,7 @@ int AsyncPager::step_pager(unsigned long time)
     if (time < _next_event_time) {
         // Not time to change state yet
         return _transmitting ? STEP_PAGER_LEAVE_ON : STEP_PAGER_LEAVE_OFF;
-    }      // Time to change state
+    }    // Time to change state
     bool was_transmitting = _transmitting;
     int old_state = _current_state;
     start_next_phase(time);
@@ -70,31 +68,35 @@ void AsyncPager::start_next_phase(unsigned long time)
 {
     switch (_current_state) {
         case PAGER_STATE_TONE_A:
-            // Tone A finished, start Tone B immediately
-            _current_state = PAGER_STATE_TONE_B;
-            _transmitting = true;
-            _next_event_time = time + PAGER_TONE_DURATION;
+            // Tone A finished, start brief gap (transmitter off)
+            _current_state = PAGER_STATE_GAP;
+            _transmitting = false;
+            _next_event_time = time + PAGER_INTER_TONE_GAP;
             break;
             
-        case PAGER_STATE_TONE_B:
+        case PAGER_STATE_GAP:
+            // Gap finished, start Tone B (transmitter back on)
+            _current_state = PAGER_STATE_TONE_B;
+            _transmitting = true;
+            _next_event_time = time + PAGER_TONE_B_DURATION;
+            break;
+              case PAGER_STATE_TONE_B:
             // Tone B finished, start silence period
             _current_state = PAGER_STATE_SILENCE;
             _transmitting = false;
-            _next_event_time = time + get_random_silence_duration();
-            break;
-            
-        case PAGER_STATE_SILENCE:
-            // Silence finished
             if (_repeat) {
-                // Start next transmission cycle with Tone A
-                _current_state = PAGER_STATE_TONE_A;
-                _transmitting = true;
-                _next_event_time = time + PAGER_TONE_DURATION;
+                _next_event_time = time + get_random_silence_duration();
             } else {
-                // No repeat, stay silent
+                // No repeat: become inactive immediately, no future events
                 _active = false;
-                _transmitting = false;
+                _next_event_time = 0; // No future events
             }
+            break;        case PAGER_STATE_SILENCE:
+            // Silence finished (only reachable if _repeat is true)
+            // Start next transmission cycle with Tone A
+            _current_state = PAGER_STATE_TONE_A;
+            _transmitting = true;
+            _next_event_time = time + PAGER_TONE_A_DURATION;
             break;
     }
 }
