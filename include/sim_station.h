@@ -4,10 +4,7 @@
 #include "async_morse.h"
 #include "sim_transmitter.h"
 
-#define MAX_AUDIBLE_FREQ 5000.0
-#define MIN_AUDIBLE_FREQ 150.0
 #define SPACE_FREQUENCY 0.1
-#define SILENT_FREQ 0.1
 
 class SimStation : public SimTransmitter
 {
