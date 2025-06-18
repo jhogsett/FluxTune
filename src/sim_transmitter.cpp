@@ -29,7 +29,7 @@ void SimTransmitter::common_frequency_update(Mode *mode)
 
 bool SimTransmitter::check_frequency_bounds()
 {
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
