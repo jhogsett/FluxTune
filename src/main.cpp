@@ -189,7 +189,7 @@ WaveOut waveout4(&realizer_pool);
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
-SimJammer simjammer4(&realizer_pool);
+// SimJammer simjammer4 already declared above
 
 Realization *realizations[4] = {&simstation1, &simstation2, &simpager3, &simjammer4}; 
 bool realization_stats[4] = {false, false, false, false};
