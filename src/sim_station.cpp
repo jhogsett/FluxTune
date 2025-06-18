@@ -7,7 +7,7 @@
 #define WAIT_SECONDS 4
 
 // mode is expected to be a derivative of VFO
-SimStation::SimStation(RealizerPool *realizer_pool) : Realization(realizer_pool)
+SimStation::SimStation(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
 {
     // _realizer_pool = realizer_pool;
     _active = false;

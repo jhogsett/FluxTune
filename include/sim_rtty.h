@@ -1,8 +1,7 @@
 #ifndef __SIM_RTTY_H__
 #define __SIM_RTTY_H__
 
-#include "realization.h"
-#include "realizer_pool.h"
+#include "sim_transmitter.h"
 #include "async_rtty.h"
 
 #define MAX_AUDIBLE_FREQ 5000.0
@@ -11,7 +10,7 @@
 #define MARK_FREQ_SHIFT 170.0
 #define SILENT_FREQ 0.1
 
-class SimRTTY : public Realization
+class SimRTTY : public SimTransmitter
 {
 public:
     SimRTTY(RealizerPool *realizer_pool);
