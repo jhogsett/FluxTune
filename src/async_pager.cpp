@@ -66,21 +66,13 @@ int AsyncPager::step_pager(unsigned long time)
 
 void AsyncPager::start_next_phase(unsigned long time)
 {
-    switch (_current_state) {
-        case PAGER_STATE_TONE_A:
-            // Tone A finished, start brief gap (transmitter off)
-            _current_state = PAGER_STATE_GAP;
-            _transmitting = false;
-            _next_event_time = time + PAGER_INTER_TONE_GAP;
-            break;
-            
-        case PAGER_STATE_GAP:
-            // Gap finished, start Tone B (transmitter back on)
+    switch (_current_state) {        case PAGER_STATE_TONE_A:
+            // Tone A finished, start Tone B immediately (no gap)
             _current_state = PAGER_STATE_TONE_B;
             _transmitting = true;
             _next_event_time = time + PAGER_TONE_B_DURATION;
-            break;
-              case PAGER_STATE_TONE_B:
+            break;            
+        case PAGER_STATE_TONE_B:
             // Tone B finished, start silence period
             _current_state = PAGER_STATE_SILENCE;
             _transmitting = false;

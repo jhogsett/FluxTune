@@ -54,15 +54,13 @@ void SimPager::realize()
                 wavegen->set_frequency(_frequency + _current_tone_b_offset, true);
                 wavegen->set_frequency(_frequency + _current_tone_b_offset, false);
                 break;
-                
-            default:
-                // Silent state (GAP or SILENCE) - should not reach here when _active is true
+                  default:
+                // Silent state (SILENCE) - should not reach here when _active is true
                 wavegen->set_frequency(SILENT_FREQ, true);
                 wavegen->set_frequency(SILENT_FREQ, false);
                 break;
-        }
-    } else {
-        // Explicitly set silent frequencies when inactive (during GAP or SILENCE)
+        }    } else {
+        // Explicitly set silent frequencies when inactive (during SILENCE)
         wavegen->set_frequency(SILENT_FREQ, true);
         wavegen->set_frequency(SILENT_FREQ, false);
     }

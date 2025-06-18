@@ -4,10 +4,10 @@
 #include "async_pager.h"
 #include "sim_transmitter.h"
 
-// Pager tone frequency range (Hz offset from VFO) - similar to DTMF range
-#define PAGER_TONE_MIN_OFFSET 650.0    // Minimum tone frequency offset
-#define PAGER_TONE_MAX_OFFSET 1650.0   // Maximum tone frequency offset  
-#define PAGER_TONE_MIN_SEPARATION 200.0 // Minimum separation between tones
+// Pager tone frequency range (Hz offset from VFO) - authentic industry standard
+#define PAGER_TONE_MIN_OFFSET 300.0    // Minimum tone frequency offset (industry standard)
+#define PAGER_TONE_MAX_OFFSET 3000.0   // Maximum tone frequency offset (industry standard)
+#define PAGER_TONE_MIN_SEPARATION 50.0  // Minimum separation between tones (reduced for 300-3000 Hz range)
 
 class SimPager : public SimTransmitter
 {
