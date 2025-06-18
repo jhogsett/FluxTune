@@ -18,6 +18,7 @@ SimStation::SimStation(RealizerPool *realizer_pool) : SimTransmitter(realizer_po
     _transmission_complete = false;
     _last_cycle_time = 0;    // Initialize simple cycle diagnostics
     _cycle_diagnostics = false;
+    _diagnostic_cycles = 0;
 }
 
 bool SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm)
@@ -80,9 +81,9 @@ bool SimStation::step(unsigned long time)
     }
     
     WaveGen *wavegen = get_wavegen();
-    
-    int morse_result = _morse.step_morse(time);
-      switch (morse_result) {
+      int morse_result = _morse.step_morse(time);
+      // Handle CW key states
+    switch (morse_result) {
         case STEP_MORSE_TURN_ON:
         case STEP_MORSE_LEAVE_ON:
             wavegen->set_active_frequency(true);  // Use tone frequency
@@ -126,12 +127,20 @@ bool SimStation::try_restart(unsigned long time)
         // Reset diagnostic parameters to original values on restart
         if (_cycle_diagnostics) {
             _wpm = _init_wpm;
-            _fixed_freq = _init_fixed_freq;
-        }
+            _fixed_freq = _init_fixed_freq;        }
         
-        // Add slight frequency variation on restart to make it audible
-        float freq_variation = (random(200) - 100); // ±100 Hz variation
-        float restart_freq = _init_fixed_freq + freq_variation;
+        // Debug: Make restart attempts more audible with larger frequency shifts
+        static int restart_attempt_count = 0;
+        restart_attempt_count++;
+        
+        // Use a much more noticeable frequency shift for debugging
+        float restart_freq = _init_fixed_freq + (restart_attempt_count * 500); // 500 Hz steps per restart
+        
+        // Cap the frequency shift to avoid going too far
+        if (restart_attempt_count > 10) {
+            restart_attempt_count = 1; // Reset counter
+            restart_freq = _init_fixed_freq + 500;
+        }
         
         // Debug output disabled to prevent Arduino instability
         // #ifdef NATIVE_BUILD
@@ -149,27 +158,29 @@ bool SimStation::try_restart(unsigned long time)
 
 // Track transmission cycles - improved per-instance tracking
 void SimStation::check_transmission_cycle()
-{
+{    // Real transmission cycle detection (for lifecycle management)
+    // This is now handled in step() method using morse_result
+    
     // Track based on time intervals for each station instance
     unsigned long current_time = millis();
       // Estimate cycle time: message + pauses should be roughly 30-60 seconds
     if (_last_cycle_time == 0) {
         _last_cycle_time = current_time; // Initialize on first call
-    }
-    
-    if (current_time - _last_cycle_time > 15000) { // 15 second intervals for easier observation
-        _current_runs++;
-        _last_cycle_time = current_time;        // Simple cycle diagnostics: increment WPM and frequency
+    }    if (current_time - _last_cycle_time > 15000) { // 15 second intervals for easier observation
+        _diagnostic_cycles++;  // Diagnostic-specific counter only
+        _last_cycle_time = current_time;
+        
+        // Simple cycle diagnostics: increment WPM and frequency
         if (_cycle_diagnostics) {
-            // Reset to original values after 4 cycles to test restart behavior
-            if (_current_runs >= 4) {
-                _current_runs = 0;  // Reset cycle counter
+            // Reset to original values after 4 diagnostic cycles
+            if (_diagnostic_cycles >= 4) {
+                _diagnostic_cycles = 0;  // Reset diagnostic cycle counter
                 _wpm = _init_wpm;   // Reset to original WPM
                 _fixed_freq = _init_fixed_freq;  // Reset to original frequency
             } else {
                 _wpm += 3;  // Increase by 3 WPM each cycle  
                 _fixed_freq += 100.0;  // Back to 100 Hz steps since 200 didn't help
-            }            // Force immediate frequency update by adjusting the current audible frequency
+            }// Force immediate frequency update by adjusting the current audible frequency
             if (_enabled) {
                 WaveGen *wavegen = get_wavegen();
                 if (wavegen) {
@@ -185,8 +196,7 @@ void SimStation::check_transmission_cycle()
             // Restart transmission with new WPM
             _morse.start_morse(_message, _wpm, true, WAIT_SECONDS);
         }
-        
-        // Debug output disabled to prevent Arduino instability
+          // Debug output disabled to prevent Arduino instability
         // #ifdef NATIVE_BUILD
         //     printf("SimStation cycle completed, run count: %d/%d\n", _current_runs, _max_runs);
         // #else
@@ -195,6 +205,15 @@ void SimStation::check_transmission_cycle()
         //     Serial.print("/");
         //     Serial.println(_max_runs);
         // #endif
+    }
+    
+    // Real transmission cycle detection (for lifecycle management)
+    // This runs separately from diagnostic cycles
+    static unsigned long last_activity_check = 0;
+    if (current_time - last_activity_check > 30000) { // Check every 30 seconds for completed transmissions
+        _current_runs++;  // Increment real transmission cycle counter for lifecycle
+        last_activity_check = current_time;
+        _transmission_complete = true;
     }
 }
 

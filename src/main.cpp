@@ -379,15 +379,13 @@ void loop()
     unsigned long time = millis();    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);	// Start stations WITHOUT automatic lifecycle management for now
 	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
 	simstation1.enable_cycle_diagnostics(true);  // Enable WPM/freq cycle tracking
-	// simstation1.set_run_limit(3); // DISABLED for debugging
-	
-	simstation2.begin(time + random(1000), 7002500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
-	// simstation2.set_run_limit(5); // DISABLED for debugging
+	// simstation1.set_run_limit(3); // DISABLED for debugging	simstation2.begin(time + random(1000), 7002200.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
+	// simstation2.set_run_limit(2); // TEMPORARILY DISABLED for debugging restart issue
 	
 	simstation3.begin(time + random(1000), 7003000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
 	// simstation3.set_run_limit(4); // DISABLED for debugging
 
-	simstation4.begin(time + random(1000), 7003500.0);
+	simstation4.begin(time + random(1000), 7010000.0);
 	// simstation4.set_run_limit(6); // DISABLED for debugging
 	// simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
@@ -435,9 +433,7 @@ void loop()
 		// 		break;
 		// }
 
-        panel_leds.step(time);
-
-		realization_pool.step(time);
+        panel_leds.step(time);		realization_pool.step(time);
 
 		// simstation1.step(time);
 		// simstation2.step(time);

@@ -38,6 +38,7 @@ private:
     bool _transmission_complete;
     unsigned long _last_cycle_time;  // Per-instance tracking    // Simple cycle diagnostics (RAM-efficient)
     bool _cycle_diagnostics;
+    int _diagnostic_cycles;  // Separate counter for diagnostic cycles
     
     void check_transmission_cycle();
     // Diagnostic methods removed due to RAM constraints

@@ -138,9 +138,7 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
 
     async_phase = PHASE_CHAR;
     async_position = 0;
-    async_morse = 0;
-
-    async_element = 0;
+    async_morse = 0;    async_element = 0;
     async_active = false;
     async_next_event = 0L;
     async_space = false;
@@ -301,7 +299,7 @@ int AsyncMorse::step_morse(unsigned long time){
         case PHASE_WAIT:
             step_wait(time);
             break;
-    }    // Generate output signal based on current active state
+    }// Generate output signal based on current active state
     if(async_active != async_switched_on) {
         async_switched_on = async_active;
         return async_active ? STEP_MORSE_TURN_ON : STEP_MORSE_TURN_OFF;

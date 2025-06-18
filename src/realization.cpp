@@ -11,7 +11,7 @@ Realization::Realization(RealizerPool *realizer_pool){
     _current_runs = 0;
     _auto_lifecycle = false; // Disabled by default for backward compatibility
     _needs_restart = false;
-    _restart_delay_ms = 5000; // 5 second delay between restart attempts
+    _restart_delay_ms = 10000; // 10 second delay for obvious restart detection
     _last_restart_attempt = 0;
 }
 
@@ -38,9 +38,10 @@ bool Realization::step(unsigned long time){
             _last_restart_attempt = time;
             if (try_restart(time)) {
                 _needs_restart = false;
-            }
-        }
-    }      // Check for automatic stopping
+            }        }
+    }
+    
+    // Check for automatic stopping
     if (_auto_lifecycle && is_active() && should_auto_stop()) {
         // Debug output disabled to prevent Arduino instability
         // #ifdef NATIVE_BUILD

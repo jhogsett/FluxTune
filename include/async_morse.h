@@ -22,9 +22,7 @@
 class AsyncMorse
 {
 public:
-    AsyncMorse();
-
-    void start_morse(const char *s, int wpm, bool repeat, int wait_seconds);
+    AsyncMorse();    void start_morse(const char *s, int wpm, bool repeat, int wait_seconds);
     int step_morse(unsigned long time);
     
 private:
@@ -60,9 +58,7 @@ private:
     char async_char;                       // Morse table index for current character
     byte async_morse;                      // Bit pattern for current character
     byte async_element;                    // Current element within character (0-6)
-    bool async_element_done;               // True when current element is finished
-    
-    // Timing and output state
+    bool async_element_done;               // True when current element is finished    // Timing and output state
     bool async_active;                     // True when transmitter should be ON
     unsigned long async_next_event;        // Time when next state change occurs
     bool async_space;                      // True when in gap between elements
