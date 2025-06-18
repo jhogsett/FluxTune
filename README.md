@@ -1,6 +1,12 @@
 # FluxTune
 Arduino Based Artificial Radio
 
+## Development Environment
+
+This project is developed on Windows using PowerShell. When running terminal commands:
+- Use `;` instead of `&&` for command chaining (PowerShell syntax)
+- Example: `cd ..; git status` instead of `cd .. && git status`
+
 ## Testing
 
 This project includes comprehensive test suites for core components:

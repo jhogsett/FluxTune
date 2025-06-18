@@ -9,9 +9,7 @@
 // mode is expected to be a derivative of VFO
 SimStation::SimStation(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
 {
-    // _realizer_pool = realizer_pool;
-    _active = false;
-    _enabled = false;
+    // Base class now initializes _active, _enabled, _fixed_freq, _frequency
 }
 
 bool SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm){

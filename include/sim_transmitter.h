@@ -10,7 +10,11 @@ public:
     SimTransmitter(RealizerPool *realizer_pool);
 
 protected:
-    // Empty base class for now
+    // Common member variables shared by SimStation and SimRTTY
+    float _fixed_freq;
+    bool _enabled;
+    float _frequency;
+    bool _active;
 };
 
 #endif

@@ -19,15 +19,9 @@ public:
 
     virtual bool step(unsigned long time);
 
-    void realize();
+    void realize();    virtual void end();
 
-    virtual void end();
-
-    float _fixed_freq;
-    bool _enabled;
-    float _frequency;
     AsyncMorse _morse;
-    bool _active;
     bool _changed;
 };
 
