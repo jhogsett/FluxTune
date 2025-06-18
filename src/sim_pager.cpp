@@ -3,9 +3,17 @@
 #include "realizer_pool.h"
 #include "sim_pager.h"
 
+#ifdef PLATFORM_NATIVE
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#endif
+
 SimPager::SimPager(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
 {
     // Base class initializes all common variables
+    // Generate initial tone pair
+    generate_new_tone_pair();
     // Pager transmission will be started in begin() method
 }
 
@@ -32,19 +40,18 @@ void SimPager::realize()
     
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     
-    if(_active) {
-        // Set frequencies based on current pager state
+    if(_active) {        // Set frequencies based on current pager state
         switch(_pager.get_current_state()) {
             case PAGER_STATE_TONE_A:
                 // Transmit Tone A on both channels (or just one)
-                wavegen->set_frequency(_frequency + PAGER_TONE_A_OFFSET, true);
-                wavegen->set_frequency(_frequency + PAGER_TONE_A_OFFSET, false);
+                wavegen->set_frequency(_frequency + _current_tone_a_offset, true);
+                wavegen->set_frequency(_frequency + _current_tone_a_offset, false);
                 break;
                 
             case PAGER_STATE_TONE_B:
                 // Transmit Tone B on both channels (or just one) 
-                wavegen->set_frequency(_frequency + PAGER_TONE_B_OFFSET, true);
-                wavegen->set_frequency(_frequency + PAGER_TONE_B_OFFSET, false);
+                wavegen->set_frequency(_frequency + _current_tone_b_offset, true);
+                wavegen->set_frequency(_frequency + _current_tone_b_offset, false);
                 break;
                 
             default:
@@ -77,8 +84,11 @@ bool SimPager::update(Mode *mode)
 
 bool SimPager::step(unsigned long time)
 {
-    switch(_pager.step_pager(time)) {
-        case STEP_PAGER_TURN_ON:
+    switch(_pager.step_pager(time)) {        case STEP_PAGER_TURN_ON:
+            // Check if this is the start of a new page cycle (silence → tone A)
+            if (_pager.get_current_state() == PAGER_STATE_TONE_A) {
+                generate_new_tone_pair();
+            }
             _active = true;
             realize();
             break;
@@ -97,4 +107,65 @@ bool SimPager::step(unsigned long time)
     }
 
     return true;
+}
+
+void SimPager::generate_new_tone_pair()
+{
+    // Generate random tone pair similar to DTMF frequencies
+    // Range: 650-1650 Hz offset, minimum 200 Hz separation
+    
+    float frequency_range = PAGER_TONE_MAX_OFFSET - PAGER_TONE_MIN_OFFSET;
+    
+#ifdef PLATFORM_NATIVE
+    // Simple pseudo-random for native testing
+    static unsigned long tone_seed = 54321;
+    tone_seed = (tone_seed * 1103515245 + 12345) & 0x7FFFFFFF;
+    
+    _current_tone_a_offset = PAGER_TONE_MIN_OFFSET + 
+        (tone_seed % (unsigned long)(frequency_range - PAGER_TONE_MIN_SEPARATION));
+    
+    // Generate second tone with minimum separation
+    tone_seed = (tone_seed * 1103515245 + 12345) & 0x7FFFFFFF;
+    float remaining_range = frequency_range - PAGER_TONE_MIN_SEPARATION;
+    float tone_b_base = tone_seed % (unsigned long)remaining_range;
+    
+    // Ensure minimum separation by placing tone B either below or above tone A
+    if (tone_b_base < _current_tone_a_offset - PAGER_TONE_MIN_OFFSET) {
+        _current_tone_b_offset = PAGER_TONE_MIN_OFFSET + tone_b_base;
+    } else {
+        _current_tone_b_offset = _current_tone_a_offset + PAGER_TONE_MIN_SEPARATION + 
+            (tone_b_base - (_current_tone_a_offset - PAGER_TONE_MIN_OFFSET));
+    }
+#else
+    // Arduino random() function
+    _current_tone_a_offset = PAGER_TONE_MIN_OFFSET + 
+        random((long)(frequency_range - PAGER_TONE_MIN_SEPARATION));
+    
+    // Generate second tone with minimum separation
+    float remaining_range = frequency_range - PAGER_TONE_MIN_SEPARATION;
+    float tone_b_base = random((long)remaining_range);
+    
+    // Ensure minimum separation
+    if (tone_b_base < _current_tone_a_offset - PAGER_TONE_MIN_OFFSET) {
+        _current_tone_b_offset = PAGER_TONE_MIN_OFFSET + tone_b_base;
+    } else {
+        _current_tone_b_offset = _current_tone_a_offset + PAGER_TONE_MIN_SEPARATION + 
+            (tone_b_base - (_current_tone_a_offset - PAGER_TONE_MIN_OFFSET));
+    }
+#endif
+
+    // Ensure tone B doesn't exceed maximum
+    if (_current_tone_b_offset > PAGER_TONE_MAX_OFFSET) {
+        _current_tone_b_offset = PAGER_TONE_MAX_OFFSET;
+    }
+}
+
+void SimPager::debug_print_tone_pair() const
+{
+#ifdef PLATFORM_NATIVE
+    std::cout << "Tone A: " << std::fixed << std::setprecision(1) << _current_tone_a_offset 
+              << " Hz, Tone B: " << _current_tone_b_offset << " Hz, "
+              << "Separation: " << std::abs(_current_tone_b_offset - _current_tone_a_offset) 
+              << " Hz" << std::endl;
+#endif
 }
