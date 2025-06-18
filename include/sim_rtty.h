@@ -5,31 +5,25 @@
 #include "realizer_pool.h"
 #include "async_rtty.h"
 
-#define MAX_AUDIBLE_FREQ 5000.0
-#define MIN_AUDIBLE_FREQ 150.0
-
 #define MARK_FREQ_SHIFT 170.0
-#define SILENT_FREQ 0.1
 
 class SimRTTY : public Realization
 {
 public:
     SimRTTY(RealizerPool *realizer_pool);
     
-    virtual bool begin(unsigned long time, float fixed_freq);
-    
-    virtual bool update(Mode *mode);
-
+    bool begin(unsigned long time, float fixed_freq);
+    virtual bool update(class Mode *mode);
     virtual bool step(unsigned long time);
+    virtual void end();
+    void set_message(const char *message);
 
-    void realize();
-
+private:
     float _fixed_freq;
-    bool _enabled;
     float _frequency;
+    bool _enabled;
     AsyncRTTY _rtty;
-    bool _active;
-
+    const char *_message;
     int _phase;
 };
 

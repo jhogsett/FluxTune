@@ -377,12 +377,11 @@ void loop()
 {
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
     unsigned long time = millis();
-    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
-	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
 	simstation2.begin(time + random(1000), 7002500.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
 	simstation3.begin(time + random(1000), 7003000.0, "CQ CQ DE N6CCM N6CCM K    ", 20);
 
-	simstation4.begin(time + random(1000), 7010000.0);
+	simstation4.begin(time + random(1000), 7003500.0);
 	// simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
 
 	set_application(APP_SIMRADIO, &display);
