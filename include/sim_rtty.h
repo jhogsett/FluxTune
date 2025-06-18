@@ -15,7 +15,10 @@ public:
     
     virtual bool update(Mode *mode);
 
-    virtual bool step(unsigned long time);    void realize();
+    virtual bool step(unsigned long time);
+    
+    void realize();
+    virtual void end();
 
     AsyncRTTY _rtty;
     int _phase;

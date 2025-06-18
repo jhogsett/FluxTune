@@ -17,6 +17,7 @@ class SimTransmitter : public Realization
 {
 public:
     SimTransmitter(RealizerPool *realizer_pool);
+    virtual void end();  // Common cleanup logic
 
 protected:
     // Common utility methods

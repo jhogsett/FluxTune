@@ -42,6 +42,11 @@ bool SimTransmitter::check_frequency_bounds()
     if(!_enabled){
         _enabled = true;
     }
-    
-    return true;  // In bounds
+      return true;  // In bounds
+}
+
+void SimTransmitter::end()
+{
+    if(_realizer != -1)
+        _realizer_pool->free_realizer(_realizer);
 }

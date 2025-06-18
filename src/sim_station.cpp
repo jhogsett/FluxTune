@@ -60,12 +60,7 @@ bool SimStation::step(unsigned long time){
             _active = false;
             realize();
     		break;
-    }
-
-    return true;
+    }    return true;
 }
 
-void SimStation::end(){
-    if(_realizer != -1)
-        _realizer_pool->free_realizer(_realizer);
-}
+// Use base class end() method for cleanup
