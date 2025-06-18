@@ -13,12 +13,9 @@ public:
     
     virtual bool begin(unsigned long time, float fixed_freq);
     
-    virtual bool update(Mode *mode);
-
-    virtual bool step(unsigned long time);
+    virtual bool update(Mode *mode);    virtual bool step(unsigned long time);
     
     void realize();
-    virtual void end();
 
     AsyncRTTY _rtty;
     int _phase;
