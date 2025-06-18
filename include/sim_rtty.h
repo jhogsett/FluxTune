@@ -10,10 +10,10 @@ class SimRTTY : public SimTransmitter
 {
 public:
     SimRTTY(RealizerPool *realizer_pool);
+      virtual bool begin(unsigned long time, float fixed_freq);
     
-    virtual bool begin(unsigned long time, float fixed_freq);
-    
-    virtual bool update(Mode *mode);    virtual bool step(unsigned long time);
+    virtual bool update(Mode *mode);
+    virtual bool step(unsigned long time);
     
     void realize();
 
