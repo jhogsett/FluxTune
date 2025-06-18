@@ -20,9 +20,9 @@ public:
 
 protected:
     // Completely empty base class - derived classes handle everything
-    
-    // Common member variables
+      // Common member variables
     float _fixed_freq;  // Target frequency for this station
+    bool _enabled;      // True when frequency is in audible range
 };
 
 #endif

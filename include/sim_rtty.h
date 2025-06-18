@@ -17,7 +17,6 @@ public:
 
     virtual bool step(unsigned long time);    void realize();
 
-    bool _enabled;
     float _frequency;
     AsyncRTTY _rtty;
     bool _active;
