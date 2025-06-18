@@ -1,5 +1,6 @@
 #include "sim_transmitter.h"
 #include "wavegen.h"
+#include "vfo.h"
 
 SimTransmitter::SimTransmitter(RealizerPool *realizer_pool) : Realization(realizer_pool)
 {
@@ -8,6 +9,21 @@ SimTransmitter::SimTransmitter(RealizerPool *realizer_pool) : Realization(realiz
     _enabled = false;
     _frequency = 0.0;
     _active = false;
+}
+
+bool SimTransmitter::common_begin(unsigned long time, float fixed_freq)
+{
+    _fixed_freq = fixed_freq;
+    _frequency = 0.0;
+    
+    return Realization::begin(time);
+}
+
+void SimTransmitter::common_frequency_update(Mode *mode)
+{
+    VFO *vfo = (VFO*)mode;
+    _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
+    _frequency = _frequency - _fixed_freq;
 }
 
 bool SimTransmitter::check_frequency_bounds()

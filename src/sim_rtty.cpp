@@ -11,14 +11,7 @@ SimRTTY::SimRTTY(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool){
 }
 
 bool SimRTTY::begin(unsigned long time, float fixed_freq){
-    _fixed_freq = fixed_freq;
-    _frequency = 0.0;
-
-    // attempt to acquire a realizer
-    // _realizer = _realizer_pool->get_realizer();
-    // if(_realizer == -1)
-    //     return false;
-    if(!Realization::begin(time))
+    if(!common_begin(time, fixed_freq))
         return false;
 
     WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
@@ -44,15 +37,9 @@ void SimRTTY::realize(){
 
 // returns true on successful update
 bool SimRTTY::update(Mode *mode){
-    VFO *vfo = (VFO*)mode;
-    _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
-
-    // _frequency = abs(_frequency - _fixed_freq);
-    _frequency = _frequency - _fixed_freq;
-
+    common_frequency_update(mode);
 
     if(_enabled){
-        // WaveGen  *wavegen = (WaveGen*)_realizer;
         WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency, true);
         wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
