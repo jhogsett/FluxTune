@@ -9,7 +9,8 @@
 class SimStation : public SimTransmitter
 {
 public:
-    SimStation(RealizerPool *realizer_pool);    virtual bool begin(unsigned long time, float fixed_freq, const char *message, int wpm);
+    SimStation(RealizerPool *realizer_pool);
+    virtual bool begin(unsigned long time, float fixed_freq, const char *message, int wpm);
     
     virtual bool update(Mode *mode);
     virtual bool step(unsigned long time);
