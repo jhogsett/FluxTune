@@ -37,7 +37,7 @@
 #include "sim_station.h"
 #include "sim_rtty.h"
 #include "sim_pager.h"
-#include "sim_jammer.h"
+// #include "sim_jammer.h"  // Available for future use
 
 #include "async_morse.h"
 
@@ -173,7 +173,7 @@ RealizerPool realizer_pool(realizers, realizer_stats, 4);
 SimStation simstation1(&realizer_pool);
 SimStation simstation2(&realizer_pool);
 SimPager simpager3(&realizer_pool);
-SimJammer simjammer4(&realizer_pool);
+SimRTTY simstation4(&realizer_pool);
 
 WaveOut waveout1(&realizer_pool);
 WaveOut waveout2(&realizer_pool);
@@ -191,7 +191,7 @@ WaveOut waveout4(&realizer_pool);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
 // SimJammer simjammer4 already declared above
 
-Realization *realizations[4] = {&simstation1, &simstation2, &simpager3, &simjammer4}; 
+Realization *realizations[4] = {&simstation1, &simstation2, &simpager3, &simstation4}; 
 bool realization_stats[4] = {false, false, false, false};
 RealizationPool realization_pool(realizations, realization_stats, 4);
 
@@ -383,8 +383,8 @@ void loop()
 	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
 	simstation2.begin(time + random(1000), 7002700.0, "CQ CQ DE N6CCM N6CCM K    ", 13);	simpager3.begin(time + random(1000), 7006000.0);
 
-	simjammer4.begin(time + random(1000), 7004100.0);
-	// Original RTTY station was here: simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+	simstation4.begin(time + random(1000), 7004100.0);
+	// Jammer station temporarily replaced with RTTY for stable testing
 
 	set_application(APP_SIMRADIO, &display);
 
