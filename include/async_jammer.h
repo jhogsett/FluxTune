@@ -29,12 +29,10 @@
 class AsyncJammer
 {
 public:
-    AsyncJammer();
-
-    void start_jammer_transmission(bool repeat);
+    AsyncJammer();    void start_jammer_transmission(bool repeat);
     int step_jammer(unsigned long time);
-    int get_current_state() { return _current_state; }
-    float get_frequency_offset() { return _current_frequency_offset; }
+    int get_current_state() const { return _current_state; }
+    float get_frequency_offset() const { return _current_frequency_offset; }
     
 private:
     void update_frequency_drift();
