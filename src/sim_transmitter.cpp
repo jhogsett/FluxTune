@@ -47,6 +47,8 @@ bool SimTransmitter::check_frequency_bounds()
 
 void SimTransmitter::end()
 {
-    if(_realizer != -1)
+    if(_realizer != -1) {
         _realizer_pool->free_realizer(_realizer);
+        _realizer = -1;  // Reset to avoid double-free or invalid access
+    }
 }
