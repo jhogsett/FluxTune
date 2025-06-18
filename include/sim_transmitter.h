@@ -17,6 +17,7 @@ class SimTransmitter : public Realization
 {
 public:
     SimTransmitter(RealizerPool *realizer_pool);
+    virtual bool step(unsigned long time) = 0;  // Pure virtual - must be implemented by derived classes
     virtual void end();  // Common cleanup logic
 
 protected:
