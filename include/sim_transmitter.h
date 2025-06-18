@@ -20,11 +20,10 @@ public:
     virtual bool step(unsigned long time) = 0;  // Pure virtual - must be implemented by derived classes
     virtual void end();  // Common cleanup logic
 
-protected:
-    // Common utility methods
+protected:    // Common utility methods
     bool check_frequency_bounds();  // Returns true if frequency is in audible range
     bool common_begin(unsigned long time, float fixed_freq);  // Common initialization logic
-    void common_frequency_update(Mode *mode);  // Common frequency calculation
+    void common_frequency_update(Mode *mode);  // Common frequency calculation (mode must be VFO)
     
     // Common member variables
     float _fixed_freq;  // Target frequency for this station
