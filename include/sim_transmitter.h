@@ -10,8 +10,8 @@
 #define SILENT_FREQ 0.1
 
 /**
- * Empty base class for simulated transmitters.
- * This is the most minimal starting point for refactoring.
+ * Base class for simulated transmitters (CW/RTTY).
+ * Provides common functionality and interface for station simulation.
  */
 class SimTransmitter : public Realization
 {
