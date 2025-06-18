@@ -2,5 +2,6 @@
 
 SimTransmitter::SimTransmitter(RealizerPool *realizer_pool) : Realization(realizer_pool)
 {
-    // Completely empty constructor - derived classes do all initialization
+    // Initialize common member variables
+    _fixed_freq = 0.0;
 }

@@ -20,6 +20,9 @@ public:
 
 protected:
     // Completely empty base class - derived classes handle everything
+    
+    // Common member variables
+    float _fixed_freq;  // Target frequency for this station
 };
 
 #endif

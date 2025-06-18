@@ -15,11 +15,8 @@ public:
     
     virtual bool update(Mode *mode);
 
-    virtual bool step(unsigned long time);
+    virtual bool step(unsigned long time);    void realize();
 
-    void realize();
-
-    float _fixed_freq;
     bool _enabled;
     float _frequency;
     AsyncRTTY _rtty;
