@@ -12,7 +12,7 @@ SimRTTY::SimRTTY(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool){
 
 bool SimRTTY::begin(unsigned long time, float fixed_freq){
     _fixed_freq = fixed_freq;
-    _frequency = 0.0;
+    _audible_frequency = 0.0;
 
     // attempt to acquire a realizer
     // _realizer = _realizer_pool->get_realizer();
@@ -37,7 +37,7 @@ void SimRTTY::realize(){
     // WaveGen  *wavegen = (WaveGen*)_realizer;
     WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
 
-    if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
+    if(_audible_frequency > MAX_AUDIBLE_FREQ || _audible_frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
             _enabled = false;
             wavegen->set_frequency(SILENT_FREQ, true);
@@ -59,17 +59,15 @@ void SimRTTY::realize(){
 // returns true on successful update
 bool SimRTTY::update(Mode *mode){
     VFO *vfo = (VFO*)mode;
-    _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
+    _audible_frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
 
-    // _frequency = abs(_frequency - _fixed_freq);
-    _frequency = _frequency - _fixed_freq;
-
-
+    // _audible_frequency = abs(_audible_frequency - _fixed_freq);
+    _audible_frequency = _audible_frequency - _fixed_freq;
     if(_enabled){
         // WaveGen  *wavegen = (WaveGen*)_realizer;
         WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
-        wavegen->set_frequency(_frequency, true);
-        wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
+        wavegen->set_frequency(_audible_frequency, true);
+        wavegen->set_frequency(_audible_frequency + MARK_FREQ_SHIFT, false);
     }
 
     realize();
