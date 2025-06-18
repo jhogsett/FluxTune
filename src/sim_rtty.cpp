@@ -34,25 +34,11 @@ bool SimRTTY::begin(unsigned long time, float fixed_freq){
 #define MAX_PHASE 36
 
 void SimRTTY::realize(){
-    // WaveGen  *wavegen = (WaveGen*)_realizer;
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
-
-    if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
-        if(_enabled){
-            _enabled = false;
-            wavegen->set_frequency(SILENT_FREQ, true);
-            wavegen->set_frequency(SILENT_FREQ, false);
-        }
-        return;
-    } 
-        
-    if(!_enabled){
-        _enabled = true;
+    if(!check_frequency_bounds()) {
+        return;  // Out of audible range
     }
-
-    // wavegen->set_frequency(_frequency, true);
-    // wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
-
+    
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
 

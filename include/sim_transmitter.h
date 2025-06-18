@@ -19,7 +19,10 @@ public:
     SimTransmitter(RealizerPool *realizer_pool);
 
 protected:
-    // Completely empty base class - derived classes handle everything    // Common member variables
+    // Common utility methods
+    bool check_frequency_bounds();  // Returns true if frequency is in audible range
+    
+    // Common member variables
     float _fixed_freq;  // Target frequency for this station
     bool _enabled;      // True when frequency is in audible range
     float _frequency;   // Current frequency difference from VFO

@@ -32,36 +32,12 @@ bool SimStation::begin(unsigned long time, float fixed_freq, const char *message
 }
 
 void SimStation::realize(){
-    // WaveGen  *wavegen = (WaveGen*)_realizer;
-    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
-
-    if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
-        if(_enabled){
-            _enabled = false;
-            wavegen->set_frequency(SILENT_FREQ, true);
-            wavegen->set_frequency(SILENT_FREQ, false);
-        }
-        return;
-    } 
-        
-    if(!_enabled){
-        _enabled = true;
+    if(!check_frequency_bounds()) {
+        return;  // Out of audible range
     }
-
-    // if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
-    //     wavegen->set_active_frequency(false);
-    //     return;
-    // }
-
+    
+    WaveGen *wavegen = (WaveGen*)_realizer_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
-
-    // if(_active && (_frequency <= MAX_AUDIBLE_FREQ)){
-    // 	// wavegen->set_frequency(_frequency);
-
-    // } else {
-    //     wavegen->set_active_frequency(false);
-    // 	// wavegen->set_frequency(SPACE_FREQUENCY);
-    // }
 }
 
 // returns true on successful update
