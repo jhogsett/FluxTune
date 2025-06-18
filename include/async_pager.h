@@ -9,8 +9,8 @@
 
 // Pager timing constants (in milliseconds)
 #define PAGER_TONE_DURATION 1000      // 1 second per tone
-#define PAGER_SILENCE_MIN 15000       // Minimum 15 seconds silence
-#define PAGER_SILENCE_MAX 30000       // Maximum 30 seconds silence
+#define PAGER_SILENCE_MIN 3000        // Minimum 3 seconds silence (shortened for testing)
+#define PAGER_SILENCE_MAX 8000        // Maximum 8 seconds silence (shortened for testing)
 
 // Pager step return values
 #define STEP_PAGER_TURN_ON   1        // Start transmitting (tone A or B)
