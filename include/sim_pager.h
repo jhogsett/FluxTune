@@ -17,13 +17,13 @@ public:
     virtual bool begin(unsigned long time, float fixed_freq);
     virtual bool update(Mode *mode);    virtual bool step(unsigned long time);
       void realize();
-    
-    // Debug method to display current tone pair
+      // Debug method to display current tone pair
     void debug_print_tone_pair() const;
+    
+    // Method to generate new tone pairs for testing
+    void generate_new_tone_pair();
 
 private:
-    void generate_new_tone_pair();
-    
     AsyncPager _pager;
     float _current_tone_a_offset;
     float _current_tone_b_offset;
