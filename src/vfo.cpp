@@ -3,6 +3,7 @@
 #else
 #include <MD_AD9833.h>
 #endif
+#include <cmath>
 #include "wavegen.h"
 #include "vfo.h"
 #include "buffers.h"
@@ -84,12 +85,11 @@ void VFO::update_signal_meter(SignalMeter *signal_meter) {
     
     float vfo_freq = float(_frequency) + (_sub_frequency / 10.0);
     int max_strength = 0;
-    
-    // Find the strongest signal based on frequency proximity
+      // Find the strongest signal based on frequency proximity
     for (int i = 0; i < num_stations; i++) {
-        float freq_diff = abs(vfo_freq - station_frequencies[i]);
+        float freq_diff = std::abs(vfo_freq - station_frequencies[i]);
         
-        // Signal strength calculation: 
+        // Signal strength calculation:
         // - Maximum strength (255) when exactly tuned (freq_diff = 0)
         // - Strength decreases with distance
         // - Audible range is roughly ±2500 Hz for typical receivers
