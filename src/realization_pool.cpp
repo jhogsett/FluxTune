@@ -3,6 +3,7 @@
 #include "basic_types.h"
 #include "realization.h"
 #include "realization_pool.h"
+#include "sim_transmitter.h"  // For dynamic_cast to update wave generators
 
 // pass array of realizer addresses, array of free/in-use bools, count of realizers 
 RealizationPool::RealizationPool(Realization **realizations, bool *statuses,  int nrealizations){
@@ -66,5 +67,15 @@ void RealizationPool::end(){
 void RealizationPool::update(Mode *mode){
     for(byte i = 0; i < _nrealizations; i++){
         _realizations[i]->update(mode);
+    }
+    
+    // After updating frequency calculations, ensure wave generators are updated
+    // This is critical when returning to SimRadio from other applications
+    for(byte i = 0; i < _nrealizations; i++){
+        // Check if this is a SimTransmitter (SimStation, SimPager, SimRTTY)
+        SimTransmitter *sim_tx = dynamic_cast<SimTransmitter*>(_realizations[i]);
+        if(sim_tx != nullptr) {
+            sim_tx->realize();  // Update wave generators with new frequencies
+        }
     }
 }
