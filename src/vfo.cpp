@@ -72,7 +72,9 @@ void VFO::mark_hardware_dirty(){
 
 void VFO::update_signal_meter(SignalMeter *signal_meter) {
     // Calculate signal strength based on proximity to active stations
-    // For now, use a simple calculation based on station frequencies    // Known station frequencies (based on configuration)
+    // Send charge pulses instead of setting signal strength directly
+    
+    // Known station frequencies (based on configuration)
     const float station_frequencies[] = {
 #if defined(ENABLE_FOUR_CW_STATIONS)
         7002000.0,  // CW station 1
@@ -113,25 +115,26 @@ void VFO::update_signal_meter(SignalMeter *signal_meter) {
     const int num_stations = sizeof(station_frequencies) / sizeof(station_frequencies[0]);
     
     float vfo_freq = float(_frequency) + (_sub_frequency / 10.0);
-    int max_strength = 0;    // Find the strongest signal based on frequency proximity
+    
+    // Find the strongest signal based on frequency proximity and send charge pulses
     for (int i = 0; i < num_stations; i++) {
         float freq_diff = abs(vfo_freq - station_frequencies[i]);
         
         // Signal strength calculation:
-        // - Maximum strength (255) when exactly tuned (freq_diff = 0)
-        // - Strength decreases with distance
+        // - Send charge pulses when within station range
+        // - More pulses for closer proximity
         // - Audible range is roughly ±2500 Hz for typical receivers
         
-        int strength = 0;
-        if (freq_diff <= 2500.0) {
-            // Linear falloff within audible range
-            strength = (int)(255.0 * (1.0 - (freq_diff / 2500.0)));
-        }
-        
-        if (strength > max_strength) {
-            max_strength = strength;
+        if (freq_diff <= 2500.0) {            // Calculate proximity factor (0.0 to 1.0)
+            float proximity = 1.0 - (freq_diff / 2500.0);
+            
+            // Convert proximity to charge pulses
+            // Closer stations send more frequent charge pulses (reduced from 20.0 to 12.0)
+            int charge_strength = (int)(proximity * 12.0);  // 0-12 charge amount
+            
+            if (charge_strength > 0) {
+                signal_meter->add_charge(charge_strength);
+            }
         }
     }
-    
-    signal_meter->update_signal_strength(max_strength);
 }

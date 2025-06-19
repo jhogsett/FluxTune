@@ -576,8 +576,11 @@ void loop()
 
 	// bool active = false;
 	// bool freq = false;	// bool last_active = true;
-		while(true){
+	while(true){
 		unsigned long time = millis();
+		
+		// Update signal meter decay (capacitor-like discharge)
+		signal_meter.update(time);
 
 		// Remove old random signal meter - now using frequency-based signal meter
 
@@ -664,7 +667,8 @@ void loop()
 #ifndef DISABLE_DISPLAY_OPERATIONS
 			dispatcher->update_display(&display);
 #endif
-			dispatcher->update_signal_meter(&signal_meter);			dispatcher->update_realization();
+			dispatcher->update_signal_meter(&signal_meter);
+			dispatcher->update_realization();
 		}
 		
 		if(encoder_handlerB.changed()){

@@ -20,26 +20,71 @@ rgb_color SignalMeter::_led_colors[LED_COUNT] = {
 
 SignalMeter::SignalMeter()
 {
+    _accumulator = 0;
     _current_strength = 0;
+    _last_decay_time = 0;
 }
 
 void SignalMeter::init()
 {
     clear();
+#ifndef NATIVE_BUILD
+    _last_decay_time = millis();
+#endif
+}
+
+void SignalMeter::add_charge(int charge_amount)
+{
+    // Add charge pulse to accumulator (like electrical charge into capacitor)
+    _accumulator += charge_amount;
+    
+    // Clamp to maximum
+    if (_accumulator > MAX_ACCUMULATOR) {
+        _accumulator = MAX_ACCUMULATOR;
+    }
+    
+    // Update display strength based on accumulator
+    _current_strength = (_accumulator * 255) / MAX_ACCUMULATOR;
+    if (_current_strength > 255) _current_strength = 255;
+    
+    write_leds();
+}
+
+void SignalMeter::update(unsigned long current_time)
+{
+    // Apply time-based decay (like capacitor discharging)
+    if (current_time - _last_decay_time >= DECAY_INTERVAL) {
+        if (_accumulator > 0) {
+            _accumulator -= DECAY_RATE;
+            if (_accumulator < 0) _accumulator = 0;
+            
+            // Update display strength
+            _current_strength = (_accumulator * 255) / MAX_ACCUMULATOR;
+            if (_current_strength > 255) _current_strength = 255;
+            
+            write_leds();
+        }
+        _last_decay_time = current_time;
+    }
 }
 
 void SignalMeter::update_signal_strength(int strength)
 {
-    // Clamp to valid range
-    if (strength < 0) strength = 0;
-    if (strength > 255) strength = 255;
-    
-    _current_strength = strength;
-    write_leds();
+    // Legacy method - convert signal strength to charge pulses
+    // This maintains backward compatibility while using the new charge system
+    if (strength > 0) {
+        // Convert strength to appropriate charge amount (reduced for better balance)
+        // Higher signal strength = more charge pulses
+        int charge_pulses = (strength * 2) / 40;  // Convert 0-255 to 0-12 charge pulses (reduced from 25)
+        for (int i = 0; i < charge_pulses; i++) {
+            add_charge();  // Use default charge amount (now 6 instead of 10)
+        }
+    }
 }
 
 void SignalMeter::clear()
 {
+    _accumulator = 0;
     _current_strength = 0;
     write_leds();
 }
