@@ -7,6 +7,7 @@
 #include "vfo.h"
 #include "buffers.h"
 #include "signal_meter.h"
+#include "station_config.h"
 
 VFO::VFO(const char *title, float frequency, unsigned long step, RealizationPool *realization_pool) : Mode(title)
 {
@@ -72,15 +73,22 @@ void VFO::mark_hardware_dirty(){
 void VFO::update_signal_meter(SignalMeter *signal_meter) {
     // Calculate signal strength based on proximity to active stations
     // For now, use a simple calculation based on station frequencies
-    
-    // Known station frequencies (should eventually come from realization pool)
+      // Known station frequencies (should eventually come from realization pool)
     const float station_frequencies[] = {
+#ifdef ENABLE_MORSE_STATION
         7002000.0,  // CW station
+#endif
+#ifdef ENABLE_NUMBERS_STATION
         7002700.0,  // Numbers station  
+#endif
+#ifdef ENABLE_PAGER_STATION
         7006000.0,  // Pager station
+#endif
+#ifdef ENABLE_RTTY_STATION
         7004100.0   // RTTY station
+#endif
     };
-    const int num_stations = 4;
+    const int num_stations = sizeof(station_frequencies) / sizeof(station_frequencies[0]);
     
     float vfo_freq = float(_frequency) + (_sub_frequency / 10.0);
     int max_strength = 0;    // Find the strongest signal based on frequency proximity

@@ -16,6 +16,7 @@
 #include "seeding.h"
 #include "utils.h"
 #include "signal_meter.h"
+#include "station_config.h"
 
 // #define ENCODER_DO_NOT_USE_INTERRUPTS
 #ifndef PLATFORM_NATIVE
@@ -35,10 +36,23 @@
 #include "wavegen.h"
 #include "wave_out.h"
 
+#include "station_config.h"
+
+#ifdef ENABLE_MORSE_STATION
 #include "sim_station.h"
+#endif
+
+#ifdef ENABLE_NUMBERS_STATION
 #include "sim_numbers.h"
+#endif
+
+#ifdef ENABLE_RTTY_STATION
 #include "sim_rtty.h"
+#endif
+
+#ifdef ENABLE_PAGER_STATION
 #include "sim_pager.h"
+#endif
 
 #include "async_morse.h"
 
@@ -173,9 +187,18 @@ Realizer *realizers[4] = {&wavegen1, &wavegen2, &wavegen3, &wavegen4};
 bool realizer_stats[4] = {false, false, false, false};
 RealizerPool realizer_pool(realizers, realizer_stats, 4);
 
+#ifdef ENABLE_MORSE_STATION
 SimStation simstation1(&realizer_pool);
+#endif
+
+#ifdef ENABLE_NUMBERS_STATION
 SimNumbers simnumbers2(&realizer_pool);  // Numbers Station - spooky!
+#endif
+
+#ifdef ENABLE_PAGER_STATION
 SimPager simpager3(&realizer_pool);
+#endif
+
 // SimStation simstation4(&realizer_pool);
 
 WaveOut waveout1(&realizer_pool);
@@ -192,10 +215,66 @@ WaveOut waveout4(&realizer_pool);
 // SimRTTY simstation1(&wavegen1, 7005000.0);
 // SimRTTY simstation2(&wavegen2, 7006000.0);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
+#ifdef ENABLE_RTTY_STATION
 SimRTTY simstation4(&realizer_pool);
+#endif
 
-Realization *realizations[4] = {&simstation1, &simnumbers2, &simpager3, &simstation4}; 
+// Station arrays - using fixed size for simplicity
+// You can manually adjust the active stations as needed
+Realization *realizations[4] = {
+#ifdef ENABLE_MORSE_STATION
+    &simstation1,
+#else
+    nullptr,
+#endif
+#ifdef ENABLE_NUMBERS_STATION
+    &simnumbers2,
+#else
+    nullptr,
+#endif
+#ifdef ENABLE_PAGER_STATION
+    &simpager3,
+#else
+    nullptr,
+#endif
+#ifdef ENABLE_RTTY_STATION
+    &simstation4
+#else
+    nullptr
+#endif
+};
 bool realization_stats[4] = {false, false, false, false};
+
+/* Dynamic array initialization - not needed with static initialization
+void initialize_station_arrays() {
+    int index = 0;
+    
+#ifdef ENABLE_MORSE_STATION
+    realizations[index] = &simstation1;
+    realization_stats[index] = false;
+    index++;
+#endif
+
+#ifdef ENABLE_NUMBERS_STATION
+    realizations[index] = &simnumbers2;
+    realization_stats[index] = false;
+    index++;
+#endif
+
+#ifdef ENABLE_PAGER_STATION
+    realizations[index] = &simpager3;
+    realization_stats[index] = false;
+    index++;
+#endif
+
+#ifdef ENABLE_RTTY_STATION
+    realizations[index] = &simstation4;
+    realization_stats[index] = false;
+    index++;
+#endif
+}
+*/
+
 RealizationPool realization_pool(realizations, realization_stats, 4);
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
@@ -400,14 +479,24 @@ void loop()
 #ifndef DISABLE_DISPLAY_OPERATIONS
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
 #endif
-    unsigned long time = millis();
-    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
+    unsigned long time = millis();    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
+	
+#ifdef ENABLE_MORSE_STATION
 	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
-	simnumbers2.begin(time + random(1000), 7002700.0, 18);  // Numbers Station - spooky 18 WPM!
-	simpager3.begin(time + random(1000), 7006000.0);
+#endif
 
+#ifdef ENABLE_NUMBERS_STATION
+	simnumbers2.begin(time + random(1000), 7002700.0, 18);  // Numbers Station - spooky 18 WPM!
+#endif
+
+#ifdef ENABLE_PAGER_STATION
+	simpager3.begin(time + random(1000), 7006000.0);
+#endif
+
+#ifdef ENABLE_RTTY_STATION
 	simstation4.begin(time + random(1000), 7004100.0);
 	// simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+#endif
 
 	set_application(APP_SIMRADIO, &display);
 
