@@ -1,5 +1,6 @@
 #include "mode.h"
 #include "mode_handler.h"
+#include "signal_meter.h"
 
 ModeHandler::ModeHandler(Mode *mode){
     set_mode(mode);    
@@ -37,6 +38,10 @@ void ModeHandler::show_title(HT16K33Disp *display){
 
 void ModeHandler::update_display(HT16K33Disp *display){
     _mode->update_display(display);
+}
+
+void ModeHandler::update_signal_meter(SignalMeter *signal_meter){
+    _mode->update_signal_meter(signal_meter);
 }
 
 void ModeHandler::update_realization(){

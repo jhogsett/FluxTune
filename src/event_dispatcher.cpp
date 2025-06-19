@@ -1,5 +1,6 @@
 #include "mode_handler.h"
 #include "event_dispatcher.h"
+#include "signal_meter.h"
 
 // change to accept an array of mode handlers
 EventDispatcher::EventDispatcher(ModeHandler **mode_handlers, int nhandlers){
@@ -66,6 +67,10 @@ bool EventDispatcher::dispatch_event(HT16K33Disp *display, int encoder_id, bool 
 
 void EventDispatcher::update_display(HT16K33Disp *display){
     _mode_handler->update_display(display);
+}
+
+void EventDispatcher::update_signal_meter(SignalMeter *signal_meter){
+    _mode_handler->update_signal_meter(signal_meter);
 }
 
 void EventDispatcher::update_realization(){

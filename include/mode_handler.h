@@ -5,6 +5,9 @@
 #include "mode.h"
 #include "realization.h"
 
+// Forward declaration
+class SignalMeter;
+
 // generic mode handler, associated to a mode, has mode-specific methods for operating on a mode
 // modes: vfo, options
 // associated to a mode realizer
@@ -26,6 +29,7 @@ public:
 
     void show_title(HT16K33Disp *display);
     virtual void update_display(HT16K33Disp *display);
+    virtual void update_signal_meter(SignalMeter *signal_meter);
     virtual void update_realization();
     
     Mode* get_mode() { return _mode; }  // Access the current mode

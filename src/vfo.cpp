@@ -6,6 +6,7 @@
 #include "wavegen.h"
 #include "vfo.h"
 #include "buffers.h"
+#include "signal_meter.h"
 
 VFO::VFO(const char *title, float frequency, unsigned long step, RealizationPool *realization_pool) : Mode(title)
 {
@@ -66,4 +67,41 @@ void VFO::force_transmitter_refresh(){
 void VFO::mark_hardware_dirty(){
     // Mark hardware state as unknown - will trigger refresh on next update
     _realization_pool->mark_dirty();
+}
+
+void VFO::update_signal_meter(SignalMeter *signal_meter) {
+    // Calculate signal strength based on proximity to active stations
+    // For now, use a simple calculation based on station frequencies
+    
+    // Known station frequencies (should eventually come from realization pool)
+    const float station_frequencies[] = {
+        7002000.0,  // CW station
+        7002700.0,  // Numbers station  
+        7006000.0,  // Pager station
+        7004100.0   // RTTY station
+    };
+    const int num_stations = 4;
+    
+    float vfo_freq = float(_frequency) + (_sub_frequency / 10.0);
+    int max_strength = 0;    // Find the strongest signal based on frequency proximity
+    for (int i = 0; i < num_stations; i++) {
+        float freq_diff = abs(vfo_freq - station_frequencies[i]);
+        
+        // Signal strength calculation:
+        // - Maximum strength (255) when exactly tuned (freq_diff = 0)
+        // - Strength decreases with distance
+        // - Audible range is roughly ±2500 Hz for typical receivers
+        
+        int strength = 0;
+        if (freq_diff <= 2500.0) {
+            // Linear falloff within audible range
+            strength = (int)(255.0 * (1.0 - (freq_diff / 2500.0)));
+        }
+        
+        if (strength > max_strength) {
+            max_strength = strength;
+        }
+    }
+    
+    signal_meter->update_signal_strength(max_strength);
 }
