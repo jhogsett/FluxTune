@@ -187,52 +187,55 @@ Realizer *realizers[4] = {&wavegen1, &wavegen2, &wavegen3, &wavegen4};
 bool realizer_stats[4] = {false, false, false, false};
 RealizerPool realizer_pool(realizers, realizer_stats, 4);
 
+// Signal meter instance
+SignalMeter signal_meter;
+
 // Station Instances - configured based on station_config.h
 
 #if defined(ENABLE_FOUR_CW_STATIONS)
 // Four CW stations for focused testing
-SimStation simstation1(&realizer_pool);
-SimStation simstation2(&realizer_pool);
-SimStation simstation3(&realizer_pool);
-SimStation simstation4(&realizer_pool);
+SimStation simstation1(&realizer_pool, &signal_meter);
+SimStation simstation2(&realizer_pool, &signal_meter);
+SimStation simstation3(&realizer_pool, &signal_meter);
+SimStation simstation4(&realizer_pool, &signal_meter);
 
 #elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
 // Four Numbers stations for focused testing
-SimNumbers simnumbers1(&realizer_pool);
-SimNumbers simnumbers2(&realizer_pool);
-SimNumbers simnumbers3(&realizer_pool);
-SimNumbers simnumbers4(&realizer_pool);
+SimNumbers simnumbers1(&realizer_pool, &signal_meter);
+SimNumbers simnumbers2(&realizer_pool, &signal_meter);
+SimNumbers simnumbers3(&realizer_pool, &signal_meter);
+SimNumbers simnumbers4(&realizer_pool, &signal_meter);
 
 #elif defined(ENABLE_FOUR_PAGER_STATIONS)
 // Four Pager stations for focused testing
-SimPager simpager1(&realizer_pool);
-SimPager simpager2(&realizer_pool);
-SimPager simpager3(&realizer_pool);
-SimPager simpager4(&realizer_pool);
+SimPager simpager1(&realizer_pool, &signal_meter);
+SimPager simpager2(&realizer_pool, &signal_meter);
+SimPager simpager3(&realizer_pool, &signal_meter);
+SimPager simpager4(&realizer_pool, &signal_meter);
 
 #elif defined(ENABLE_FOUR_RTTY_STATIONS)
 // Four RTTY stations for focused testing
-SimRTTY simrtty1(&realizer_pool);
-SimRTTY simrtty2(&realizer_pool);
-SimRTTY simrtty3(&realizer_pool);
-SimRTTY simrtty4(&realizer_pool);
+SimRTTY simrtty1(&realizer_pool, &signal_meter);
+SimRTTY simrtty2(&realizer_pool, &signal_meter);
+SimRTTY simrtty3(&realizer_pool, &signal_meter);
+SimRTTY simrtty4(&realizer_pool, &signal_meter);
 
 #else
 // Default mixed configuration or minimal config
 #ifdef ENABLE_MORSE_STATION
-SimStation simstation1(&realizer_pool);
+SimStation simstation1(&realizer_pool, &signal_meter);
 #endif
 
 #ifdef ENABLE_NUMBERS_STATION
-SimNumbers simnumbers2(&realizer_pool);  // Numbers Station - spooky!
+SimNumbers simnumbers2(&realizer_pool, &signal_meter);  // Numbers Station - spooky!
 #endif
 
 #ifdef ENABLE_PAGER_STATION
-SimPager simpager3(&realizer_pool);
+SimPager simpager3(&realizer_pool, &signal_meter);
 #endif
 
 #ifdef ENABLE_RTTY_STATION
-SimRTTY simstation4(&realizer_pool);
+SimRTTY simstation4(&realizer_pool, &signal_meter);
 #endif
 #endif
 
@@ -341,9 +344,6 @@ EventDispatcher dispatcher3(handlers3, 1);
 
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
-
-// Signal meter instance
-SignalMeter signal_meter;
 
 #define APP_SIMRADIO 1
 #define APP_WAVEGEN 2

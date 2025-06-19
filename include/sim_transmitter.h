@@ -26,10 +26,16 @@ protected:    // Common utility methods
     bool common_begin(unsigned long time, float fixed_freq);  // Common initialization logic
     void common_frequency_update(Mode *mode);  // Common frequency calculation (mode must be VFO)
     
+#ifdef PLATFORM_NATIVE
+    // Test-only method to set VFO frequency directly
+    void set_vfo_frequency_for_test(float vfo_freq) { _vfo_freq = vfo_freq; }
+#endif
+
     // Common member variables
     float _fixed_freq;  // Target frequency for this station
     bool _enabled;      // True when frequency is in audible range
     float _frequency;   // Current frequency difference from VFO
+    float _vfo_freq;    // Current VFO frequency (for signal meter charge calculation)
     bool _active;       // True when transmitter should be active
 };
 

@@ -4,6 +4,8 @@
 #include "async_morse.h"
 #include "sim_transmitter.h"
 
+class SignalMeter; // Forward declaration
+
 #define NUMBERS_SPACE_FREQUENCY 0.1
 
 /**
@@ -13,7 +15,7 @@
 class SimNumbers : public SimTransmitter
 {
 public:
-    SimNumbers(RealizerPool *realizer_pool);
+    SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter);
     virtual bool begin(unsigned long time, float fixed_freq, int wpm = 18);
     
     virtual bool update(Mode *mode);
@@ -32,6 +34,10 @@ private:
     unsigned long _next_group_time; // When to send next group
     bool _transmission_active;      // Track if morse is currently transmitting
     int _wpm;                       // Store WPM setting for consistent use
+    SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses
+
+private:
+    void send_carrier_charge_pulse();  // Helper to send charge pulse to signal meter
 };
 
 #endif

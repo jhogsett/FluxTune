@@ -71,70 +71,31 @@ void VFO::mark_hardware_dirty(){
 }
 
 void VFO::update_signal_meter(SignalMeter *signal_meter) {
-    // Calculate signal strength based on proximity to active stations
-    // Send charge pulses instead of setting signal strength directly
+    // Calculate signal strength based on proximity to active stations    // Send charge pulses instead of setting signal strength directly
     
-    // Known station frequencies (based on configuration)
-    const float station_frequencies[] = {
-#if defined(ENABLE_FOUR_CW_STATIONS)
-        7002000.0,  // CW station 1
-        7003000.0,  // CW station 2
-        7004000.0,  // CW station 3
-        7005000.0   // CW station 4
-#elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
-        7002700.0,  // Numbers station 1
-        7003700.0,  // Numbers station 2
-        7004700.0,  // Numbers station 3
-        7005700.0   // Numbers station 4
-#elif defined(ENABLE_FOUR_PAGER_STATIONS)
-        7006000.0,  // Pager station 1
-        7007000.0,  // Pager station 2
-        7008000.0,  // Pager station 3
-        7009000.0   // Pager station 4
-#elif defined(ENABLE_FOUR_RTTY_STATIONS)
-        7004100.0,  // RTTY station 1
-        7005100.0,  // RTTY station 2
-        7006100.0,  // RTTY station 3
-        7007100.0   // RTTY station 4
-#else
-        // Default mixed or minimal configuration
-#ifdef ENABLE_MORSE_STATION
-        7002000.0,  // CW station
-#endif
-#ifdef ENABLE_NUMBERS_STATION
-        7002700.0,  // Numbers station  
-#endif
-#ifdef ENABLE_PAGER_STATION
-        7006000.0,  // Pager station
-#endif
-#ifdef ENABLE_RTTY_STATION
-        7004100.0   // RTTY station
-#endif
-#endif
-    };
-    const int num_stations = sizeof(station_frequencies) / sizeof(station_frequencies[0]);
+    // Note: Charge pulses are now sent directly by stations when their carrier turns on
+    // This provides more realistic signal meter behavior tied to actual transmission events
+}
+
+// Static utility for stations to calculate signal strength charge based on VFO proximity
+int VFO::calculate_signal_charge(float station_freq, float vfo_freq) {
+    float freq_diff = abs(vfo_freq - station_freq);
     
-    float vfo_freq = float(_frequency) + (_sub_frequency / 10.0);
+    // Signal strength calculation:
+    // - Charge from stations within audible range (±2500 Hz)
+    // - More charge for closer proximity
+    // - Uses same logic as the original VFO charge pulse system
     
-    // Find the strongest signal based on frequency proximity and send charge pulses
-    for (int i = 0; i < num_stations; i++) {
-        float freq_diff = abs(vfo_freq - station_frequencies[i]);
+    if (freq_diff <= 2500.0) {
+        // Calculate proximity factor (0.0 to 1.0)
+        float proximity = 1.0 - (freq_diff / 2500.0);
         
-        // Signal strength calculation:
-        // - Send charge pulses when within station range
-        // - More pulses for closer proximity
-        // - Audible range is roughly ±2500 Hz for typical receivers
+        // Convert proximity to charge amount
+        // Closer stations contribute more charge
+        int charge = (int)(proximity * 12.0);  // 0-12 charge amount
         
-        if (freq_diff <= 2500.0) {            // Calculate proximity factor (0.0 to 1.0)
-            float proximity = 1.0 - (freq_diff / 2500.0);
-            
-            // Convert proximity to charge pulses
-            // Closer stations send more frequent charge pulses (reduced from 20.0 to 12.0)
-            int charge_strength = (int)(proximity * 12.0);  // 0-12 charge amount
-            
-            if (charge_strength > 0) {
-                signal_meter->add_charge(charge_strength);
-            }
-        }
+        return charge;
     }
+    
+    return 0;  // No charge if out of range
 }

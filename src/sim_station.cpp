@@ -1,13 +1,13 @@
-
 #include "vfo.h"
 #include "wavegen.h"
 #include "realizer_pool.h"
 #include "sim_station.h"
+#include "signal_meter.h"
 
 #define WAIT_SECONDS 4
 
 // mode is expected to be a derivative of VFO
-SimStation::SimStation(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
+SimStation::SimStation(RealizerPool *realizer_pool, SignalMeter *signal_meter) : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
 {
     // Base class now initializes all common variables
 }
@@ -54,15 +54,33 @@ bool SimStation::step(unsigned long time){
     	case STEP_MORSE_TURN_ON:
             _active = true;
             realize();
+            send_carrier_charge_pulse();  // Send charge pulse when carrier turns on
     		break;
+
+    	case STEP_MORSE_LEAVE_ON:
+            // Carrier remains on - send another charge pulse
+            send_carrier_charge_pulse();
+            break;
 
     	case STEP_MORSE_TURN_OFF:
             _active = false;
             realize();
+            // No charge pulse when carrier turns off
     		break;
     }
     
     return true;
+}
+
+// Send charge pulse to signal meter based on VFO proximity
+void SimStation::send_carrier_charge_pulse() {
+    if (_signal_meter) {
+        int charge = VFO::calculate_signal_charge(_fixed_freq, _vfo_freq);
+        
+        if (charge > 0) {
+            _signal_meter->add_charge(charge);
+        }
+    }
 }
 
 // Use base class end() method for cleanup
