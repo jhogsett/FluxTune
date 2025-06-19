@@ -19,6 +19,9 @@ public:
     virtual bool begin(unsigned long time);
     virtual bool step(unsigned long time);
     virtual void end();
+    
+    // Virtual method for wave generator refresh - default does nothing
+    virtual void force_wave_generator_refresh() {}
 
     RealizerPool *_realizer_pool;
     int _realizer;

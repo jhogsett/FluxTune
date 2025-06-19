@@ -1,7 +1,6 @@
 #include "basic_types.h"
 #include "realization.h"
 #include "realization_pool.h"
-#include "sim_transmitter.h"  // For dynamic_cast to force wave generator refresh
 
 // pass array of realizer addresses, array of free/in-use bools, count of realizers 
 RealizationPool::RealizationPool(Realization **realizations, bool *statuses,  int nrealizations){
@@ -73,9 +72,7 @@ void RealizationPool::force_sim_transmitter_refresh(){
     // This is called when switching to SimRadio to ensure wave generators
     // are properly synchronized with their software state
     for(byte i = 0; i < _nrealizations; i++){
-        SimTransmitter *sim_tx = dynamic_cast<SimTransmitter*>(_realizations[i]);
-        if(sim_tx != nullptr) {
-            sim_tx->force_wave_generator_refresh();
-        }
+        // Use virtual method instead of dynamic_cast for Arduino compatibility
+        _realizations[i]->force_wave_generator_refresh();
     }
 }
