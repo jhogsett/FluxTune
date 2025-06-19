@@ -8,7 +8,7 @@
 
 /**
  * Simulated Numbers Station - transmits creepy 5-digit number groups in Morse code
- * Generates mysterious transmissions like: "7-4-9-2-1   8-8-3-1-5   " (pure numbers only)
+ * Generates mysterious transmissions like: "74921   88315   " (pure digits only, no punctuation)
  */
 class SimNumbers : public SimTransmitter
 {

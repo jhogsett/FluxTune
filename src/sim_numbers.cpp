@@ -76,12 +76,12 @@ bool SimNumbers::step(unsigned long time)
 
 void SimNumbers::generate_next_transmission()
 {
-    // Create pure number group transmission - no letters, only digits
-    char group1[12], group2[12];
+    // Create pure number group transmission - only digits 0-9
+    char group1[6], group2[6];  // Each group is now 5 chars + null terminator
     generate_number_group(group1, _current_group);
     generate_number_group(group2, _current_group + 1);
     
-    // Format: "X-X-X-X-X   Y-Y-Y-Y-Y   " (just the number groups)
+    // Format: "XXXXX   YYYYY   " (just the number groups with spacing)
 #ifdef PLATFORM_NATIVE
     snprintf(_transmission_buffer, sizeof(_transmission_buffer), 
              "%s   %s   ", group1, group2);
@@ -100,9 +100,7 @@ void SimNumbers::generate_next_transmission()
 
 void SimNumbers::generate_number_group(char *buffer, int group_number)
 {
-    // Generate a 5-digit number group with dashes for authentic feel
-    // Use group number to seed some predictability but add randomness
-    
+    // Generate a 5-digit number group (no dashes - they're not in morse table)
     int digits[5];
     
     // Generate 5 random digits (0-9)
@@ -114,12 +112,12 @@ void SimNumbers::generate_number_group(char *buffer, int group_number)
 #endif
     }
     
-    // Format as "X-X-X-X-X"
+    // Format as "XXXXX" (no dashes, just digits)
 #ifdef PLATFORM_NATIVE
-    snprintf(buffer, 20, "%d-%d-%d-%d-%d", 
+    snprintf(buffer, 12, "%d%d%d%d%d", 
              digits[0], digits[1], digits[2], digits[3], digits[4]);
 #else
-    sprintf(buffer, "%d-%d-%d-%d-%d", 
+    sprintf(buffer, "%d%d%d%d%d", 
             digits[0], digits[1], digits[2], digits[3], digits[4]);
 #endif
 }
