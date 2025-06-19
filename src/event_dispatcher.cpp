@@ -17,8 +17,10 @@ void EventDispatcher::set_mode(int nhandler){
 
 void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){
     set_mode(nhandler);
+#ifndef DISABLE_DISPLAY_OPERATIONS
     _mode_handler->show_title(display);
     update_display(display);
+#endif
     update_realization();
 }
 

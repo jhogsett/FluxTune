@@ -28,7 +28,9 @@ bool ModeHandler::event_sink(bool pressed, bool long_pressed){
 
 
 void ModeHandler::show_title(HT16K33Disp *display){
+#ifndef DISABLE_DISPLAY_OPERATIONS
     display->scroll_string(_mode->_title);
+#endif
     // update_display(display);
 }
 

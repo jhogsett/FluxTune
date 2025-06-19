@@ -16,7 +16,7 @@
 
 #define NUM_DIGITS_PER_DISPLAY 4
 
-#define DEFAULT_SHOW_DELAY 750
+#define DEFAULT_SHOW_DELAY 750  // Restored to original value
 #define DEFAULT_SCROLL_DELAY 200
 #define SEGMENT_TEST_DELAY 10
 

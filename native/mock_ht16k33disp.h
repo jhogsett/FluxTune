@@ -12,9 +12,9 @@
 
 class HT16K33Disp {
 public:
-    HT16K33Disp() {}
-    HT16K33Disp(int address) {}
-    HT16K33Disp(int address, int num_displays) {}
+    HT16K33Disp() : _num_displays(1), _num_digits(4) {}
+    HT16K33Disp(int address) : _num_displays(1), _num_digits(4) {}
+    HT16K33Disp(int address, int num_displays) : _num_displays(num_displays), _num_digits(num_displays * 4) {}
     
     void begin() {}
     void clear() {}
@@ -24,12 +24,24 @@ public:
     void writeDigitRaw(uint8_t pos, uint16_t bitmask) {}
     void print(const char* str) {}
     void print(int num) {}
-    void print(float num, int decimals = 2) {}    void println(const char* str) {}
+    void print(float num, int decimals = 2) {}
+    void println(const char* str) {}
     void println(int num) {}
     void println(float num, int decimals = 2) {}
     void drawColon(bool state) {}
     void blinkRate(uint8_t rate) {}
-    void show_string(const char* str) {}  // Add missing method
+    
+    // Display manager compatible methods
+    void show_string(const char* str, bool pad_blanks = true) {}
+    void scroll_string(const char* str, int show_delay = 0, int scroll_delay = 0) {}
+    void simple_show_string(const char* str) {}
+    int begin_scroll_string(const char* str, int show_delay = 0, int scroll_delay = 0) { return 0; }
+    bool step_scroll_string(unsigned long time) { return false; }
+    void init(const byte* brightLevels) {}
+    
+    // Public member variables (like the real class)
+    int _num_displays;
+    int _num_digits;
 };
 
 #endif // MOCK_HT16K33DISP_H

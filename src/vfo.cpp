@@ -38,10 +38,11 @@ void VFO::update_display(HT16K33Disp *display){
         
     } else {
         // Display in Hz
-        sprintf(display_text_buffer, "%8ld", _frequency);
-    }
+        sprintf(display_text_buffer, "%8ld", _frequency);    }
 
+#ifndef DISABLE_DISPLAY_OPERATIONS
     display->show_string(display_text_buffer);
+#endif
 }
 
 void VFO::update_realization(){
