@@ -27,6 +27,8 @@ public:
     void show_title(HT16K33Disp *display);
     virtual void update_display(HT16K33Disp *display);
     virtual void update_realization();
+    
+    Mode* get_mode() { return _mode; }  // Access the current mode
 
 protected:
     Mode *_mode;

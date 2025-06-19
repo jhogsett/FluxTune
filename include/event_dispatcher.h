@@ -24,6 +24,8 @@ public:
 
     void update_display(HT16K33Disp *display);
     void update_realization();
+    
+    Mode* get_current_mode();  // Access current mode for refresh operations
 
 private:
     ModeHandler * _mode_handler;

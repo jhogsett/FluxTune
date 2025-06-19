@@ -137,7 +137,7 @@ void step_sm(unsigned long time)
 
 // Display handling
 // show a display string for 700ms before beginning scrolling for ease of reading
-#define DISPLAY_SHOW_TIME 800
+#define DISPLAY_SHOW_TIME 800  // Restored to original value
 // scroll the display every 90ms for ease of reading
 #define DISPLAY_SCROLL_TIME 70
 // scroll flipped options every 100ms
@@ -320,9 +320,7 @@ bool main_menu(){
 
 EventDispatcher * set_application(int application, HT16K33Disp *display){
 	EventDispatcher *dispatcher;
-	char *title;
-
-	switch(application){
+	char *title;	switch(application){
 		case APP_SIMRADIO:
 			dispatcher = &dispatcher1;
 			current_dispatcher = APP_SIMRADIO;
@@ -339,11 +337,25 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 			dispatcher = &dispatcher3;
 			current_dispatcher = APP_SETTINGS;
 			title = (FSTR("Settings"));
-		break;
-	}
-		
+		break;	}
+#ifndef DISABLE_DISPLAY_OPERATIONS
 	display->scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
+#endif
+	
+	// Mark hardware state as dirty when switching to SimRadio  
+	// This ensures audio resumes properly after application switches
+	if(application == APP_SIMRADIO) {
+		realization_pool.mark_dirty();
+	}
+	
+#ifndef DISABLE_DISPLAY_OPERATIONS
 	dispatcher->set_mode(display, 0);
+#endif
+	
+	// Force realization update when switching to SimRadio to ensure audio resumes immediately
+	if(application == APP_SIMRADIO) {
+		dispatcher->update_realization();
+	}
 
 	// // empty outstanding events
 	// encoder_handlerA.changed();
@@ -372,11 +384,11 @@ void purge_events(){
 	while(encoder_handlerB.long_pressed());
 }
 
-#define PURGE_TIME 1000
-
 void loop()
 {
+#ifndef DISABLE_DISPLAY_OPERATIONS
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
+#endif
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);	
 	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
@@ -403,8 +415,7 @@ void loop()
 	// bool active = false;
 	// bool freq = false;
 	// bool last_active = true;
-	while(true){
-        unsigned long time = millis();
+	while(true){        unsigned long time = millis();
 
 		step_sm(time);
 
@@ -485,25 +496,25 @@ void loop()
 				// encoder_handlerB.long_pressed();
 			}
 		}
-
 		if(encoder_handlerA.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
+#ifndef DISABLE_DISPLAY_OPERATIONS
 			dispatcher->update_display(&display);
+#endif
 			dispatcher->update_realization();
-		}
-
-		if(encoder_handlerB.changed()){
-			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
-
-			purge_events();
-
-			dispatcher->update_display(&display);
+		}		if(encoder_handlerB.changed()){
+			int diff_value = encoder_handlerB.diff();
+			// Diagnostic: Print encoder B events to demonstrate phantom event bug
+			Serial.print("EncoderB: diff=");
+			Serial.print(diff_value);
+			Serial.print(" time=");
+			Serial.println(millis());
+			
+			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, diff_value, 0);
+			purge_events();  // Clear any noise/overshoot after mode change
+			
+			// Note: No immediate update_display() call here - let show_title() finish first
 			dispatcher->update_realization();
-
-			// after mode change
-			unsigned long endtime = millis() + PURGE_TIME;
-			while(millis() < endtime)
-				purge_events();
 		}
 
 		pressed = encoder_handlerA.pressed();

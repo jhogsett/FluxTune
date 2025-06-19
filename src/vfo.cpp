@@ -38,10 +38,11 @@ void VFO::update_display(HT16K33Disp *display){
         
     } else {
         // Display in Hz
-        sprintf(display_text_buffer, "%8ld", _frequency);
-    }
+        sprintf(display_text_buffer, "%8ld", _frequency);    }
 
+#ifndef DISABLE_DISPLAY_OPERATIONS
     display->show_string(display_text_buffer);
+#endif
 }
 
 void VFO::update_realization(){
@@ -54,4 +55,15 @@ void VFO::update_realization(){
 
     // // WaveGen *wavegen = (WaveGen *)realization;
 	// wavegen->_sig_gen->setFrequency((MD_AD9833::channel_t)0, float(_frequency));
+}
+
+void VFO::force_transmitter_refresh(){
+    // Force hardware refresh for all SimTransmitter objects
+    // This ensures wave generators are properly updated when switching to SimRadio
+    _realization_pool->force_sim_transmitter_refresh();
+}
+
+void VFO::mark_hardware_dirty(){
+    // Mark hardware state as unknown - will trigger refresh on next update
+    _realization_pool->mark_dirty();
 }

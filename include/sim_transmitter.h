@@ -19,6 +19,7 @@ public:
     SimTransmitter(RealizerPool *realizer_pool);
     virtual bool step(unsigned long time) = 0;  // Pure virtual - must be implemented by derived classes
     virtual void end();  // Common cleanup logic
+    virtual void force_wave_generator_refresh() override;  // Override base class method
 
 protected:    // Common utility methods
     bool check_frequency_bounds();  // Returns true if frequency is in audible range

@@ -81,12 +81,12 @@ public:
       if (new_dial_position != old_dial_position) {
         int diff = new_dial_position - old_dial_position;
         old_dial_position = new_dial_position;
-        
-        if(diff != 0){
+          if(diff != 0){
           long new_encoded_position = new_dial_position / _pulses_per_detent;
           if(new_encoded_position != old_encoded_position){
             old_encoded_position = new_encoded_position;
-            send(diff);      
+            // Normalize diff to ±1 regardless of pulses_per_detent value
+            send(diff > 0 ? 1 : -1);      
           }
         }
       }
@@ -122,7 +122,6 @@ public:
 // accumulate the diffs while changed = true
 
   }
-
   bool changed(){
     return _changed;
   }

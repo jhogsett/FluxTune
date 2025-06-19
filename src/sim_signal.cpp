@@ -14,119 +14,115 @@ SimSignal::SimSignal(RealizerPool *realizer_pool) : Realization(realizer_pool){
 #define MAX_PHASE 36
 
 void SimSignal::realize(){
-    bool active = false;
-
     switch(_phase){
         case 1:
-            active = true;
+            // active = true;
             break;
         case 2:
-            active = true;
+            // active = true;
             break;
         case 3:
-            active = true;
+            // active = true;
             break;
         case 4:
-            active = false;
+            // active = false;
             break;
         case 5:
-            active = true;
+            // active = true;
             break;
         case 6:
-            active = false;
+            // active = false;
             break;
         case 7:
-            active = true;
+            // active = true;
             break;
         case 8:
-            active = true;
+            // active = true;
             break;
         case 9:
-            active = true;
+            // active = true;
             break;
         case 10:
-            active = false;
+            // active = false;
             break;
         case 11:
-            active = true;
-            break;
-        case 12:
-            active = false;
+            // active = true;
+            break;        case 12:
+            // active = false;
             break;
         case 13:
-            active = false;
+            // active = false;
             break;
         case 14:
-            active = false;
+            // active = false;
             break;
 
         case 15:
-            active = false;
+            // active = false;
             break;
 
         case 16:
-            active = true;
+            // active = true;
             break;
         case 17:
-            active = true;
+            // active = true;
             break;
         case 18:
-            active = true;
+            // active = true;
             break;
         case 19:
-            active = false;
+            // active = false;
             break;
         case 20:
-            active = true;
+            // active = true;
             break;
         case 21:
-            active = true;
+            // active = true;
             break;
         case 22:
-            active = true;
+            // active = true;
             break;
         case 23:
-            active = false;
+            // active = false;
             break;
         case 24:
-            active = true;
-            break;
-        case 25:
-            active = false;
+            // active = true;
+            break;        case 25:
+            // active = false;
             break;
         case 26:
-            active = true;
+            // active = true;
             break;
         case 27:
-            active = true;
+            // active = true;
             break;
         case 28:
-            active = true;
+            // active = true;
             break;
         case 29:
-            active = false;
+            // active = false;
             break;
 
         case 30:
-            active = false;
+            // active = false;
             break;
         case 31:
-            active = false;
+            // active = false;
             break;
         case 32:
-            active = false;
+            // active = false;
             break;
         case 33:
-            active = false;
+            // active = false;
             break;
         case 34:
-            active = false;
+            // active = false;
             break;
         case 35:
-            active = false;
+            // active = false;
             break;
         case 36:
-            active = false;
+            // active = false;
             break;
 }
 
