@@ -122,15 +122,13 @@ public:
 // accumulate the diffs while changed = true
 
   }
-
   bool changed(){
     return _changed;
   }
+
   int diff(){
     _changed = false;
-    int result = _diff;
-    _diff = 0;  // Reset accumulator to prevent phantom movements
-    return result;
+    return _diff;
   }
 
   int pressed(){
