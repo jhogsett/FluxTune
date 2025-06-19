@@ -34,8 +34,7 @@ void SignalMeter::init()
 }
 
 void SignalMeter::add_charge(int charge_amount)
-{
-    // Add charge pulse to accumulator (like electrical charge into capacitor)
+{    // Add charge pulse to accumulator (like electrical charge into capacitor)
     _accumulator += charge_amount;
     
     // Clamp to maximum
@@ -45,7 +44,6 @@ void SignalMeter::add_charge(int charge_amount)
     
     // Update display strength based on accumulator
     _current_strength = (_accumulator * 255) / MAX_ACCUMULATOR;
-    if (_current_strength > 255) _current_strength = 255;
     
     write_leds();
 }
@@ -57,10 +55,8 @@ void SignalMeter::update(unsigned long current_time)
         if (_accumulator > 0) {
             _accumulator -= DECAY_RATE;
             if (_accumulator < 0) _accumulator = 0;
-            
-            // Update display strength
+              // Update display strength
             _current_strength = (_accumulator * 255) / MAX_ACCUMULATOR;
-            if (_current_strength > 255) _current_strength = 255;
             
             write_leds();
         }
