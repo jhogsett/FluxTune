@@ -8,13 +8,13 @@
 
 /**
  * Simulated Numbers Station - transmits creepy 5-digit number groups in Morse code
- * Generates mysterious transmissions like: "GROUP 1... 7-4-9-2-1... GROUP 2... 8-8-3-1-5..."
+ * Generates mysterious transmissions like: "7-4-9-2-1   8-8-3-1-5   " (pure numbers only)
  */
 class SimNumbers : public SimTransmitter
 {
 public:
     SimNumbers(RealizerPool *realizer_pool);
-    virtual bool begin(unsigned long time, float fixed_freq);
+    virtual bool begin(unsigned long time, float fixed_freq, int wpm = 18);
     
     virtual bool update(Mode *mode);
     virtual bool step(unsigned long time);

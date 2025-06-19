@@ -19,14 +19,14 @@ SimNumbers::SimNumbers(RealizerPool *realizer_pool) : SimTransmitter(realizer_po
     _transmission_complete = true;  // Start by generating first transmission
 }
 
-bool SimNumbers::begin(unsigned long time, float fixed_freq)
+bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
 {
     if(!common_begin(time, fixed_freq))
         return false;
     
     // Generate initial transmission
     generate_next_transmission();
-    _morse.start_morse(_transmission_buffer, 8, true, WAIT_SECONDS);  // Slow, deliberate 8 WPM
+    _morse.start_morse(_transmission_buffer, wpm, true, WAIT_SECONDS);
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     wavegen->set_frequency(NUMBERS_SPACE_FREQUENCY, false);
@@ -76,19 +76,18 @@ bool SimNumbers::step(unsigned long time)
 
 void SimNumbers::generate_next_transmission()
 {
-    // Create creepy number group transmission
-    char group_text[20];
-    generate_number_group(group_text, _current_group);
+    // Create pure number group transmission - no letters, only digits
+    char group1[12], group2[12];
+    generate_number_group(group1, _current_group);
+    generate_number_group(group2, _current_group + 1);
     
-    // Format: "GROUP N... X-X-X-X-X... GROUP N... Y-Y-Y-Y-Y..."
+    // Format: "X-X-X-X-X   Y-Y-Y-Y-Y   " (just the number groups)
 #ifdef PLATFORM_NATIVE
     snprintf(_transmission_buffer, sizeof(_transmission_buffer), 
-             "GROUP %d   %s   GROUP %d   ", 
-             _current_group, group_text, _current_group + 1);
+             "%s   %s   ", group1, group2);
 #else
     sprintf(_transmission_buffer, 
-            "GROUP %d   %s   GROUP %d   ", 
-            _current_group, group_text, _current_group + 1);
+            "%s   %s   ", group1, group2);
 #endif
     
     _current_group += 2;  // Next transmission will be groups N+2, N+3
