@@ -347,6 +347,11 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 	}
 	
 	dispatcher->set_mode(display, 0);
+	
+	// Force realization update when switching to SimRadio to ensure audio resumes immediately
+	if(application == APP_SIMRADIO) {
+		dispatcher->update_realization();
+	}
 
 	// // empty outstanding events
 	// encoder_handlerA.changed();

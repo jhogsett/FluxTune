@@ -14,7 +14,9 @@ SimStation::SimStation(RealizerPool *realizer_pool) : SimTransmitter(realizer_po
 
 bool SimStation::begin(unsigned long time, float fixed_freq, const char *message, int wpm){
     if(!common_begin(time, fixed_freq))
-        return false;    _morse.start_morse(message, wpm, true, WAIT_SECONDS);
+        return false;
+        
+    _morse.start_morse(message, wpm, true, WAIT_SECONDS);
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     wavegen->set_frequency(SPACE_FREQUENCY, false);
@@ -33,7 +35,9 @@ void SimStation::realize(){
 
 // returns true on successful update
 bool SimStation::update(Mode *mode){
-    common_frequency_update(mode);    if(_enabled){
+    common_frequency_update(mode);
+    
+    if(_enabled){
         WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
         wavegen->set_frequency(_frequency);
     }
@@ -56,7 +60,9 @@ bool SimStation::step(unsigned long time){
             _active = false;
             realize();
     		break;
-    }    return true;
+    }
+    
+    return true;
 }
 
 // Use base class end() method for cleanup

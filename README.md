@@ -25,4 +25,10 @@ g++ -DNATIVE_BUILD -I. -Itest/unity/src -std=c++11 test/test_async_morse.cpp tes
 g++ -DNATIVE_BUILD -I. -Itest/unity/src -DUNITY_INCLUDE_DOUBLE test/test_async_rtty.cpp test/unity/src/unity.c src/async_rtty.cpp native/mock_arduino.cpp -o test_async_rtty && ./test_async_rtty
 ```
 
+**Note for PowerShell users:** Replace `&&` with `;` for command chaining:
+```powershell
+# Example for PowerShell
+g++ ... -o test_async_morse; ./test_async_morse
+```
+
 VS Code tasks are also available for building and running tests.

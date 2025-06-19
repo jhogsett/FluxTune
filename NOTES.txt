@@ -6,6 +6,11 @@ def mr(value):
   print(int(full_on))
   print(int(remain))
 
+# PowerShell Notes:
+# - Use semicolon (;) for command chaining, NOT && like in bash
+# - Example: cd test; g++ ... instead of cd test && g++ ...
+# - && is not a valid statement separator in PowerShell
+
 
 
 cd test
