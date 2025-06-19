@@ -24,6 +24,7 @@ protected:    // Common utility methods
     bool check_frequency_bounds();  // Returns true if frequency is in audible range
     bool common_begin(unsigned long time, float fixed_freq);  // Common initialization logic
     void common_frequency_update(Mode *mode);  // Common frequency calculation (mode must be VFO)
+    void force_wave_generator_refresh();  // Force hardware update after application switch
     
     // Common member variables
     float _fixed_freq;  // Target frequency for this station

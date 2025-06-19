@@ -53,3 +53,13 @@ void SimTransmitter::end()
         _realizer = -1;  // Reset to avoid double-free or invalid access
     }
 }
+
+void SimTransmitter::force_wave_generator_refresh()
+{
+    // Force wave generator hardware update regardless of cached state
+    // This is needed when returning to SimRadio after application switches
+    if(_realizer != -1) {
+        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+        wavegen->force_refresh();
+    }
+}

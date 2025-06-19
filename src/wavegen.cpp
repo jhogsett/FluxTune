@@ -28,3 +28,11 @@ void WaveGen::set_active_frequency(bool main){
 		_main = main;
 	}
 }
+
+void WaveGen::force_refresh(){
+	// Force hardware update regardless of cached state
+	// This is needed when returning to SimRadio after application switches
+	// that may have affected the AD9833 hardware state
+	_sig_gen->setFrequency((MD_AD9833::channel_t)(_main ? 0 : 1), _frequency);
+	_sig_gen->setActiveFrequency((MD_AD9833::channel_t)(_main ? 0 : 1));
+}

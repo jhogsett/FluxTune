@@ -70,6 +70,10 @@ void EventDispatcher::update_realization(){
     _mode_handler->update_realization();
 }
 
+Mode* EventDispatcher::get_current_mode(){
+    return _mode_handler->get_mode();
+}
+
 
 
 

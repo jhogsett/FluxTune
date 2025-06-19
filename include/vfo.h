@@ -14,6 +14,7 @@ public:
     
     virtual void update_display(HT16K33Disp *display);
     virtual void update_realization();
+    void force_transmitter_refresh();  // Force hardware refresh when switching to SimRadio
 
     unsigned long _frequency;
     byte _sub_frequency;

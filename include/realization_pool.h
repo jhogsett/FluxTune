@@ -1,4 +1,3 @@
-
 #ifndef __REALIZATION_POOL_H__
 #define __REALIZATION_POOL_H__
 
@@ -20,6 +19,7 @@ public:
     void end();
 
     void update(Mode *mode);
+    void force_sim_transmitter_refresh();  // Force hardware refresh for SimTransmitter objects
 
 private:
     Realization **_realizations;
