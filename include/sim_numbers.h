@@ -22,13 +22,16 @@ public:
     void realize();
 
 private:
-    void generate_next_transmission();
-    void generate_number_group(char *buffer, int group_number);
+    void generate_next_number_group();
     
     AsyncMorse _morse;
-    char _transmission_buffer[80];  // Buffer for current transmission
-    int _current_group;             // Current group number
-    bool _transmission_complete;    // Flag to generate new transmission
+    char _group_buffer[7];          // Small buffer for single 5-digit group + space + null
+    int _groups_sent;               // Count of groups sent in current cycle
+    int _total_groups_per_cycle;    // Total groups to send per cycle (13 for creepiness)
+    bool _in_inter_group_delay;     // True when waiting between groups
+    unsigned long _next_group_time; // When to send next group
+    bool _transmission_active;      // Track if morse is currently transmitting
+    int _last_morse_state;          // Last morse state to detect completion
 };
 
 #endif

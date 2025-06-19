@@ -10,13 +10,18 @@
 #include <Arduino.h>
 #endif
 
-#define WAIT_SECONDS 8  // Longer pause between transmissions for spooky effect
+#define INTER_GROUP_DELAY 1000  // 1 second delay between number groups
+#define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 
 SimNumbers::SimNumbers(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
 {
     // Base class initializes all common variables
-    _current_group = 1;
-    _transmission_complete = true;  // Start by generating first transmission
+    _groups_sent = 0;
+    _total_groups_per_cycle = 13;  // 13 groups for creepiness
+    _in_inter_group_delay = false;
+    _next_group_time = 0;
+    _transmission_active = false;
+    _last_morse_state = STEP_MORSE_LEAVE_OFF;
 }
 
 bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
@@ -24,9 +29,9 @@ bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
     if(!common_begin(time, fixed_freq))
         return false;
     
-    // Generate initial transmission
-    generate_next_transmission();
-    _morse.start_morse(_transmission_buffer, wpm, true, WAIT_SECONDS);
+    // Start with first group immediately
+    generate_next_number_group();
+    _morse.start_morse(_group_buffer, wpm, false, 0);  // No repeat, no wait
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     wavegen->set_frequency(NUMBERS_SPACE_FREQUENCY, false);
@@ -59,9 +64,13 @@ bool SimNumbers::update(Mode *mode)
 
 bool SimNumbers::step(unsigned long time)
 {
-    switch(_morse.step_morse(time)){
+    // Handle morse code timing
+    int morse_state = _morse.step_morse(time);
+    
+    switch(morse_state){
         case STEP_MORSE_TURN_ON:
             _active = true;
+            _transmission_active = true;
             realize();
             break;
 
@@ -69,41 +78,54 @@ bool SimNumbers::step(unsigned long time)
             _active = false;
             realize();
             break;
+            
+        case STEP_MORSE_LEAVE_OFF:
+            _active = false;
+            realize();
+            break;
     }
     
+    // Detect transmission completion: was active, now consistently off
+    if(_transmission_active && 
+       morse_state == STEP_MORSE_LEAVE_OFF && 
+       _last_morse_state == STEP_MORSE_LEAVE_OFF) {
+        
+        _transmission_active = false;
+        
+        if(!_in_inter_group_delay) {
+            // Group just finished, start delay
+            _in_inter_group_delay = true;
+            _groups_sent++;
+            
+            if(_groups_sent >= _total_groups_per_cycle) {
+                // Cycle complete, long delay
+                _next_group_time = time + INTER_CYCLE_DELAY;
+                _groups_sent = 0;
+            } else {
+                // More groups in cycle, short delay
+                _next_group_time = time + INTER_GROUP_DELAY;
+            }
+        }
+    }
+    
+    // Check if it's time for next group
+    if(_in_inter_group_delay && time >= _next_group_time) {
+        _in_inter_group_delay = false;
+        // Generate fresh random group
+        generate_next_number_group();
+        _morse.start_morse(_group_buffer, 18, false, 0);  // Start new group
+    }
+    
+    _last_morse_state = morse_state;
     return true;
 }
 
-void SimNumbers::generate_next_transmission()
+void SimNumbers::generate_next_number_group()
 {
-    // Create pure number group transmission - only digits 0-9
-    char group1[6], group2[6];  // Each group is now 5 chars + null terminator
-    generate_number_group(group1, _current_group);
-    generate_number_group(group2, _current_group + 1);
-    
-    // Format: "XXXXX   YYYYY   " (just the number groups with spacing)
-#ifdef PLATFORM_NATIVE
-    snprintf(_transmission_buffer, sizeof(_transmission_buffer), 
-             "%s   %s   ", group1, group2);
-#else
-    sprintf(_transmission_buffer, 
-            "%s   %s   ", group1, group2);
-#endif
-    
-    _current_group += 2;  // Next transmission will be groups N+2, N+3
-    
-    // Reset to group 1 after reaching 99 to keep it manageable
-    if(_current_group > 99) {
-        _current_group = 1;
-    }
-}
-
-void SimNumbers::generate_number_group(char *buffer, int group_number)
-{
-    // Generate a 5-digit number group (no dashes - they're not in morse table)
+    // Generate one fresh random 5-digit group
     int digits[5];
     
-    // Generate 5 random digits (0-9)
+    // Generate 5 random digits (0-9) - fresh every time!
     for(int i = 0; i < 5; i++) {
 #ifdef PLATFORM_NATIVE
         digits[i] = rand() % 10;
@@ -112,12 +134,12 @@ void SimNumbers::generate_number_group(char *buffer, int group_number)
 #endif
     }
     
-    // Format as "XXXXX" (no dashes, just digits)
+    // Format as "XXXXX " (5 digits + space for separation)
 #ifdef PLATFORM_NATIVE
-    snprintf(buffer, 12, "%d%d%d%d%d", 
+    snprintf(_group_buffer, sizeof(_group_buffer), "%d%d%d%d%d ", 
              digits[0], digits[1], digits[2], digits[3], digits[4]);
 #else
-    sprintf(buffer, "%d%d%d%d%d", 
+    sprintf(_group_buffer, "%d%d%d%d%d ", 
             digits[0], digits[1], digits[2], digits[3], digits[4]);
 #endif
 }
