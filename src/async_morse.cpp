@@ -138,13 +138,12 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
 
     async_phase = PHASE_CHAR;
     async_position = 0;
-    async_morse = 0;
-
-    async_element = 0;
+    async_morse = 0;    async_element = 0;
     async_active = false;
     async_next_event = 0L;
     async_space = false;
     async_switched_on = false;  // Ensure clean initial state
+    async_just_completed = false;  // Initialize completion flag
 
     async_element_done = true;
 
@@ -267,12 +266,11 @@ void AsyncMorse::start_wait(unsigned long time){
 void AsyncMorse::step_wait(unsigned long time){
     if(!is_time_ready(time)){
         return;
-    }
-
-    if(async_repeat){
+    }    if(async_repeat){
         restart_morse();
     } else {
         async_phase = PHASE_DONE;
+        async_just_completed = true;  // Mark that we just completed
     }
 }
 
@@ -284,6 +282,7 @@ void AsyncMorse::handle_transmission_complete(unsigned long time) {
         start_wait(time);
     } else {
         async_phase = PHASE_DONE;
+        async_just_completed = true;  // Mark that we just completed
     }
 }
 
@@ -300,8 +299,15 @@ int AsyncMorse::step_morse(unsigned long time){
             break;
         case PHASE_WAIT:
             step_wait(time);
-            break;
-    }    // Generate output signal based on current active state
+            break;    }
+    
+    // Check for message completion before normal wave generator control
+    if(async_just_completed) {
+        async_just_completed = false;  // Reset flag after reporting
+        return STEP_MORSE_MESSAGE_COMPLETE;
+    }
+    
+    // Generate output signal based on current active state
     if(async_active != async_switched_on) {
         async_switched_on = async_active;
         return async_active ? STEP_MORSE_TURN_ON : STEP_MORSE_TURN_OFF;
@@ -315,6 +321,13 @@ int AsyncMorse::step_morse(unsigned long time){
 // ========================================
 bool AsyncMorse::is_time_ready(unsigned long current_time) {
     return current_time >= async_next_event;
+}
+
+// ========================================
+// COMPLETION CHECK
+// ========================================
+bool AsyncMorse::is_done() const {
+    return async_phase == PHASE_DONE;
 }
 
 

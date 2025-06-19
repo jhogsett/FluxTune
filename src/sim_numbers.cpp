@@ -10,7 +10,7 @@
 #include <Arduino.h>
 #endif
 
-#define INTER_GROUP_DELAY 1000  // 1 second delay between number groups
+#define INTER_GROUP_DELAY 2000  // 2 seconds delay between number groups (more distinct)
 #define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 
 SimNumbers::SimNumbers(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
@@ -21,7 +21,7 @@ SimNumbers::SimNumbers(RealizerPool *realizer_pool) : SimTransmitter(realizer_po
     _in_inter_group_delay = false;
     _next_group_time = 0;
     _transmission_active = false;
-    _last_morse_state = STEP_MORSE_LEAVE_OFF;
+    _wpm = 18;  // Default WPM
 }
 
 bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
@@ -29,9 +29,11 @@ bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
     if(!common_begin(time, fixed_freq))
         return false;
     
+    _wpm = wpm;  // Store WPM setting for consistent use
+    
     // Start with first group immediately
     generate_next_number_group();
-    _morse.start_morse(_group_buffer, wpm, false, 0);  // No repeat, no wait
+    _morse.start_morse(_group_buffer, _wpm, false, 0);  // No repeat, no wait
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     wavegen->set_frequency(NUMBERS_SPACE_FREQUENCY, false);
@@ -66,8 +68,7 @@ bool SimNumbers::step(unsigned long time)
 {
     // Handle morse code timing
     int morse_state = _morse.step_morse(time);
-    
-    switch(morse_state){
+      switch(morse_state){
         case STEP_MORSE_TURN_ON:
             _active = true;
             _transmission_active = true;
@@ -83,17 +84,14 @@ bool SimNumbers::step(unsigned long time)
             _active = false;
             realize();
             break;
-    }
-    
-    // Detect transmission completion: was active, now consistently off
-    if(_transmission_active && 
-       morse_state == STEP_MORSE_LEAVE_OFF && 
-       _last_morse_state == STEP_MORSE_LEAVE_OFF) {
-        
-        _transmission_active = false;
-        
-        if(!_in_inter_group_delay) {
-            // Group just finished, start delay
+            
+        case STEP_MORSE_MESSAGE_COMPLETE:
+            // Message transmission just completed!
+            _active = false;
+            _transmission_active = false;
+            realize();
+            
+            // Start delay before next group
             _in_inter_group_delay = true;
             _groups_sent++;
             
@@ -105,18 +103,16 @@ bool SimNumbers::step(unsigned long time)
                 // More groups in cycle, short delay
                 _next_group_time = time + INTER_GROUP_DELAY;
             }
-        }
-    }
+            break;    }
     
     // Check if it's time for next group
     if(_in_inter_group_delay && time >= _next_group_time) {
         _in_inter_group_delay = false;
         // Generate fresh random group
         generate_next_number_group();
-        _morse.start_morse(_group_buffer, 18, false, 0);  // Start new group
+        _morse.start_morse(_group_buffer, _wpm, false, 0);  // Start new group with stored WPM
     }
     
-    _last_morse_state = morse_state;
     return true;
 }
 
@@ -134,12 +130,12 @@ void SimNumbers::generate_next_number_group()
 #endif
     }
     
-    // Format as "XXXXX " (5 digits + space for separation)
+    // Format as "XXXXX" (5 digits only, no space - we handle pauses with timing)
 #ifdef PLATFORM_NATIVE
-    snprintf(_group_buffer, sizeof(_group_buffer), "%d%d%d%d%d ", 
+    snprintf(_group_buffer, sizeof(_group_buffer), "%d%d%d%d%d", 
              digits[0], digits[1], digits[2], digits[3], digits[4]);
 #else
-    sprintf(_group_buffer, "%d%d%d%d%d ", 
+    sprintf(_group_buffer, "%d%d%d%d%d", 
             digits[0], digits[1], digits[2], digits[3], digits[4]);
 #endif
 }

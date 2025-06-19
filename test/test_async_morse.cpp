@@ -82,12 +82,12 @@ void test_morse_produces_valid_states(void) {
     morse->start_morse("E", 20, false, 0);
     
     for (unsigned long time = 0; time <= 200; time += 5) {
-        int state = morse->step_morse(time);
-        TEST_ASSERT_TRUE_MESSAGE(
+        int state = morse->step_morse(time);        TEST_ASSERT_TRUE_MESSAGE(
             state == STEP_MORSE_TURN_ON || 
             state == STEP_MORSE_TURN_OFF || 
             state == STEP_MORSE_LEAVE_ON || 
-            state == STEP_MORSE_LEAVE_OFF,
+            state == STEP_MORSE_LEAVE_OFF ||
+            state == STEP_MORSE_MESSAGE_COMPLETE,
             "All states should be valid morse states"
         );
     }

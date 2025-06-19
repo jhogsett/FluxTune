@@ -25,13 +25,13 @@ private:
     void generate_next_number_group();
     
     AsyncMorse _morse;
-    char _group_buffer[7];          // Small buffer for single 5-digit group + space + null
+    char _group_buffer[6];          // Buffer for single 5-digit group + null ("12345")
     int _groups_sent;               // Count of groups sent in current cycle
     int _total_groups_per_cycle;    // Total groups to send per cycle (13 for creepiness)
     bool _in_inter_group_delay;     // True when waiting between groups
     unsigned long _next_group_time; // When to send next group
     bool _transmission_active;      // Track if morse is currently transmitting
-    int _last_morse_state;          // Last morse state to detect completion
+    int _wpm;                       // Store WPM setting for consistent use
 };
 
 #endif
