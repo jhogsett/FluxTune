@@ -12,8 +12,8 @@
 #define PAGER_TONE_A_DURATION 1000    // First tone: 1.0 seconds (standard duration)
 #define PAGER_TONE_B_DURATION 3000    // Second tone: 3.0 seconds (standard duration)
 #define PAGER_INTER_TONE_GAP 0        // No gap between tones in authentic systems
-#define PAGER_SILENCE_MIN 3000        // Minimum 3 seconds silence (shortened for testing)
-#define PAGER_SILENCE_MAX 8000        // Maximum 8 seconds silence (shortened for testing)
+#define PAGER_SILENCE_MIN 3000        // Minimum 3 seconds silence
+#define PAGER_SILENCE_MAX 6000        // Maximum 6 seconds silence (reduced for more frequent paging)
 
 // Pager step return values
 #define STEP_PAGER_TURN_ON   1        // Start transmitting (tone A or B)
