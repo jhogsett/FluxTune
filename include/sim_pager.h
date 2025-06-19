@@ -4,6 +4,8 @@
 #include "async_pager.h"
 #include "sim_transmitter.h"
 
+class SignalMeter; // Forward declaration
+
 // Pager tone frequency range (Hz offset from VFO) - DTMF-like range for pleasant listening
 #define PAGER_TONE_MIN_OFFSET 650.0    // Minimum tone frequency offset (DTMF-like range)
 #define PAGER_TONE_MAX_OFFSET 1650.0   // Maximum tone frequency offset (DTMF-like range)
@@ -12,7 +14,7 @@
 class SimPager : public SimTransmitter
 {
 public:
-    SimPager(RealizerPool *realizer_pool);
+    SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter);
     
     virtual bool begin(unsigned long time, float fixed_freq);
     virtual bool update(Mode *mode);    virtual bool step(unsigned long time);
@@ -27,6 +29,9 @@ private:
     AsyncPager _pager;
     float _current_tone_a_offset;
     float _current_tone_b_offset;
+    SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses
+
+    void send_carrier_charge_pulse();  // Helper to send charge pulse to signal meter
 };
 
 #endif

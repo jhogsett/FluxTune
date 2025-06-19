@@ -2,6 +2,7 @@
 #include "wavegen.h"
 #include "realizer_pool.h"
 #include "sim_numbers.h"
+#include "signal_meter.h"
 
 #ifdef PLATFORM_NATIVE
 #include <cstdlib>  // For rand()
@@ -13,7 +14,7 @@
 #define INTER_GROUP_DELAY 2000  // 2 seconds delay between number groups (more distinct)
 #define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 
-SimNumbers::SimNumbers(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
+SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter) : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
 {
     // Base class initializes all common variables
     _groups_sent = 0;
@@ -65,24 +66,31 @@ bool SimNumbers::update(Mode *mode)
 }
 
 bool SimNumbers::step(unsigned long time)
-{
-    // Handle morse code timing
+{    // Handle morse code timing
     int morse_state = _morse.step_morse(time);
       switch(morse_state){
         case STEP_MORSE_TURN_ON:
             _active = true;
             _transmission_active = true;
             realize();
+            send_carrier_charge_pulse();  // Send charge pulse when carrier turns on
+            break;
+
+        case STEP_MORSE_LEAVE_ON:
+            // Carrier remains on - send another charge pulse
+            send_carrier_charge_pulse();
             break;
 
         case STEP_MORSE_TURN_OFF:
             _active = false;
             realize();
+            // No charge pulse when carrier turns off
             break;
             
         case STEP_MORSE_LEAVE_OFF:
             _active = false;
             realize();
+            // No charge pulse when carrier is off
             break;
             
         case STEP_MORSE_MESSAGE_COMPLETE:
@@ -138,4 +146,15 @@ void SimNumbers::generate_next_number_group()
     sprintf(_group_buffer, "%d%d%d%d%d", 
             digits[0], digits[1], digits[2], digits[3], digits[4]);
 #endif
+}
+
+// Send charge pulse to signal meter based on VFO proximity
+void SimNumbers::send_carrier_charge_pulse() {
+    if (_signal_meter) {
+        int charge = VFO::calculate_signal_charge(_fixed_freq, _vfo_freq);
+        
+        if (charge > 0) {
+            _signal_meter->add_charge(charge);
+        }
+    }
 }

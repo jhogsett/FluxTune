@@ -2,6 +2,7 @@
 #include "wavegen.h"
 #include "realizer_pool.h"
 #include "sim_pager.h"
+#include "signal_meter.h"
 
 #ifdef PLATFORM_NATIVE
 #include <iostream>
@@ -9,7 +10,7 @@
 #include <cmath>
 #endif
 
-SimPager::SimPager(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
+SimPager::SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter) : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
 {
     // Base class initializes all common variables
     // Generate initial tone pair
@@ -90,15 +91,23 @@ bool SimPager::step(unsigned long time)
             }
             _active = true;
             realize();
+            send_carrier_charge_pulse();  // Send charge pulse when carrier turns on
+            break;
+
+        case STEP_PAGER_LEAVE_ON:
+            // Carrier remains on - send another charge pulse
+            send_carrier_charge_pulse();
             break;
 
         case STEP_PAGER_TURN_OFF:
             _active = false;
             realize();
+            // No charge pulse when carrier turns off
             break;
               case STEP_PAGER_CHANGE_FREQ:
             // Transmitter stays on, but frequency needs to change
             realize();
+            send_carrier_charge_pulse();  // Send charge pulse on frequency change while on
             break;
             
         // LEAVE_ON and LEAVE_OFF don't require action since _active state doesn't change
@@ -167,4 +176,15 @@ void SimPager::debug_print_tone_pair() const
               << "Separation: " << std::abs(_current_tone_b_offset - _current_tone_a_offset) 
               << " Hz" << std::endl;
 #endif
+}
+
+// Send charge pulse to signal meter based on VFO proximity
+void SimPager::send_carrier_charge_pulse() {
+    if (_signal_meter) {
+        int charge = VFO::calculate_signal_charge(_fixed_freq, _vfo_freq);
+        
+        if (charge > 0) {
+            _signal_meter->add_charge(charge);
+        }
+    }
 }

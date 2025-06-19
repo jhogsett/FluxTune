@@ -21,6 +21,9 @@ public:
     void force_transmitter_refresh();  // Force hardware refresh when switching to SimRadio
     void mark_hardware_dirty();  // Mark hardware as needing refresh
 
+    // Static utility for stations to calculate signal strength charge based on VFO proximity
+    static int calculate_signal_charge(float station_freq, float vfo_freq);
+
     unsigned long _frequency;
     byte _sub_frequency;
     unsigned long _step;

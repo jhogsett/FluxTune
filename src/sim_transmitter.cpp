@@ -23,8 +23,8 @@ void SimTransmitter::common_frequency_update(Mode *mode)
 {
     // Note: mode is expected to be a VFO object
     VFO *vfo = static_cast<VFO*>(mode);
-    _frequency = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
-    _frequency = _frequency - _fixed_freq;
+    _vfo_freq = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
+    _frequency = _vfo_freq - _fixed_freq;
 }
 
 bool SimTransmitter::check_frequency_bounds()

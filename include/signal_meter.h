@@ -7,21 +7,48 @@
 #endif
 
 // Signal Meter - 7 WS2812 LEDs showing signal strength
-// Similar architecture to HT16K33Disp display
+// Uses capacitor-like charging/discharging behavior for realistic analog meter response
+//
+// CAPACITOR BEHAVIOR:
+// - add_charge() sends electrical charge pulses (like current into a capacitor)
+// - Accumulator builds up charge from multiple pulses
+// - update() applies time-based decay (like capacitor discharge through resistor)
+// - Results in smooth, realistic meter response with persistence and decay
+//
+// USAGE:
+// 1. Call add_charge() whenever tuning events occur (e.g., encoder changes)
+// 2. Call update() regularly in main loop for time-based decay
+// 3. Meter will smoothly charge up during tuning and decay when idle
+//
+// TUNING TIPS:
+// - Increase DECAY_RATE for faster meter fall-off (more responsive)
+// - Decrease DEFAULT_CHARGE for slower buildup (less sensitive)
+// - Decrease DECAY_INTERVAL for smoother decay (more CPU usage)
 class SignalMeter
 {
 public:
     SignalMeter();
     
     void init();
-    void update_signal_strength(int strength);  // 0-255 signal strength value
+    void add_charge(int charge_amount = DEFAULT_CHARGE);    // Add charge pulse (like electrical charge into capacitor)
+    void update(unsigned long current_time);    // Update with time-based decay
     void clear();
     
-private:
-    void write_leds();
+    // Legacy method for backward compatibility (now adds charge instead of setting directly)
+    void update_signal_strength(int strength);
     
-    static const int LED_COUNT = 7;
-    int _current_strength;
+private:
+    void write_leds();    static const int LED_COUNT = 7;
+    static const int MAX_ACCUMULATOR = 510;     // Maximum accumulator value (2x LED range for resolution)
+    
+    // TUNABLE PARAMETERS for capacitor behavior:
+    static const int DECAY_RATE = 3;            // Accumulator decay per update (higher = faster decay)
+    static const unsigned long DECAY_INTERVAL = 50;  // Decay update interval in milliseconds
+    static const int DEFAULT_CHARGE = 6;        // Default charge amount per pulse (lower = slower buildup)
+    
+    int _accumulator;                           // Current charge accumulator (0 to MAX_ACCUMULATOR)
+    int _current_strength;                      // Current display strength (0-255)
+    unsigned long _last_decay_time;             // Last time decay was applied
     
 #ifndef NATIVE_BUILD
     rgb_color _led_buffer[LED_COUNT];
