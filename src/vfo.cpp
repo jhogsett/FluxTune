@@ -72,9 +72,30 @@ void VFO::mark_hardware_dirty(){
 
 void VFO::update_signal_meter(SignalMeter *signal_meter) {
     // Calculate signal strength based on proximity to active stations
-    // For now, use a simple calculation based on station frequencies
-      // Known station frequencies (should eventually come from realization pool)
+    // For now, use a simple calculation based on station frequencies    // Known station frequencies (based on configuration)
     const float station_frequencies[] = {
+#if defined(ENABLE_FOUR_CW_STATIONS)
+        7002000.0,  // CW station 1
+        7003000.0,  // CW station 2
+        7004000.0,  // CW station 3
+        7005000.0   // CW station 4
+#elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
+        7002700.0,  // Numbers station 1
+        7003700.0,  // Numbers station 2
+        7004700.0,  // Numbers station 3
+        7005700.0   // Numbers station 4
+#elif defined(ENABLE_FOUR_PAGER_STATIONS)
+        7006000.0,  // Pager station 1
+        7007000.0,  // Pager station 2
+        7008000.0,  // Pager station 3
+        7009000.0   // Pager station 4
+#elif defined(ENABLE_FOUR_RTTY_STATIONS)
+        7004100.0,  // RTTY station 1
+        7005100.0,  // RTTY station 2
+        7006100.0,  // RTTY station 3
+        7007100.0   // RTTY station 4
+#else
+        // Default mixed or minimal configuration
 #ifdef ENABLE_MORSE_STATION
         7002000.0,  // CW station
 #endif
@@ -86,6 +107,7 @@ void VFO::update_signal_meter(SignalMeter *signal_meter) {
 #endif
 #ifdef ENABLE_RTTY_STATION
         7004100.0   // RTTY station
+#endif
 #endif
     };
     const int num_stations = sizeof(station_frequencies) / sizeof(station_frequencies[0]);

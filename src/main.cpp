@@ -187,6 +187,38 @@ Realizer *realizers[4] = {&wavegen1, &wavegen2, &wavegen3, &wavegen4};
 bool realizer_stats[4] = {false, false, false, false};
 RealizerPool realizer_pool(realizers, realizer_stats, 4);
 
+// Station Instances - configured based on station_config.h
+
+#if defined(ENABLE_FOUR_CW_STATIONS)
+// Four CW stations for focused testing
+SimStation simstation1(&realizer_pool);
+SimStation simstation2(&realizer_pool);
+SimStation simstation3(&realizer_pool);
+SimStation simstation4(&realizer_pool);
+
+#elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
+// Four Numbers stations for focused testing
+SimNumbers simnumbers1(&realizer_pool);
+SimNumbers simnumbers2(&realizer_pool);
+SimNumbers simnumbers3(&realizer_pool);
+SimNumbers simnumbers4(&realizer_pool);
+
+#elif defined(ENABLE_FOUR_PAGER_STATIONS)
+// Four Pager stations for focused testing
+SimPager simpager1(&realizer_pool);
+SimPager simpager2(&realizer_pool);
+SimPager simpager3(&realizer_pool);
+SimPager simpager4(&realizer_pool);
+
+#elif defined(ENABLE_FOUR_RTTY_STATIONS)
+// Four RTTY stations for focused testing
+SimRTTY simrtty1(&realizer_pool);
+SimRTTY simrtty2(&realizer_pool);
+SimRTTY simrtty3(&realizer_pool);
+SimRTTY simrtty4(&realizer_pool);
+
+#else
+// Default mixed configuration or minimal config
 #ifdef ENABLE_MORSE_STATION
 SimStation simstation1(&realizer_pool);
 #endif
@@ -199,29 +231,28 @@ SimNumbers simnumbers2(&realizer_pool);  // Numbers Station - spooky!
 SimPager simpager3(&realizer_pool);
 #endif
 
-// SimStation simstation4(&realizer_pool);
+#ifdef ENABLE_RTTY_STATION
+SimRTTY simstation4(&realizer_pool);
+#endif
+#endif
 
 WaveOut waveout1(&realizer_pool);
 WaveOut waveout2(&realizer_pool);
 WaveOut waveout3(&realizer_pool);
 WaveOut waveout4(&realizer_pool);
 
-// Realization *simstations[] = {&simstation1, &simstation2, &simstation3, &simstation4}; 
-
-// VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
-// VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
-// VFO vfoc("VFO C", 146520000.0, 5000, &realization_pool);
-
-// SimRTTY simstation1(&wavegen1, 7005000.0);
-// SimRTTY simstation2(&wavegen2, 7006000.0);
-// SimRTTY simstation3(&wavegen3, 7007000.0);
-#ifdef ENABLE_RTTY_STATION
-SimRTTY simstation4(&realizer_pool);
-#endif
-
-// Station arrays - using fixed size for simplicity
-// You can manually adjust the active stations as needed
+// Station arrays - configured based on station_config.h
 Realization *realizations[4] = {
+#if defined(ENABLE_FOUR_CW_STATIONS)
+    &simstation1, &simstation2, &simstation3, &simstation4
+#elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
+    &simnumbers1, &simnumbers2, &simnumbers3, &simnumbers4
+#elif defined(ENABLE_FOUR_PAGER_STATIONS)
+    &simpager1, &simpager2, &simpager3, &simpager4
+#elif defined(ENABLE_FOUR_RTTY_STATIONS)
+    &simrtty1, &simrtty2, &simrtty3, &simrtty4
+#else
+    // Default mixed or minimal configuration
 #ifdef ENABLE_MORSE_STATION
     &simstation1,
 #else
@@ -241,6 +272,7 @@ Realization *realizations[4] = {
     &simstation4
 #else
     nullptr
+#endif
 #endif
 };
 bool realization_stats[4] = {false, false, false, false};
@@ -481,6 +513,36 @@ void loop()
 #endif
     unsigned long time = millis();    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	
+#if defined(ENABLE_FOUR_CW_STATIONS)
+	// Four CW stations with different messages and speeds
+	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+	simstation2.begin(time + random(1000), 7003000.0, "CQ CQ DE W1ABC W1ABC K    ", 15);
+	simstation3.begin(time + random(1000), 7004000.0, "CQ CQ DE K2DEF K2DEF K    ", 20);
+	simstation4.begin(time + random(1000), 7005000.0, "CQ CQ DE VE3GHI VE3GHI K  ", 25);
+
+#elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
+	// Four Numbers stations on different frequencies with different speeds
+	simnumbers1.begin(time + random(1000), 7002700.0, 15);  // Slow numbers
+	simnumbers2.begin(time + random(1000), 7003700.0, 18);  // Medium numbers
+	simnumbers3.begin(time + random(1000), 7004700.0, 22);  // Fast numbers
+	simnumbers4.begin(time + random(1000), 7005700.0, 12);  // Very slow numbers
+
+#elif defined(ENABLE_FOUR_PAGER_STATIONS)
+	// Four Pager stations on different frequencies
+	simpager1.begin(time + random(1000), 7006000.0);
+	simpager2.begin(time + random(1000), 7007000.0);
+	simpager3.begin(time + random(1000), 7008000.0);
+	simpager4.begin(time + random(1000), 7009000.0);
+
+#elif defined(ENABLE_FOUR_RTTY_STATIONS)
+	// Four RTTY stations on different frequencies
+	simrtty1.begin(time + random(1000), 7004100.0);
+	simrtty2.begin(time + random(1000), 7005100.0);
+	simrtty3.begin(time + random(1000), 7006100.0);
+	simrtty4.begin(time + random(1000), 7007100.0);
+
+#else
+	// Default mixed or minimal configuration
 #ifdef ENABLE_MORSE_STATION
 	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
 #endif
@@ -495,7 +557,7 @@ void loop()
 
 #ifdef ENABLE_RTTY_STATION
 	simstation4.begin(time + random(1000), 7004100.0);
-	// simstation4.begin(time + random(1000), 7003500.0, "CQ CQ DE N16CCM N6CCM K    ", 24);
+#endif
 #endif
 
 	set_application(APP_SIMRADIO, &display);
