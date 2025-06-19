@@ -61,3 +61,8 @@ void VFO::force_transmitter_refresh(){
     // This ensures wave generators are properly updated when switching to SimRadio
     _realization_pool->force_sim_transmitter_refresh();
 }
+
+void VFO::mark_hardware_dirty(){
+    // Mark hardware state as unknown - will trigger refresh on next update
+    _realization_pool->mark_dirty();
+}

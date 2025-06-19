@@ -20,12 +20,13 @@ public:
 
     void update(Mode *mode);
     void force_sim_transmitter_refresh();  // Force hardware refresh for SimTransmitter objects
+    void mark_dirty();  // Mark hardware state as unknown - triggers refresh on next update
 
 private:
     Realization **_realizations;
     bool *_statuses;
     int _nrealizations;
-
+    bool _hardware_dirty;  // True when hardware state is unknown and needs refresh
 };
 
 

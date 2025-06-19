@@ -338,19 +338,15 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 			current_dispatcher = APP_SETTINGS;
 			title = (FSTR("Settings"));
 		break;
-	}
-			display->scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-	dispatcher->set_mode(display, 0);
+	}	display->scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
 	
-	// Force wave generator refresh when switching to SimRadio
+	// Mark hardware state as dirty when switching to SimRadio  
 	// This ensures audio resumes properly after application switches
 	if(application == APP_SIMRADIO) {
-		// Access the current VFO through the dispatcher to force refresh
-		VFO *current_vfo = static_cast<VFO*>(dispatcher1.get_current_mode());
-		if(current_vfo != nullptr) {
-			current_vfo->force_transmitter_refresh();
-		}
+		realization_pool.mark_dirty();
 	}
+	
+	dispatcher->set_mode(display, 0);
 
 	// // empty outstanding events
 	// encoder_handlerA.changed();
