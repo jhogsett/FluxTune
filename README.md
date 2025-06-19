@@ -1,6 +1,47 @@
 # FluxTune
 Arduino Based Artificial Radio
 
+## Features
+
+FluxTune is a sophisticated radio simulation system with multiple station types and a frequency-aware signal meter:
+
+### 🚀 Station Types
+- **CW/Morse Stations**: Customizable callsigns and speeds
+- **Numbers Stations**: Authentic spooky number group transmissions  
+- **Pager Stations**: Digital pager simulations
+- **RTTY Stations**: Radio teletype digital mode
+
+### 📊 Signal Meter
+- 7-LED WS2812 signal strength indicator
+- Real-time response to frequency proximity
+- Updates synchronously with VFO tuning
+
+### ⚙️ Configurable Architecture
+- Conditional compilation for memory optimization
+- Switchable test configurations
+- Event-driven architecture with clean separation
+
+## Configuration
+
+### Station Configuration
+Edit `include/station_config.h` to choose your configuration:
+
+**Production (Default):**
+```cpp
+#define CONFIG_MIXED_STATIONS    // All different station types
+```
+
+**Testing Configurations:**
+```cpp
+#define CONFIG_FOUR_CW          // Four CW stations (different speeds)
+#define CONFIG_FOUR_NUMBERS     // Four Numbers stations (spooky!)
+#define CONFIG_FOUR_PAGER       // Four Pager stations
+#define CONFIG_FOUR_RTTY        // Four RTTY stations  
+#define CONFIG_MINIMAL_CW       // Single CW station (minimal memory)
+```
+
+See [STATION_CONFIGURATION.md](STATION_CONFIGURATION.md) for detailed configuration options.
+
 ## Testing
 
 This project includes comprehensive test suites for core components:
@@ -10,7 +51,7 @@ This project includes comprehensive test suites for core components:
 - Tests initialization, dot/dash patterns, timing consistency, and edge cases
 
 ### AsyncRTTY Tests  
-- 17 tests covering RTTY signal generation, timing, and behavior
+- 20 tests covering RTTY signal generation, timing, and behavior
 - Tests initialization, state transitions, bit timing, repeat modes, and randomness
 
 ### Running Tests
@@ -32,3 +73,13 @@ g++ ... -o test_async_morse; ./test_async_morse
 ```
 
 VS Code tasks are also available for building and running tests.
+
+## Architecture
+
+FluxTune uses a clean event-driven architecture:
+- **Event Dispatcher**: Central event routing and coordination
+- **Mode Handlers**: VFO tuning, contrast control, option management
+- **Display System**: Synchronized updates with signal meter
+- **Station Pool**: Configurable realizations with conditional compilation
+
+The architecture supports both native PC testing and Arduino deployment with the same codebase.
