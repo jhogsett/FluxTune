@@ -15,6 +15,7 @@
 #include "saved_data.h"
 #include "seeding.h"
 #include "utils.h"
+#include "signal_meter.h"
 
 // #define ENCODER_DO_NOT_USE_INTERRUPTS
 #ifndef PLATFORM_NATIVE
@@ -69,13 +70,26 @@ rgb_color colors[LED_COUNT] =
   { 15, 0, 0 } 
 };
 
+// ========================================
+// OLD RANDOM SIGNAL METER VARIABLES (REPLACED)
+// ========================================
+// These were replaced by the new SignalMeter class
+
+/*
 // Global LED buffer to avoid stack allocation in step_sm()
 rgb_color led_buffer[LED_COUNT];
 
 #define INTERVAL 100
 unsigned long next_time = 0;
 int value = 127;
+*/
 
+// ========================================
+// OLD RANDOM SIGNAL METER (REPLACED)
+// ========================================
+// This was replaced by the new frequency-based SignalMeter class
+
+/*
 void step_sm(unsigned long time)
 {
 	if(time < next_time)
@@ -94,18 +108,6 @@ void step_sm(unsigned long time)
 	int on_leds = (sample / 73) + 1;
 	int remain = ((sample % 73) * 16) / 73;
 
-	// Serial.println(remain);
-
-//   remain = remain / 73
-//   print(full_on)
-//   print(remain)
-
-
-
-//   int count = value / 8;
-//   if(count > 7)
-//     count = 7;
-	// 
 	memcpy(led_buffer, colors, on_leds * sizeof(rgb_color));
 	// Clear the remaining LEDs to off (black)
 	memset(led_buffer + on_leds, 0, (LED_COUNT - on_leds) * sizeof(rgb_color));
@@ -124,6 +126,7 @@ void step_sm(unsigned long time)
 
 	ledStrip.write(led_buffer, LED_COUNT);
 }
+*/
 
 
 #define CLKA 3
@@ -228,6 +231,8 @@ EventDispatcher dispatcher3(handlers3, 1);
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
 
+// Signal meter instance
+SignalMeter signal_meter;
 
 #define APP_SIMRADIO 1
 #define APP_WAVEGEN 2
@@ -243,6 +248,10 @@ void setup_display(){
 	disp2.init(brightness+1);
 	disp3.init(brightness+2); */
 	display.clear();
+}
+
+void setup_signal_meter(){
+	signal_meter.init();
 }
 
 void setup_leds(){
@@ -271,6 +280,7 @@ void setup(){
 
 	setup_leds();
 	setup_display();
+	setup_signal_meter();
 	// setup_buttons();
 
 
@@ -414,11 +424,11 @@ void loop()
 	// AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
 
 	// bool active = false;
-	// bool freq = false;
-	// bool last_active = true;
-	while(true){        unsigned long time = millis();
+	// bool freq = false;	// bool last_active = true;
+		while(true){
+		unsigned long time = millis();
 
-		step_sm(time);
+		// Remove old random signal meter - now using frequency-based signal meter
 
 		// switch(morse1.step_morse(time)){
 		// 	case STEP_MORSE_TURN_ON:
@@ -497,13 +507,16 @@ void loop()
 				// encoder_handlerB.long_pressed();
 			}
 		}
+		
 		if(encoder_handlerA.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 #ifndef DISABLE_DISPLAY_OPERATIONS
 			dispatcher->update_display(&display);
 #endif
-			dispatcher->update_realization();
-		}		if(encoder_handlerB.changed()){
+			dispatcher->update_signal_meter(&signal_meter);			dispatcher->update_realization();
+		}
+		
+		if(encoder_handlerB.changed()){
 			int diff_value = encoder_handlerB.diff();
 			// Diagnostic: Print encoder B events to demonstrate phantom event bug
 			Serial.print("EncoderB: diff=");

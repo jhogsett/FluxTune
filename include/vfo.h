@@ -4,6 +4,9 @@
 #include "mode.h"
 #include "realization_pool.h"
 
+// Forward declaration
+class SignalMeter;
+
 // need to define a set of bands
 
 class VFO : public Mode
@@ -13,6 +16,7 @@ public:
     VFO(const char *title, float frequency, unsigned long step, RealizationPool *realization_pool);
     
     virtual void update_display(HT16K33Disp *display);
+    virtual void update_signal_meter(SignalMeter *signal_meter);
     virtual void update_realization();
     void force_transmitter_refresh();  // Force hardware refresh when switching to SimRadio
     void mark_hardware_dirty();  // Mark hardware as needing refresh

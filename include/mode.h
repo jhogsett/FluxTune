@@ -8,6 +8,9 @@
 #endif
 #include "realization.h"
 
+// Forward declaration
+class SignalMeter;
+
 // generic mode, has data and methods specific to a mode
 
 // a mode has public methods/data
@@ -21,6 +24,7 @@ public:
     Mode(const char *title);
 
     virtual void update_display(HT16K33Disp *display);
+    virtual void update_signal_meter(SignalMeter *signal_meter);
     virtual void update_realization();
 
     const char *_title;

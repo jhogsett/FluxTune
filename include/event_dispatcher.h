@@ -4,6 +4,9 @@
 #include "mode_handler.h"
 #include "realization.h"
 
+// Forward declaration
+class SignalMeter;
+
 #define ID_ENCODER_TUNING 0
 #define ID_ENCODER_MODES 1
 
@@ -23,6 +26,7 @@ public:
     bool dispatch_event(HT16K33Disp *display, int encoder_id, bool press, bool long_press);
 
     void update_display(HT16K33Disp *display);
+    void update_signal_meter(SignalMeter *signal_meter);
     void update_realization();
     
     Mode* get_current_mode();  // Access current mode for refresh operations
