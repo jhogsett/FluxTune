@@ -14,6 +14,7 @@
 #define STEP_MORSE_TURN_OFF  2
 #define STEP_MORSE_LEAVE_ON  3
 #define STEP_MORSE_LEAVE_OFF 4
+#define STEP_MORSE_MESSAGE_COMPLETE 5  // Signals end of message (doesn't affect wave generator)
 
 #define STEP_ELEMENT_EARLY 0
 #define STEP_ELEMENT_ACTIVE 1
@@ -26,6 +27,7 @@ public:
 
     void start_morse(const char *s, int wpm, bool repeat, int wait_seconds);
     int step_morse(unsigned long time);
+    bool is_done() const;  // Check if current transmission is complete
     
 private:
     // ========================================
@@ -61,12 +63,12 @@ private:
     byte async_morse;                      // Bit pattern for current character
     byte async_element;                    // Current element within character (0-6)
     bool async_element_done;               // True when current element is finished
-    
-    // Timing and output state
+      // Timing and output state
     bool async_active;                     // True when transmitter should be ON
     unsigned long async_next_event;        // Time when next state change occurs
     bool async_space;                      // True when in gap between elements
     bool async_switched_on;                // Tracks output transitions for TURN_ON/TURN_OFF
+    bool async_just_completed;             // True for one step after message completion
 
 };
 

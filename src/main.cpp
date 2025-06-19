@@ -35,6 +35,7 @@
 #include "wave_out.h"
 
 #include "sim_station.h"
+#include "sim_numbers.h"
 #include "sim_rtty.h"
 #include "sim_pager.h"
 
@@ -170,7 +171,7 @@ bool realizer_stats[4] = {false, false, false, false};
 RealizerPool realizer_pool(realizers, realizer_stats, 4);
 
 SimStation simstation1(&realizer_pool);
-SimStation simstation2(&realizer_pool);
+SimNumbers simnumbers2(&realizer_pool);  // Numbers Station - spooky!
 SimPager simpager3(&realizer_pool);
 // SimStation simstation4(&realizer_pool);
 
@@ -190,7 +191,7 @@ WaveOut waveout4(&realizer_pool);
 // SimRTTY simstation3(&wavegen3, 7007000.0);
 SimRTTY simstation4(&realizer_pool);
 
-Realization *realizations[4] = {&simstation1, &simstation2, &simpager3, &simstation4}; 
+Realization *realizations[4] = {&simstation1, &simnumbers2, &simpager3, &simstation4}; 
 bool realization_stats[4] = {false, false, false, false};
 RealizationPool realization_pool(realizations, realization_stats, 4);
 
@@ -390,9 +391,9 @@ void loop()
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
 #endif
     unsigned long time = millis();
-    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);	
+    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
-	simstation2.begin(time + random(1000), 7002700.0, "CQ CQ DE N6CCM N6CCM K    ", 13);
+	simnumbers2.begin(time + random(1000), 7002700.0, 18);  // Numbers Station - spooky 18 WPM!
 	simpager3.begin(time + random(1000), 7006000.0);
 
 	simstation4.begin(time + random(1000), 7004100.0);
