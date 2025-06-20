@@ -30,8 +30,6 @@ private:
     float _current_tone_a_offset;
     float _current_tone_b_offset;
     SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses
-
-    void send_carrier_charge_pulse();  // Helper to send charge pulse to signal meter
 };
 
 #endif

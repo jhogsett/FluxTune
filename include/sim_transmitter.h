@@ -1,6 +1,8 @@
 #ifndef __SIM_TRANSMITTER_H__
 #define __SIM_TRANSMITTER_H__
 
+#include "signal_meter.h"
+#include "vfo.h"
 #include "realization.h"
 #include "realizer_pool.h"
 
@@ -61,6 +63,21 @@ protected:    // Common utility methods
     
     // Dynamic station management state
     StationState _station_state;  // Current state in dynamic management system
+
+    // Centralized charge pulse logic for all simulated stations
+    virtual void send_carrier_charge_pulse(SignalMeter* signal_meter) {
+        if (!signal_meter) return;
+        int charge = VFO::calculate_signal_charge(_fixed_freq, _vfo_freq);
+        if (charge > 0) {
+            const float LOCK_WINDOW_HZ = 50.0; // Lock window threshold (adjust as needed)
+            float freq_diff = abs(_fixed_freq - _vfo_freq);
+            if (freq_diff <= LOCK_WINDOW_HZ) {
+                signal_meter->add_charge(-charge);
+            } else {
+                signal_meter->add_charge(charge);
+            }
+        }
+    }
 };
 
 #endif

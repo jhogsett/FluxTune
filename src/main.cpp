@@ -534,7 +534,16 @@ void loop()
 		// 		break;
 		// }
 
-        panel_leds.step(time);
+        // --- PANEL LOCK LED OVERRIDE ---
+        int lock_brightness = signal_meter.get_panel_led_brightness();
+        if (lock_brightness > 0) {
+            int pwm = (lock_brightness * PANEL_LOCK_LED_FULL_BRIGHTNESS) / 255;
+            analogWrite(WHITE_PANEL_LED, pwm); // White LED lock indicator
+        } else {
+            analogWrite(WHITE_PANEL_LED, 0);
+        }
+        // Comment out the old animation:
+        // panel_leds.step(time);
 
 		realization_pool.step(time);
 

@@ -50,9 +50,6 @@ private:
     NumbersPhase _current_phase;
     int _interval_repeats_sent;     // Count of "FT" repeats sent
     int _total_interval_repeats;    // Total "FT" repeats to send (e.g., 6 for authentic feel)
-
-private:
-    void send_carrier_charge_pulse();  // Helper to send charge pulse to signal meter
 };
 
 #endif

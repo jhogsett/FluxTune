@@ -20,9 +20,6 @@ public:
     AsyncMorse _morse;
     bool _changed;
     SignalMeter *_signal_meter;
-    
-private:
-    void send_carrier_charge_pulse();
 };
 
 #endif

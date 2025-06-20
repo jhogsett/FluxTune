@@ -54,12 +54,12 @@ bool SimRTTY::step(unsigned long time){
     	case STEP_RTTY_TURN_ON:
             _active = true;
             realize();
-            send_carrier_charge_pulse();  // Send charge pulse when carrier turns on
+            send_carrier_charge_pulse(_signal_meter);  // Send charge pulse when carrier turns on
     		break;
 
     	case STEP_RTTY_LEAVE_ON:
             // Carrier remains on - send another charge pulse
-            send_carrier_charge_pulse();
+            send_carrier_charge_pulse(_signal_meter);
             break;
 
     	case STEP_RTTY_TURN_OFF:
@@ -70,15 +70,4 @@ bool SimRTTY::step(unsigned long time){
     }
 
     return true;
-}
-
-// Send charge pulse to signal meter based on VFO proximity
-void SimRTTY::send_carrier_charge_pulse() {
-    if (_signal_meter) {
-        int charge = VFO::calculate_signal_charge(_fixed_freq, _vfo_freq);
-        
-        if (charge > 0) {
-            _signal_meter->add_charge(charge);
-        }
-    }
 }
