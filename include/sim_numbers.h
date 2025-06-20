@@ -25,6 +25,8 @@ public:
 
 private:
     void generate_next_number_group();
+    void generate_interval_signal();
+    void generate_ending_sequence();
     
     AsyncMorse _morse;
     char _group_buffer[6];          // Buffer for single 5-digit group + null ("12345")
@@ -35,6 +37,18 @@ private:
     bool _transmission_active;      // Track if morse is currently transmitting
     int _wpm;                       // Store WPM setting for consistent use
     SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses
+    
+    // Enhanced numbers station state
+    enum NumbersPhase {
+        PHASE_INTERVAL_SIGNAL,      // Sending "FT FT FT..." before numbers
+        PHASE_NUMBERS,              // Sending the 13 groups of numbers
+        PHASE_ENDING,               // Sending "00000" ending sequence
+        PHASE_CYCLE_DELAY           // Waiting between complete cycles
+    };
+    
+    NumbersPhase _current_phase;
+    int _interval_repeats_sent;     // Count of "FT" repeats sent
+    int _total_interval_repeats;    // Total "FT" repeats to send (e.g., 6 for authentic feel)
 
 private:
     void send_carrier_charge_pulse();  // Helper to send charge pulse to signal meter
