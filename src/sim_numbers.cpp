@@ -21,8 +21,12 @@ SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter) :
     _total_groups_per_cycle = 13;  // 13 groups for creepiness
     _in_inter_group_delay = false;
     _next_group_time = 0;
-    _transmission_active = false;
-    _wpm = 18;  // Default WPM
+    _transmission_active = false;    _wpm = 18;  // Default WPM
+    
+    // Enhanced numbers station state
+    _current_phase = PHASE_INTERVAL_SIGNAL;
+    _interval_repeats_sent = 0;
+    _total_interval_repeats = DEFAULT_INTERVAL_REPEATS;  // Default interval repeats for optimal anticipation
 }
 
 bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
@@ -32,8 +36,12 @@ bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
     
     _wpm = wpm;  // Store WPM setting for consistent use
     
-    // Start with first group immediately
-    generate_next_number_group();
+    // Start with interval signal phase
+    _current_phase = PHASE_INTERVAL_SIGNAL;
+    _interval_repeats_sent = 0;
+    _groups_sent = 0;
+    
+    generate_interval_signal();
     _morse.start_morse(_group_buffer, _wpm, false, 0);  // No repeat, no wait
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
@@ -92,33 +100,81 @@ bool SimNumbers::step(unsigned long time)
             realize();
             // No charge pulse when carrier is off
             break;
-            
-        case STEP_MORSE_MESSAGE_COMPLETE:
+              case STEP_MORSE_MESSAGE_COMPLETE:
             // Message transmission just completed!
             _active = false;
             _transmission_active = false;
             realize();
             
-            // Start delay before next group
-            _in_inter_group_delay = true;
-            _groups_sent++;
-            
-            if(_groups_sent >= _total_groups_per_cycle) {
-                // Cycle complete, long delay
-                _next_group_time = time + INTER_CYCLE_DELAY;
-                _groups_sent = 0;
-            } else {
-                // More groups in cycle, short delay
-                _next_group_time = time + INTER_GROUP_DELAY;
+            // Handle phase transitions
+            switch(_current_phase) {
+                case PHASE_INTERVAL_SIGNAL:
+                    _interval_repeats_sent++;
+                    if(_interval_repeats_sent >= _total_interval_repeats) {
+                        // Interval signal complete, start numbers phase
+                        _current_phase = PHASE_NUMBERS;
+                        _groups_sent = 0;
+                        _next_group_time = time + INTER_GROUP_DELAY;  // Short delay before first number
+                    } else {
+                        // Send another "FT"
+                        _next_group_time = time + INTER_GROUP_DELAY;
+                    }
+                    break;
+                    
+                case PHASE_NUMBERS:
+                    _groups_sent++;
+                    if(_groups_sent >= _total_groups_per_cycle) {
+                        // Numbers complete, send ending sequence
+                        _current_phase = PHASE_ENDING;
+                        _next_group_time = time + INTER_GROUP_DELAY;
+                    } else {
+                        // More groups in cycle, short delay
+                        _next_group_time = time + INTER_GROUP_DELAY;
+                    }
+                    break;
+                    
+                case PHASE_ENDING:
+                    // Ending sequence complete, start cycle delay
+                    _current_phase = PHASE_CYCLE_DELAY;
+                    _next_group_time = time + INTER_CYCLE_DELAY;
+                    break;
+                    
+                case PHASE_CYCLE_DELAY:
+                    // This shouldn't happen (handled in delay check below)
+                    break;
             }
-            break;    }
-    
-    // Check if it's time for next group
+            
+            _in_inter_group_delay = true;
+            break;}
+      // Check if it's time for next transmission
     if(_in_inter_group_delay && time >= _next_group_time) {
         _in_inter_group_delay = false;
-        // Generate fresh random group
-        generate_next_number_group();
-        _morse.start_morse(_group_buffer, _wpm, false, 0);  // Start new group with stored WPM
+        
+        switch(_current_phase) {
+            case PHASE_INTERVAL_SIGNAL:
+                generate_interval_signal();
+                _morse.start_morse(_group_buffer, _wpm, false, 0);
+                break;
+                
+            case PHASE_NUMBERS:
+                generate_next_number_group();
+                _morse.start_morse(_group_buffer, _wpm, false, 0);
+                break;
+                
+            case PHASE_ENDING:
+                generate_ending_sequence();
+                _morse.start_morse(_group_buffer, _wpm, false, 0);
+                break;
+                
+            case PHASE_CYCLE_DELAY:
+                // Cycle complete, restart with interval signal
+                _current_phase = PHASE_INTERVAL_SIGNAL;
+                _interval_repeats_sent = 0;
+                _groups_sent = 0;
+                generate_interval_signal();
+                _morse.start_morse(_group_buffer, _wpm, false, 0);
+                break;
+        }
     }
     
     return true;
@@ -145,6 +201,28 @@ void SimNumbers::generate_next_number_group()
 #else
     sprintf(_group_buffer, "%d%d%d%d%d", 
             digits[0], digits[1], digits[2], digits[3], digits[4]);
+#endif
+}
+
+void SimNumbers::generate_interval_signal()
+{
+    // Generate "FT" interval signal for FluxTune signature
+    // This creates the anticipatory, hypnotic effect before numbers
+#ifdef PLATFORM_NATIVE
+    snprintf(_group_buffer, sizeof(_group_buffer), "FT");
+#else
+    sprintf(_group_buffer, "FT");
+#endif
+}
+
+void SimNumbers::generate_ending_sequence()
+{
+    // Generate "00000" ending sequence (standard numbers station ending)
+    // This clearly marks the end of the message transmission
+#ifdef PLATFORM_NATIVE
+    snprintf(_group_buffer, sizeof(_group_buffer), "00000");
+#else
+    sprintf(_group_buffer, "00000");
 #endif
 }
 
