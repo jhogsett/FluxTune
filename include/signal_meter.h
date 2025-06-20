@@ -26,8 +26,7 @@
 // - Decrease DECAY_INTERVAL for smoother decay (more CPU usage)
 class SignalMeter
 {
-public:
-    SignalMeter();
+public:    SignalMeter();
     
     void init();
     void add_charge(int charge_amount = DEFAULT_CHARGE);    // Add charge pulse (like electrical charge into capacitor)
@@ -36,6 +35,9 @@ public:
     
     // Legacy method for backward compatibility (now adds charge instead of setting directly)
     void update_signal_strength(int strength);
+    
+    // Test accessor
+    int get_current_strength() const { return _current_strength; }
     
 private:
     void write_leds();    static const int LED_COUNT = 7;

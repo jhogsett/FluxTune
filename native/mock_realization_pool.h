@@ -2,13 +2,14 @@
 #define MOCK_REALIZATION_POOL_H
 
 class Realization;
+class Realizer;
 
-class RealizationPool {
+// Mock for RealizerPool (not RealizationPool!)
+class RealizerPool {
 public:
-    RealizationPool(Realization **realizations, bool *statuses, int nrealizations) {}
-    bool begin(unsigned long time) { return true; }
-    bool step(unsigned long time) { return true; }
-    void end() {}
+    RealizerPool(Realizer **realizers, bool *statuses, int nrealizers) {}
+    int get_realizer() { return 0; }  // Always return first realizer for testing
+    void free_realizer(int realizer_index) {}
     
     // Add any other required methods as needed
 };

@@ -32,6 +32,8 @@
 
 #include "contrast.h"
 #include "contrast_handler.h"
+#include "bfo.h"
+#include "bfo_handler.h"
 
 #include "wavegen.h"
 #include "wave_out.h"
@@ -323,6 +325,7 @@ VFO vfoe("CHAN 2", 100.0, 10L, &realization_pool);
 VFO vfof("CHAN 3", 1000000.0, 100L, &realization_pool);
 
 Contrast contrast("Contrast");
+BFO bfo("BFO");
 
 VFO_Tuner tunera(&vfoa);
 VFO_Tuner tunerb(&vfob);
@@ -333,14 +336,15 @@ VFO_Tuner tunere(&vfoe);
 VFO_Tuner tunerf(&vfof);
 
 ContrastHandler contrast_handler(&contrast);
+BFOHandler bfo_handler(&bfo);
 
 ModeHandler *handlers1[3] = {&tunera, &tunerb, &tunerc};
 ModeHandler *handlers2[3] = {&tunerd, &tunere, &tunerf};
-ModeHandler *handlers3[1] = {&contrast_handler};
+ModeHandler *handlers3[2] = {&contrast_handler, &bfo_handler};
 
 EventDispatcher dispatcher1(handlers1, 3);
 EventDispatcher dispatcher2(handlers2, 3);
-EventDispatcher dispatcher3(handlers3, 1);
+EventDispatcher dispatcher3(handlers3, 2);
 
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
