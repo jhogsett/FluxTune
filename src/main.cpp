@@ -194,32 +194,24 @@ SignalMeter signal_meter;
 
 // ============================================================================
 // ENHANCED STATION POOL FOR DYNAMIC PIPELINING
-// 12 pre-allocated stations of mixed types for realistic band simulation
+// 6 pre-allocated stations of mixed types for realistic band simulation
 // Only 4 can be AUDIBLE (have AD9833 generators) at any time
 // ============================================================================
 
-// Mixed station pool - 4 of each major type for variety
+// Mixed station pool - conservative memory usage
 SimStation cw_station1(&realizer_pool, &signal_meter);
 SimStation cw_station2(&realizer_pool, &signal_meter);
-SimStation cw_station3(&realizer_pool, &signal_meter);
-SimStation cw_station4(&realizer_pool, &signal_meter);
 
 SimNumbers numbers_station1(&realizer_pool, &signal_meter);
 SimNumbers numbers_station2(&realizer_pool, &signal_meter);
-SimNumbers numbers_station3(&realizer_pool, &signal_meter);
-SimNumbers numbers_station4(&realizer_pool, &signal_meter);
 
 SimRTTY rtty_station1(&realizer_pool, &signal_meter);
-SimRTTY rtty_station2(&realizer_pool, &signal_meter);
 
 SimPager pager_station1(&realizer_pool, &signal_meter);
-SimPager pager_station2(&realizer_pool, &signal_meter);
 
-// Expanded station array - 12 stations total for dynamic management
-// First 4 slots are "primary" (initially audible), remaining 8 are "secondary" (dormant/silent)
-// Expanded station array - 12 stations total for dynamic management
-// First 4 slots are "primary" (initially audible), remaining 8 are "secondary" (dormant/silent)
-Realization *realizations[12] = {
+// Expanded station array - 6 stations total for dynamic management
+// First 4 slots are "primary" (initially audible), remaining 2 are "secondary" (dormant/silent)
+Realization *realizations[6] = {
     // Primary stations (initially AUDIBLE with AD9833 generators)
     &cw_station1,
     &numbers_station1, 
@@ -228,13 +220,7 @@ Realization *realizations[12] = {
     
     // Secondary stations (initially DORMANT, become ACTIVE/SILENT as needed)
     &cw_station2,
-    &cw_station3,
-    &cw_station4,
-    &numbers_station2,
-    &numbers_station3,
-    &numbers_station4,
-    &rtty_station2,
-    &pager_station2
+    &numbers_station2
 };
 
 WaveOut waveout1(&realizer_pool);
@@ -242,8 +228,8 @@ WaveOut waveout2(&realizer_pool);
 WaveOut waveout3(&realizer_pool);
 WaveOut waveout4(&realizer_pool);
 
-// Expanded realization status array for 12 stations  
-bool realization_stats[12] = {false, false, false, false, false, false, false, false, false, false, false, false};
+// Expanded realization status array for 6 stations  
+bool realization_stats[6] = {false, false, false, false, false, false};
 
 /* Dynamic array initialization - not needed with static initialization
 void initialize_station_arrays() {
@@ -275,7 +261,7 @@ void initialize_station_arrays() {
 }
 */
 
-RealizationPool realization_pool(realizations, realization_stats, 12);
+RealizationPool realization_pool(realizations, realization_stats, 6);
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
