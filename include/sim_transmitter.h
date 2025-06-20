@@ -41,6 +41,8 @@ public:
     StationState get_station_state() const;  // Get current station state
     bool is_audible() const;  // True if station has AD9833 generator assigned
     float get_fixed_frequency() const;  // Get station's target frequency
+    void setActive(bool active);
+    bool isActive() const;
 
 #ifdef NATIVE_BUILD
     // Test-only method to set VFO frequency directly

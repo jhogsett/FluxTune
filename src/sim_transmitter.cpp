@@ -127,3 +127,11 @@ float SimTransmitter::get_fixed_frequency() const
 {
     return _fixed_freq;
 }
+
+void SimTransmitter::setActive(bool active) {
+    _active = active;
+}
+
+bool SimTransmitter::isActive() const {
+    return _active;
+}
