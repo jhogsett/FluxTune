@@ -26,7 +26,8 @@
 // - Decrease DECAY_INTERVAL for smoother decay (more CPU usage)
 class SignalMeter
 {
-public:    SignalMeter();
+public:
+    SignalMeter();
     
     void init();
     void add_charge(int charge_amount = DEFAULT_CHARGE);    // Add charge pulse (like electrical charge into capacitor)
@@ -38,10 +39,16 @@ public:    SignalMeter();
     
     // Test accessor
     int get_current_strength() const { return _current_strength; }
-    
+    // Panel LED lock indicator accessor
+    int get_panel_led_brightness() const { return _panel_led_accumulator; }
+    void clear_panel_led();
+
 private:
     void write_leds();    static const int LED_COUNT = 7;
     static const int MAX_ACCUMULATOR = 510;     // Maximum accumulator value (2x LED range for resolution)
+    // Panel LED lock indicator parameters
+    static const int PANEL_LED_MAX_ACCUMULATOR = 255;
+    static const int PANEL_LED_DECAY_RATE = 32;
     
     // TUNABLE PARAMETERS for capacitor behavior:
     static const int DECAY_RATE = 3;            // Accumulator decay per update (higher = faster decay)
@@ -52,6 +59,8 @@ private:
     int _current_strength;                      // Current display strength (0-255)
     unsigned long _last_decay_time;             // Last time decay was applied
     
+    int _panel_led_accumulator;                 // Accumulator for panel LED lock indicator (0 to PANEL_LED_MAX_ACCUMULATOR)
+
 #ifndef NATIVE_BUILD
     rgb_color _led_buffer[LED_COUNT];
     static rgb_color _led_colors[LED_COUNT];

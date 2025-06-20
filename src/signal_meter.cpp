@@ -2,7 +2,7 @@
 
 #ifndef NATIVE_BUILD
 extern PololuLedStrip<12> ledStrip;  // Defined in main.cpp
-extern byte option_contrast;        // Defined in main.cpp
+extern int option_contrast;         // Defined in main.cpp (matches saved_data.cpp type)
 #endif
 
 // Color definitions: Green → Yellow → Red (like analog signal meters)
@@ -23,11 +23,13 @@ SignalMeter::SignalMeter()
     _accumulator = 0;
     _current_strength = 0;
     _last_decay_time = 0;
+    _panel_led_accumulator = 0;
 }
 
 void SignalMeter::init()
 {
     clear();
+    _panel_led_accumulator = 0;
 #ifndef NATIVE_BUILD
     _last_decay_time = millis();
 #endif
@@ -35,16 +37,22 @@ void SignalMeter::init()
 
 void SignalMeter::add_charge(int charge_amount)
 {    // Add charge pulse to accumulator (like electrical charge into capacitor)
+    if (charge_amount < 0) {
+        // Negative charge: treat as panel LED lock pulse
+        int abs_charge = -charge_amount;
+        _panel_led_accumulator += abs_charge; // Add absolute value
+        if (_panel_led_accumulator > PANEL_LED_MAX_ACCUMULATOR) {
+            _panel_led_accumulator = PANEL_LED_MAX_ACCUMULATOR;
+        }
+        charge_amount = abs_charge; // Also update main signal meter as if it was a regular pulse
+    }
     _accumulator += charge_amount;
-    
     // Clamp to maximum
     if (_accumulator > MAX_ACCUMULATOR) {
         _accumulator = MAX_ACCUMULATOR;
     }
-    
     // Update display strength based on accumulator
     _current_strength = (_accumulator * 255) / MAX_ACCUMULATOR;
-    
     write_leds();
 }
 
@@ -55,10 +63,14 @@ void SignalMeter::update(unsigned long current_time)
         if (_accumulator > 0) {
             _accumulator -= DECAY_RATE;
             if (_accumulator < 0) _accumulator = 0;
-              // Update display strength
+            // Update display strength
             _current_strength = (_accumulator * 255) / MAX_ACCUMULATOR;
-            
             write_leds();
+        }
+        // Decay panel LED accumulator
+        if (_panel_led_accumulator > 0) {
+            _panel_led_accumulator -= PANEL_LED_DECAY_RATE;
+            if (_panel_led_accumulator < 0) _panel_led_accumulator = 0;
         }
         _last_decay_time = current_time;
     }
@@ -82,7 +94,13 @@ void SignalMeter::clear()
 {
     _accumulator = 0;
     _current_strength = 0;
+    _panel_led_accumulator = 0;
     write_leds();
+}
+
+void SignalMeter::clear_panel_led()
+{
+    _panel_led_accumulator = 0;
 }
 
 void SignalMeter::write_leds()

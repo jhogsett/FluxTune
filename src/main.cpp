@@ -192,95 +192,44 @@ RealizerPool realizer_pool(realizers, realizer_stats, 4);
 // Signal meter instance
 SignalMeter signal_meter;
 
-// Station Instances - configured based on station_config.h
+// ============================================================================
+// ENHANCED STATION POOL FOR DYNAMIC PIPELINING
+// 6 pre-allocated stations of mixed types for realistic band simulation
+// Only 4 can be AUDIBLE (have AD9833 generators) at any time
+// ============================================================================
 
-#if defined(ENABLE_FOUR_CW_STATIONS)
-// Four CW stations for focused testing
-SimStation simstation1(&realizer_pool, &signal_meter);
-SimStation simstation2(&realizer_pool, &signal_meter);
-SimStation simstation3(&realizer_pool, &signal_meter);
-SimStation simstation4(&realizer_pool, &signal_meter);
+// Mixed station pool - conservative memory usage
+SimStation cw_station1(&realizer_pool, &signal_meter);
+SimStation cw_station2(&realizer_pool, &signal_meter);
 
-#elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
-// Four Numbers stations for focused testing
-SimNumbers simnumbers1(&realizer_pool, &signal_meter);
-SimNumbers simnumbers2(&realizer_pool, &signal_meter);
-SimNumbers simnumbers3(&realizer_pool, &signal_meter);
-SimNumbers simnumbers4(&realizer_pool, &signal_meter);
+SimNumbers numbers_station1(&realizer_pool, &signal_meter);
+SimNumbers numbers_station2(&realizer_pool, &signal_meter);
 
-#elif defined(ENABLE_FOUR_PAGER_STATIONS)
-// Four Pager stations for focused testing
-SimPager simpager1(&realizer_pool, &signal_meter);
-SimPager simpager2(&realizer_pool, &signal_meter);
-SimPager simpager3(&realizer_pool, &signal_meter);
-SimPager simpager4(&realizer_pool, &signal_meter);
+SimRTTY rtty_station1(&realizer_pool, &signal_meter);
 
-#elif defined(ENABLE_FOUR_RTTY_STATIONS)
-// Four RTTY stations for focused testing
-SimRTTY simrtty1(&realizer_pool, &signal_meter);
-SimRTTY simrtty2(&realizer_pool, &signal_meter);
-SimRTTY simrtty3(&realizer_pool, &signal_meter);
-SimRTTY simrtty4(&realizer_pool, &signal_meter);
+SimPager pager_station1(&realizer_pool, &signal_meter);
 
-#else
-// Default mixed configuration or minimal config
-#ifdef ENABLE_MORSE_STATION
-SimStation simstation1(&realizer_pool, &signal_meter);
-#endif
-
-#ifdef ENABLE_NUMBERS_STATION
-SimNumbers simnumbers2(&realizer_pool, &signal_meter);  // Numbers Station - spooky!
-#endif
-
-#ifdef ENABLE_PAGER_STATION
-SimPager simpager3(&realizer_pool, &signal_meter);
-#endif
-
-#ifdef ENABLE_RTTY_STATION
-SimRTTY simstation4(&realizer_pool, &signal_meter);
-#endif
-#endif
+// Expanded station array - 6 stations total for dynamic management
+// First 4 slots are "primary" (initially audible), remaining 2 are "secondary" (dormant/silent)
+Realization *realizations[6] = {
+    // Primary stations (initially AUDIBLE with AD9833 generators)
+    &cw_station1,
+    &numbers_station1, 
+    &rtty_station1,
+    &pager_station1,
+    
+    // Secondary stations (initially DORMANT, become ACTIVE/SILENT as needed)
+    &cw_station2,
+    &numbers_station2
+};
 
 WaveOut waveout1(&realizer_pool);
 WaveOut waveout2(&realizer_pool);
 WaveOut waveout3(&realizer_pool);
 WaveOut waveout4(&realizer_pool);
 
-// Station arrays - configured based on station_config.h
-Realization *realizations[4] = {
-#if defined(ENABLE_FOUR_CW_STATIONS)
-    &simstation1, &simstation2, &simstation3, &simstation4
-#elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
-    &simnumbers1, &simnumbers2, &simnumbers3, &simnumbers4
-#elif defined(ENABLE_FOUR_PAGER_STATIONS)
-    &simpager1, &simpager2, &simpager3, &simpager4
-#elif defined(ENABLE_FOUR_RTTY_STATIONS)
-    &simrtty1, &simrtty2, &simrtty3, &simrtty4
-#else
-    // Default mixed or minimal configuration
-#ifdef ENABLE_MORSE_STATION
-    &simstation1,
-#else
-    nullptr,
-#endif
-#ifdef ENABLE_NUMBERS_STATION
-    &simnumbers2,
-#else
-    nullptr,
-#endif
-#ifdef ENABLE_PAGER_STATION
-    &simpager3,
-#else
-    nullptr,
-#endif
-#ifdef ENABLE_RTTY_STATION
-    &simstation4
-#else
-    nullptr
-#endif
-#endif
-};
-bool realization_stats[4] = {false, false, false, false};
+// Expanded realization status array for 6 stations  
+bool realization_stats[6] = {false, false, false, false, false, false};
 
 /* Dynamic array initialization - not needed with static initialization
 void initialize_station_arrays() {
@@ -312,7 +261,7 @@ void initialize_station_arrays() {
 }
 */
 
-RealizationPool realization_pool(realizations, realization_stats, 4);
+RealizationPool realization_pool(realizations, realization_stats, 6);
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
@@ -515,54 +464,29 @@ void loop()
 #ifndef DISABLE_DISPLAY_OPERATIONS
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
 #endif
-    unsigned long time = millis();    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
+    unsigned long time = millis();
+    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	
-#if defined(ENABLE_FOUR_CW_STATIONS)
-	// Four CW stations with different messages and speeds
-	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
-	simstation2.begin(time + random(1000), 7003000.0, "CQ CQ DE W1ABC W1ABC K    ", 15);
-	simstation3.begin(time + random(1000), 7004000.0, "CQ CQ DE K2DEF K2DEF K    ", 20);
-	simstation4.begin(time + random(1000), 7005000.0, "CQ CQ DE VE3GHI VE3GHI K  ", 25);
-
-#elif defined(ENABLE_FOUR_NUMBERS_STATIONS)
-	// Four Numbers stations on different frequencies with different speeds
-	simnumbers1.begin(time + random(1000), 7002700.0, 15);  // Slow numbers
-	simnumbers2.begin(time + random(1000), 7003700.0, 18);  // Medium numbers
-	simnumbers3.begin(time + random(1000), 7004700.0, 22);  // Fast numbers
-	simnumbers4.begin(time + random(1000), 7005700.0, 12);  // Very slow numbers
-
-#elif defined(ENABLE_FOUR_PAGER_STATIONS)
-	// Four Pager stations on different frequencies
-	simpager1.begin(time + random(1000), 7006000.0);
-	simpager2.begin(time + random(1000), 7007000.0);
-	simpager3.begin(time + random(1000), 7008000.0);
-	simpager4.begin(time + random(1000), 7009000.0);
-
-#elif defined(ENABLE_FOUR_RTTY_STATIONS)
-	// Four RTTY stations on different frequencies
-	simrtty1.begin(time + random(1000), 7004100.0);
-	simrtty2.begin(time + random(1000), 7005100.0);
-	simrtty3.begin(time + random(1000), 7006100.0);
-	simrtty4.begin(time + random(1000), 7007100.0);
-
-#else
-	// Default mixed or minimal configuration
-#ifdef ENABLE_MORSE_STATION
-	simstation1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
-#endif
-
-#ifdef ENABLE_NUMBERS_STATION
-	simnumbers2.begin(time + random(1000), 7002700.0, 18);  // Numbers Station - spooky 18 WPM!
-#endif
-
-#ifdef ENABLE_PAGER_STATION
-	simpager3.begin(time + random(1000), 7006000.0);
-#endif
-
-#ifdef ENABLE_RTTY_STATION
-	simstation4.begin(time + random(1000), 7004100.0);
-#endif
-#endif
+	// ============================================================================
+	// INITIALIZE 12-STATION DYNAMIC POOL
+	// Start with 4 primary stations active, rest dormant until needed
+	// ============================================================================
+	
+	// Initialize primary stations (first 4 - will be AUDIBLE with AD9833 generators)
+	cw_station1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+	cw_station1.set_station_state(AUDIBLE);
+	
+	numbers_station1.begin(time + random(1000), 7002700.0, 18);  // Spooky 18 WPM!
+	numbers_station1.set_station_state(AUDIBLE);
+	
+	rtty_station1.begin(time + random(1000), 7004100.0);
+	rtty_station1.set_station_state(AUDIBLE);
+	
+	pager_station1.begin(time + random(1000), 7006000.0);
+	pager_station1.set_station_state(AUDIBLE);
+	
+	// Secondary stations remain DORMANT until StationManager activates them
+	// (No .begin() calls - they start in DORMANT state and will be initialized dynamically)
 
 	set_application(APP_SIMRADIO, &display);
 
@@ -610,7 +534,16 @@ void loop()
 		// 		break;
 		// }
 
-        panel_leds.step(time);
+        // --- PANEL LOCK LED OVERRIDE ---
+        int lock_brightness = signal_meter.get_panel_led_brightness();
+        if (lock_brightness > 0) {
+            int pwm = (lock_brightness * PANEL_LOCK_LED_FULL_BRIGHTNESS) / 255;
+            analogWrite(WHITE_PANEL_LED, pwm); // White LED lock indicator
+        } else {
+            analogWrite(WHITE_PANEL_LED, 0);
+        }
+        // Comment out the old animation:
+        // panel_leds.step(time);
 
 		realization_pool.step(time);
 
