@@ -21,13 +21,12 @@ SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter) :
     _total_groups_per_cycle = 13;  // 13 groups for creepiness
     _in_inter_group_delay = false;
     _next_group_time = 0;
-    _transmission_active = false;
-    _wpm = 18;  // Default WPM
+    _transmission_active = false;    _wpm = 18;  // Default WPM
     
     // Enhanced numbers station state
     _current_phase = PHASE_INTERVAL_SIGNAL;
     _interval_repeats_sent = 0;
-    _total_interval_repeats = 6;  // "FT FT FT FT FT FT" for good anticipation
+    _total_interval_repeats = DEFAULT_INTERVAL_REPEATS;  // Default interval repeats for optimal anticipation
 }
 
 bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
