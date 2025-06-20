@@ -8,9 +8,10 @@
 // ##DATA Increment the save data version to force upgraded devices to auto-reset after programming
 // Current save data version
 // On start-up if this differs from the EEPROM value, the data is reset to defaults
-#define SAVE_DATA_VERSION 1
+#define SAVE_DATA_VERSION 2   // Incremented for BFO offset addition
 
 #define DEFAULT_CONTRAST 2
+#define DEFAULT_BFO_OFFSET 700   // 700 Hz default BFO offset for comfortable audio tuning
 
 // the longest possible count of milliseconds
 #define DEFAULT_TIME ((unsigned long)-1)
@@ -21,6 +22,7 @@
 extern byte save_data_version;
 
 extern int option_contrast;
+extern int option_bfo_offset;  // BFO offset in Hz (0-2000)
 
 // // Whether to play sounds
 // extern bool option_sound;
@@ -50,6 +52,7 @@ extern int option_contrast;
 struct SavedData{
 	byte version;
 	int option_contrast;
+	int option_bfo_offset;
 };
 
 extern void load_save_data();

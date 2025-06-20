@@ -82,17 +82,22 @@ int VFO::calculate_signal_charge(float station_freq, float vfo_freq) {
     float freq_diff = abs(vfo_freq - station_freq);
     
     // Signal strength calculation:
-    // - Charge from stations within audible range (±2500 Hz)
-    // - More charge for closer proximity
-    // - Uses same logic as the original VFO charge pulse system
+    // - Charge from stations within wider range (±2500 Hz) for easier tuning
+    // - Much reduced charge amounts for better proportionality
+    // - Comfortable tuning bandwidth with gentle response
     
-    if (freq_diff <= 2500.0) {
+    const float MAX_RANGE = 2500.0;  // Wider range for comfortable tuning
+    
+    if (freq_diff <= MAX_RANGE) {
         // Calculate proximity factor (0.0 to 1.0)
-        float proximity = 1.0 - (freq_diff / 2500.0);
+        float proximity = 1.0 - (freq_diff / MAX_RANGE);
         
-        // Convert proximity to charge amount
-        // Closer stations contribute more charge
-        int charge = (int)(proximity * 12.0);  // 0-12 charge amount
+        // Apply squared curve for realistic but not too steep falloff
+        proximity = proximity * proximity;
+        
+        // Convert proximity to charge amount (much reduced for proportionality)
+        // Lower charge amounts prevent meter from jumping too high
+        int charge = (int)(proximity * 2.0);  // 0-2 charge amount (much reduced)
         
         return charge;
     }

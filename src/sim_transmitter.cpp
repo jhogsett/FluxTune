@@ -1,6 +1,7 @@
 #include "sim_transmitter.h"
 #include "wavegen.h"
 #include "vfo.h"
+#include "saved_data.h"  // For option_bfo_offset
 
 SimTransmitter::SimTransmitter(RealizerPool *realizer_pool) : Realization(realizer_pool)
 {
@@ -24,7 +25,12 @@ void SimTransmitter::common_frequency_update(Mode *mode)
     // Note: mode is expected to be a VFO object
     VFO *vfo = static_cast<VFO*>(mode);
     _vfo_freq = float(vfo->_frequency) + (vfo->_sub_frequency / 10.0);
-    _frequency = _vfo_freq - _fixed_freq;
+    
+    // Calculate raw frequency difference (used for signal meter - no BFO offset)
+    float raw_frequency = _vfo_freq - _fixed_freq;
+      // Add BFO offset for comfortable audio tuning
+    // This shifts the audio frequency without affecting signal meter calculations
+    _frequency = raw_frequency + option_bfo_offset;
 }
 
 bool SimTransmitter::check_frequency_bounds()
