@@ -477,7 +477,9 @@ void loop()
 {
 #ifndef DISABLE_DISPLAY_OPERATIONS
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-#endif    unsigned long time = millis();    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
+#endif
+    unsigned long time = millis();
+    panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	
 	// ============================================================================
 	// INITIALIZE 12-STATION DYNAMIC POOL
