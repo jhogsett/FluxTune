@@ -68,6 +68,11 @@ A centralized list of minor issues, enhancements, and technical debt to address 
   - Switch to VFO C and verify station works correctly in new position
   - Validate VFO object handles frequency transitions properly
   - Ensure pager content and timing remain authentic at VHF frequencies
+- [ ] **Test SimRTTY station on HF frequencies**
+  - Move simulated RTTY station to 14 MHz range (20m amateur band)
+  - Switch to VFO B and verify station works correctly in new position
+  - Validate RTTY decoding and display at HF frequencies
+  - Ensure baudot character generation remains accurate
 - [ ] **Real-device validation of signal meter**
   - Test capacitor-like behavior on actual hardware
   - Verify charge/discharge rates feel authentic
