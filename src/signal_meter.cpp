@@ -2,7 +2,7 @@
 
 #ifndef NATIVE_BUILD
 extern PololuLedStrip<12> ledStrip;  // Defined in main.cpp
-extern byte option_contrast;        // Defined in main.cpp
+extern int option_contrast;         // Defined in main.cpp (matches saved_data.cpp type)
 #endif
 
 // Color definitions: Green → Yellow → Red (like analog signal meters)
