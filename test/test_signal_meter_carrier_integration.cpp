@@ -1,14 +1,8 @@
 #include "unity.h"
+#include "../native/mock_arduino.h"   // Must be first for byte typedef
 #include "signal_meter.h"
 #include "sim_station.h"
-#include "realizer_pool.h"
-#include "mock_realization_pool.h"
-
-#ifdef PLATFORM_NATIVE
-#include "mock_arduino.h"
-#else
-#include <Arduino.h>
-#endif
+#include "../native/mock_realization_pool.h"
 
 void setUp(void) {
     // This is run before EACH test
@@ -21,21 +15,20 @@ void tearDown(void) {
 void test_station_sends_charge_pulse_on_carrier_turn_on(void) {
     // Setup signal meter
     SignalMeter signal_meter;
-    signal_meter.begin();
+    signal_meter.init();
     
     // Setup mock realizer pool
-    MockRealizationPool realizer_pool;
+    RealizerPool realizer_pool(nullptr, nullptr, 0);
     
     // Create station with signal meter
     SimStation station(&realizer_pool, &signal_meter);
     
     // Initialize station
     station.begin(0, 7002000.0, "E", 20); // Short message, 20 WPM
-      // Set VFO frequency close to station for maximum charge
+    // Set VFO frequency close to station for maximum charge
     station.set_vfo_frequency_for_test(7002000.0); // Exact match
-    
-    // Initial signal meter should be at 0
-    signal_meter.step(0);
+      // Initial signal meter should be at 0
+    signal_meter.update(0);
     TEST_ASSERT_EQUAL(0, signal_meter.get_current_strength());
     
     // Step the station - should eventually get TURN_ON event
@@ -46,7 +39,7 @@ void test_station_sends_charge_pulse_on_carrier_turn_on(void) {
         unsigned long time = i * 10; // 10ms steps
         
         // Step signal meter to handle decay
-        signal_meter.step(time);
+        signal_meter.update(time);
         
         // Step station
         station.step(time);
@@ -63,23 +56,23 @@ void test_station_sends_charge_pulse_on_carrier_turn_on(void) {
 void test_station_no_charge_when_vfo_far_away(void) {
     // Setup signal meter
     SignalMeter signal_meter;
-    signal_meter.begin();
+    signal_meter.init();
     
     // Setup mock realizer pool
-    MockRealizationPool realizer_pool;
+    RealizerPool realizer_pool(nullptr, nullptr, 0);
     
     // Create station with signal meter
     SimStation station(&realizer_pool, &signal_meter);
     
     // Initialize station
     station.begin(0, 7002000.0, "E", 20); // Short message, 20 WPM
-      // Set VFO frequency very far from station (no charge expected)
+    // Set VFO frequency very far from station (no charge expected)
     station.set_vfo_frequency_for_test(3500000.0); // Way off frequency
     
     // Step the station and signal meter
     for (int i = 0; i < 1000; i++) {
         unsigned long time = i * 10;
-        signal_meter.step(time);
+        signal_meter.update(time);
         station.step(time);
     }
     
