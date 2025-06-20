@@ -10,6 +10,9 @@ SimTransmitter::SimTransmitter(RealizerPool *realizer_pool) : Realization(realiz
     _enabled = false;
     _frequency = 0.0;
     _active = false;
+    
+    // Initialize dynamic station management state
+    _station_state = DORMANT;
 }
 
 bool SimTransmitter::common_begin(unsigned long time, float fixed_freq)
@@ -68,4 +71,59 @@ void SimTransmitter::force_wave_generator_refresh()
         WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
         wavegen->force_refresh();
     }
+}
+
+// Dynamic station management methods
+bool SimTransmitter::reinitialize(unsigned long time, float fixed_freq)
+{
+    // Reinitialize station with new frequency for dynamic management
+    // This allows reusing dormant stations for new frequencies
+    
+    // Clean up any existing state
+    if(_station_state == AUDIBLE && _realizer != -1) {
+        end();  // Release realizer if currently assigned
+    }
+    
+    // Set new parameters
+    _fixed_freq = fixed_freq;
+    _frequency = 0.0;
+    _enabled = false;
+    _active = false;
+    _station_state = ACTIVE;  // Station is now active at new frequency
+    
+    // Subclasses should override this method to reinitialize their specific content
+    // (e.g., new morse messages, different WPM, new pager content, etc.)
+    
+    return true;
+}
+
+void SimTransmitter::set_station_state(StationState new_state)
+{
+    StationState old_state = _station_state;
+    _station_state = new_state;
+    
+    // Handle state transition logic
+    if(old_state == AUDIBLE && new_state != AUDIBLE) {
+        // Losing AD9833 generator - release it
+        if(_realizer != -1) {
+            end();  // This will free the realizer
+        }
+    }
+    // Note: Gaining AD9833 generator (ACTIVE/SILENT -> AUDIBLE) will be handled
+    // by the StationManager when it assigns a realizer to this station
+}
+
+StationState SimTransmitter::get_station_state() const
+{
+    return _station_state;
+}
+
+bool SimTransmitter::is_audible() const
+{
+    return _station_state == AUDIBLE;
+}
+
+float SimTransmitter::get_fixed_frequency() const
+{
+    return _fixed_freq;
 }
