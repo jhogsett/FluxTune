@@ -199,15 +199,15 @@ SignalMeter signal_meter;
 // ============================================================================
 
 // Mixed station pool - conservative memory usage
-SimStation cw_station1(&realizer_pool, &signal_meter, 7.002, "CQ CQ DE N6CCM N6CCM K    ", 11);
-SimStation cw_station2(&realizer_pool, &signal_meter, 7.010, "CQ CQ DE W1AW W1AW K      ", 13);
+SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+SimStation cw_station2(&realizer_pool, &signal_meter, 7010000.0, "CQ CQ DE W1AW W1AW K      ", 13);
 
-SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7.0027, 18);  // 7.0027 MHz, 18 WPM
-SimNumbers numbers_station2(&realizer_pool, &signal_meter, 7.011, 20);   // 7.011 MHz, 20 WPM
+SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 18);  // 7002700.0 Hz, 18 WPM
+SimNumbers numbers_station2(&realizer_pool, &signal_meter, 7011000.0, 20);   // 7011000.0 Hz, 20 WPM
 
-SimRTTY rtty_station1(&realizer_pool, &signal_meter, 7.0041);  // 7.0041 MHz
+SimRTTY rtty_station1(&realizer_pool, &signal_meter, 7004100.0);  // 7004100.0 Hz
 
-SimPager pager_station1(&realizer_pool, &signal_meter, 7.006);   // 7.006 MHz
+SimPager pager_station1(&realizer_pool, &signal_meter, 7006000.0);   // 7006000.0 Hz
 
 // Expanded station array - 6 stations total for dynamic management
 // First 4 slots are "primary" (initially audible), remaining 2 are "secondary" (dormant/silent)
