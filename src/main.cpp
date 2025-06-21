@@ -479,10 +479,10 @@ void loop()
 	numbers_station1.begin(time + random(1000));  // Parameters now come from constructor
 	numbers_station1.set_station_state(AUDIBLE);
 	
-	rtty_station1.begin(time + random(1000), 7004100.0);
+	rtty_station1.begin(time + random(1000));
 	rtty_station1.set_station_state(AUDIBLE);
 	
-	pager_station1.begin(time + random(1000), 7006000.0);
+	pager_station1.begin(time + random(1000));
 	pager_station1.set_station_state(AUDIBLE);
 	
 	// Secondary stations remain DORMANT until StationManager activates them
@@ -544,13 +544,13 @@ void loop()
         }
         // Comment out the old animation:
         // panel_leds.step(time);
-
 		realization_pool.step(time);
 
-		// simstation1.step(time);
-		// simstation2.step(time);
-		// simstation3.step(time);
-		// simstation4.step(time);
+		// Step all active stations
+		cw_station1.step(time);
+		numbers_station1.step(time);
+		rtty_station1.step(time);
+		pager_station1.step(time);
 
 		encoder_handlerA.step();
 		encoder_handlerB.step();
