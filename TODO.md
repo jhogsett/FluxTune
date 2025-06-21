@@ -157,10 +157,12 @@ A centralized list of minor issues, enhancements, and technical debt to address 
   - Wired up updateStations() to be called from realization_pool.step() when VFO changes
   - Frequency tracking integrated in VFO_Tuner event handler
   - Fixed VFO switching to update frequency tracking (VFO::update_realization)
-- [ ] **Implement automatic station activation/deactivation**
-  - Calculate proximity between VFO and station frequencies
+- ✅ **Implement automatic station activation/deactivation**
+  - Calculate proximity between VFO and station frequencies (±50kHz range)
   - Auto-transition stations between DORMANT/ACTIVE/AUDIBLE based on proximity
-  - Respect 4-generator limit for AUDIBLE stations
+  - Respect 4-generator limit for AUDIBLE stations with priority selection
+  - Proper station initialization with type-specific begin() parameters
+  - Cleanup via end() method when deactivating stations
 - [ ] **Complete StationManager AD9833 assignment tracking**
   - Populate ad9833_assignment[] array with actual assignments
   - Implement allocateAD9833() method for intelligent generator distribution
