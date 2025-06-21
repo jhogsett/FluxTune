@@ -37,6 +37,25 @@ A centralized list of minor issues, enhancements, and technical debt to address 
   - Consider renaming the BFO menu option to be more human-readable
   - Current technical name may not be clear to casual users
   - Possible alternatives: "Beat Frequency", "Audio Tuning", "Fine Tune", etc.
+- [ ] **QRN/QRM Lightning/Static Detector LED + Audio Static Generator (Blue LED)**
+  - Use second panel LED as atmospheric noise/interference indicator
+  - **Audio static generator**: Hardware module to blend authentic background static and noise bursts into audio stream
+  - **Phase 1 (Software)**: Random charge accumulation model - slowly builds "static charge" over 10-30 seconds
+  - Quick bright flash and fade when discharging (mimics lightning/static bursts)
+  - Blue LED indicates when static generator is active/bursting
+  - Frequency dependent activity - more on lower HF frequencies (realistic)
+  - Station interference - brief flickers when multiple stations are close together
+  - Optional "storm periods" with increased activity for realism
+  - Strong signals could suppress static (noise blanking effect)
+  - **Phase 2 (Hardware)**: Research and integrate hardware noise generator modules
+  - Blend static/atmospheric noise directly into audio output stream
+  - LED and audio generation controlled by same software logic
+  - Authentic QRN (atmospheric noise) and QRM (interference) simulation
+  - Visual (LED) + Audio (static) representation of atmospheric conditions
+  - Blue color suggests electrical/lightning activity
+  - Complements green "station lock" LED perfectly
+  - **Future hardware expansion**: LED logic designed to work with hardware static generator
+  - Architecture allows software-controlled static blending with visual feedback
 - [ ] **Station information display**
   - Show current station type and frequency when tuning
   - Add brief station descriptions or callsigns
