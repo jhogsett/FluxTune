@@ -9,6 +9,7 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 - Deal with the branding hack
 - option: for morse training, you can tune up the dial and the WPM advances the further you go up
 - Rename "RealizerPool" to be more different from "RealizationPool" to avoid confusion 
+- station type like KFS commercial CW station
 
 ## 🔧 Code Quality & Technical Debt
 
@@ -155,6 +156,7 @@ A centralized list of minor issues, enhancements, and technical debt to address 
   - Added StationManager pointer to RealizationPool
   - Wired up updateStations() to be called from realization_pool.step() when VFO changes
   - Frequency tracking integrated in VFO_Tuner event handler
+  - Fixed VFO switching to update frequency tracking (VFO::update_realization)
 - [ ] **Implement automatic station activation/deactivation**
   - Calculate proximity between VFO and station frequencies
   - Auto-transition stations between DORMANT/ACTIVE/AUDIBLE based on proximity
