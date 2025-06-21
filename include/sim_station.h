@@ -11,8 +11,8 @@ class SignalMeter; // Forward declaration
 class SimStation : public SimTransmitter
 {
 public:
-    SimStation(RealizerPool *realizer_pool, SignalMeter *signal_meter);
-    virtual bool begin(unsigned long time, float fixed_freq, const char *message, int wpm);
+    SimStation(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, const char *message, int wpm);
+    virtual bool begin(unsigned long time);
     
     virtual bool update(Mode *mode);
     virtual bool step(unsigned long time);    void realize();
@@ -20,6 +20,9 @@ public:
     AsyncMorse _morse;
     bool _changed;
     SignalMeter *_signal_meter;
+    float _stored_fixed_freq;       // Stored frequency from constructor
+    const char *_stored_message;    // Stored message from constructor
+    int _stored_wpm;                // Stored WPM from constructor
 };
 
 #endif

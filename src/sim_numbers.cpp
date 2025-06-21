@@ -14,14 +14,19 @@
 #define INTER_GROUP_DELAY 2000  // 2 seconds delay between number groups (more distinct)
 #define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 
-SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter) : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
+SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
+    : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
 {
     // Base class initializes all common variables
     _groups_sent = 0;
     _total_groups_per_cycle = 13;  // 13 groups for creepiness
     _in_inter_group_delay = false;
     _next_group_time = 0;
-    _transmission_active = false;    _wpm = 18;  // Default WPM
+    _transmission_active = false;
+    _wpm = wpm;  // Store WPM from constructor
+    
+    // Store fixed frequency (will be passed to begin())
+    _stored_fixed_freq = fixed_freq;
     
     // Enhanced numbers station state
     _current_phase = PHASE_INTERVAL_SIGNAL;
@@ -29,12 +34,12 @@ SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter) :
     _total_interval_repeats = DEFAULT_INTERVAL_REPEATS;  // Default interval repeats for optimal anticipation
 }
 
-bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
+bool SimNumbers::begin(unsigned long time)
 {
-    if(!common_begin(time, fixed_freq))
+    if(!common_begin(time, _stored_fixed_freq))
         return false;
     
-    _wpm = wpm;  // Store WPM setting for consistent use
+    // WPM is already stored from constructor, no need to update it
     
     // Start with interval signal phase
     _current_phase = PHASE_INTERVAL_SIGNAL;

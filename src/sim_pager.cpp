@@ -10,18 +10,20 @@
 #include <cmath>
 #endif
 
-SimPager::SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter) : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
+SimPager::SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq) 
+    : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
 {
     // Base class initializes all common variables
+    _stored_fixed_freq = fixed_freq;
     // Generate initial tone pair
     generate_new_tone_pair();
     // Pager transmission will be started in begin() method
 }
 
-bool SimPager::begin(unsigned long time, float fixed_freq)
+bool SimPager::begin(unsigned long time)
 {
-    if(!common_begin(time, fixed_freq))
-        return false;    // Start pager transmission with repeat enabled
+    if(!common_begin(time, _stored_fixed_freq))
+        return false;// Start pager transmission with repeat enabled
     _pager.start_pager_transmission(true);
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));

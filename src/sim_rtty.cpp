@@ -5,12 +5,16 @@
 #include "signal_meter.h"
 
 // mode is expected to be a derivative of VFO
-SimRTTY::SimRTTY(RealizerPool *realizer_pool, SignalMeter *signal_meter) : SimTransmitter(realizer_pool), _signal_meter(signal_meter){
+SimRTTY::SimRTTY(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq) 
+    : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
+{
     // Base class now initializes all common variables
+    _stored_fixed_freq = fixed_freq;
     _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
 }
 
-bool SimRTTY::begin(unsigned long time, float fixed_freq){    if(!common_begin(time, fixed_freq))
+bool SimRTTY::begin(unsigned long time){
+    if(!common_begin(time, _stored_fixed_freq))
         return false;
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
