@@ -281,9 +281,6 @@ SimTransmitter* station_ptrs[6] = {
 // Initialize StationManager and integrate with RealizationPool
 StationManager station_manager(station_ptrs);
 
-// Set up VFO frequency tracking in RealizationPool
-realization_pool.set_station_manager(&station_manager);
-
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
 VFO vfoc("VFO C", 146520000.0, 5000, &realization_pool);
@@ -362,11 +359,13 @@ void setup(){
 	randomizer.randomize();
 
 	load_save_data();
-
 	setup_leds();
 	setup_display();
 	setup_signal_meter();
 	// setup_buttons();
+
+	// Set up VFO frequency tracking integration between RealizationPool and StationManager
+	realization_pool.set_station_manager(&station_manager);
 
 
     // // if all three buttons are pressed, enable auto play
