@@ -163,6 +163,8 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 - ✅ **Station begin/end safety** - Made begin() and end() idempotent and safe for repeated calls to support dynamic pipelining
 - ✅ **Member variable cleanup** - Removed redundant _stored_fixed_freq variables, using only base class _fixed_freq
 - ✅ **Fixed frequency drift wave generator update** - Fixed bug where frequency drift didn't update audio until next tuning knob turn
+- ✅ **AsyncMorse repeat functionality removal** - Simplified AsyncMorse to single-message only, stations handle their own repetition
+- ✅ **SimStation operator frustration drift** - Working drift after 3-8 random CQ cycles with realistic ±75 Hz frequency changes
 
 ## 🚧 In Progress: Dynamic Station Pipelining
 - ✅ **Basic StationManager integration** - Class instantiated and basic method calls working
@@ -171,7 +173,19 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 - 📋 **Need to implement**: Full state machine (DORMANT→ACTIVE→AUDIBLE→SILENT), frequency-based activation/deactivation
 
 ## 🎯 Fun Station Enhancements (Mental Diversion)
-- [ ] **Numbers station frequency drift** - Add slight frequency changes between transmission cycles for creepiness
+- ✅ **Numbers station frequency drift** - Add slight frequency changes between transmission cycles for creepiness
+- ✅ **SimStation random callsigns** - Generate random callsigns per session with doubled digits to avoid real callsigns
+- ✅ **SimStation operator frustration drift** - Station QSYs (changes frequency) after random number of CQ cycles
+- [ ] **QSO Station (Two-Station Conversation)** - New station type simulating realistic amateur radio conversation
+  - Two stations (different callsigns/locations) having brief QSO
+  - Authentic exchange: callsigns, signal reports (59/599), QTH (location), name exchange
+  - Realistic timing: CQ call, response, back-and-forth conversation, 73s and sign-off
+  - Duration: 2-3 minutes typical for casual contact
+  - Both stations on same frequency, alternating transmissions
+  - Operator characteristics: speech patterns, CW speed variations, slight timing differences
+  - Mix of CW and voice modes for variety
+  - Could simulate "nets" (multiple stations checking in)
+  - Frequency changes when QSO completes (stations QSY to other frequencies)
 - [ ] **Pager station realistic timing** - Add authentic pager transmission patterns and delays
 - [ ] **CW station QSB simulation** - Add subtle signal strength variation to simulate propagation
 - [ ] **RTTY station frequency stability** - Add slight frequency wobble like old mechanical equipment

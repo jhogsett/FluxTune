@@ -228,26 +228,29 @@ void test_morse_invalid_characters(void) {
 }
 
 void test_morse_repeat_vs_non_repeat(void) {
-    // Test that messages complete properly (repeat functionality removed)
+    // Test that repeat produces more activity than non-repeat
     
-    // Test single message completion
+    // Non-repeat: count turn-ons over 3 seconds
     morse->start_morse("E", 20);
-    bool found_completion = false;
-    int turn_ons = 0;
-    
+    int non_repeat_turn_ons = 0;
     for (unsigned long time = 0; time <= 3000; time += 10) {
-        int state = morse->step_morse(time);
-        if (state == STEP_MORSE_TURN_ON) {
-            turn_ons++;
-        }
-        if (state == STEP_MORSE_MESSAGE_COMPLETE) {
-            found_completion = true;
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            non_repeat_turn_ons++;
         }
     }
     
-    // Should have at least one turn-on and complete
-    TEST_ASSERT_GREATER_THAN_MESSAGE(0, turn_ons, "Should have at least one turn-on");
-    TEST_ASSERT_TRUE_MESSAGE(found_completion, "Message should complete");
+    // Repeat: count turn-ons over 3 seconds
+    morse->start_morse("E", 20, true, 1); // Repeat every 1 second
+    int repeat_turn_ons = 0;
+    for (unsigned long time = 0; time <= 3000; time += 10) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            repeat_turn_ons++;
+        }
+    }
+    
+    // Repeat should have more turn-ons
+    TEST_ASSERT_GREATER_THAN_MESSAGE(non_repeat_turn_ons, repeat_turn_ons, 
+                                      "Repeat should have more activity than non-repeat");
 }
 
 void test_morse_complete_cycle_phases(void) {
@@ -266,26 +269,29 @@ void test_morse_complete_cycle_phases(void) {
     TEST_ASSERT_TRUE_MESSAGE(completed, "Morse should complete and go inactive");
 }
 
-void test_morse_wait_parameter(void) {    // Test different wait times in repeat mode
-    morse->start_morse("E", 20); // Simplified call without repeat
+void test_morse_wait_parameter(void) {
+    // Test different wait times in repeat mode
+    morse->start_morse("E", 20, true, 2); // 2 second wait
     
-    bool found_completion = false;
-    int total_turn_ons = 0;
+    int first_cycle_turn_ons = 0;
+    int second_cycle_turn_ons = 0;
     
-    // Should complete within reasonable time
-    for (unsigned long time = 0; time <= 2000; time += 10) {
-        int state = morse->step_morse(time);
-        if (state == STEP_MORSE_TURN_ON) {
-            total_turn_ons++;
-        }
-        if (state == STEP_MORSE_MESSAGE_COMPLETE) {
-            found_completion = true;
-            break;
+    // Count first cycle (0-1000ms)
+    for (unsigned long time = 0; time <= 1000; time += 10) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            first_cycle_turn_ons++;
         }
     }
     
-    TEST_ASSERT_GREATER_THAN_MESSAGE(0, total_turn_ons, "Should have activity");
-    TEST_ASSERT_TRUE_MESSAGE(found_completion, "Should complete within reasonable time");
+    // Count around second cycle (2000-3000ms, accounting for 2s wait)
+    for (unsigned long time = 2000; time <= 3000; time += 10) {
+        if (morse->step_morse(time) == STEP_MORSE_TURN_ON) {
+            second_cycle_turn_ons++;
+        }
+    }
+    
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, first_cycle_turn_ons, "Should have activity in first cycle");
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, second_cycle_turn_ons, "Should repeat after wait period");
 }
 
 void test_morse_extreme_wpm_values(void) {

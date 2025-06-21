@@ -99,42 +99,10 @@ bool AsyncMorse::start_step_element(unsigned long time){
     return false;
 }
 
-void AsyncMorse::restart_morse(){
-    async_phase = PHASE_CHAR;
-    async_position = 0;
-    async_morse = 0;
-
-    async_element = 0;
-    async_active = false;
-    async_next_event = 0L;
-    async_space = false;
-
-    async_element_done = true;
-
-    async_char = async_str[async_position];
-    
-    if(async_char == ' '){
-        async_phase = PHASE_SPACE;
-
-        return;
-    }
-
-    async_char = lookup_morse_char(async_char);    
-
-    if(!start_step_element(millis()))
-        return;
-
-    if(async_char > 0){
-        async_phase = PHASE_CHAR;
-    }    
-}
-
-void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_seconds){
+void AsyncMorse::start_morse(const char *s, int wpm){
     async_str = s;
     async_length = strlen(s);
     async_element_del = MORSE_TIME_FROM_WPM(wpm);
-    async_repeat = repeat;
-    async_wait_seconds = wait_seconds;
 
     async_phase = PHASE_CHAR;
     async_position = 0;
@@ -154,9 +122,7 @@ void AsyncMorse::start_morse(const char *s, int wpm, bool repeat, int wait_secon
         return;
     }
 
-    async_char = lookup_morse_char(async_char);    
-
-    // Initialize with time 0 to eliminate startup delay
+    async_char = lookup_morse_char(async_char);        // Initialize with time 0 to eliminate startup delay
     if(!start_step_element(0))
         return;
 
@@ -253,37 +219,16 @@ bool AsyncMorse::step_position(unsigned long time){
 void AsyncMorse::step_space(unsigned long time){
     if(!is_time_ready(time)){
         return;
-    }
-
-    async_phase = PHASE_CHAR;
-}
-
-void AsyncMorse::start_wait(unsigned long time){
-    async_phase = PHASE_WAIT;
-    async_next_event = time + (async_wait_seconds * 1000);
-}
-
-void AsyncMorse::step_wait(unsigned long time){
-    if(!is_time_ready(time)){
-        return;
-    }    if(async_repeat){
-        restart_morse();
-    } else {
-        async_phase = PHASE_DONE;
-        async_just_completed = true;  // Mark that we just completed
-    }
+    }    async_phase = PHASE_CHAR;
 }
 
 // ========================================
 // TRANSMISSION COMPLETION HELPER
 // ========================================
 void AsyncMorse::handle_transmission_complete(unsigned long time) {
-    if(async_repeat) {
-        start_wait(time);
-    } else {
-        async_phase = PHASE_DONE;
-        async_just_completed = true;  // Mark that we just completed
-    }
+    // Mark message as complete and stop transmission
+    async_just_completed = true;
+    async_phase = PHASE_DONE;
 }
 
 int AsyncMorse::step_morse(unsigned long time){
@@ -291,14 +236,10 @@ int AsyncMorse::step_morse(unsigned long time){
         case PHASE_DONE:
             break;        case PHASE_CHAR:
             if(!step_position(time)){
-                handle_transmission_complete(time);
-            }
+                handle_transmission_complete(time);            }
             break;
         case PHASE_SPACE:
             step_space(time);
-            break;
-        case PHASE_WAIT:
-            step_wait(time);
             break;    }
     
     // Check for message completion before normal wave generator control

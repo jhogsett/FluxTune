@@ -200,15 +200,15 @@ SignalMeter signal_meter;
 // ============================================================================
 
 // Mixed station pool - conservative memory usage
-SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
-// SimStation cw_station2(&realizer_pool, &signal_meter, 7010000.0, "CQ CQ DE W1AW W1AW K      ", 13);
+SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 11);
+// SimStation cw_station2(&realizer_pool, &signal_meter, 7010000.0, 13);
 
 SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 18);  // 7002700.0 Hz, 18 WPM
 // SimNumbers numbers_station2(&realizer_pool, &signal_meter, 7011000.0, 20);   // 7011000.0 Hz, 20 WPM
 
-SimRTTY rtty_station1(&realizer_pool, &signal_meter, 7004100.0);  // 7004100.0 Hz
+SimRTTY rtty_station1(&realizer_pool, &signal_meter, 14004100.0);  // 7004100.0 Hz
 
-SimPager pager_station1(&realizer_pool, &signal_meter, 7006000.0);   // 7006000.0 Hz
+SimPager pager_station1(&realizer_pool, &signal_meter, 146800000.0);   // 7006000.0 Hz
 
 // ============================================================================
 // STATION MANAGER - Create but don't use yet (testing instantiation)

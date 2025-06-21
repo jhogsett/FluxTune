@@ -42,9 +42,8 @@ bool SimNumbers::begin(unsigned long time)
     _current_phase = PHASE_INTERVAL_SIGNAL;
     _interval_repeats_sent = 0;
     _groups_sent = 0;
-    
-    generate_interval_signal();
-    _morse.start_morse(_group_buffer, _wpm, false, 0);  // No repeat, no wait
+      generate_interval_signal();
+    _morse.start_morse(_group_buffer, _wpm);  // No repeat, stations handle their own repetition
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
     wavegen->set_frequency(NUMBERS_SPACE_FREQUENCY, false);
@@ -152,21 +151,20 @@ bool SimNumbers::step(unsigned long time)
     if(_in_inter_group_delay && time >= _next_group_time) {
         _in_inter_group_delay = false;
         
-        switch(_current_phase) {
-            case PHASE_INTERVAL_SIGNAL:
+        switch(_current_phase) {            case PHASE_INTERVAL_SIGNAL:
                 generate_interval_signal();
-                _morse.start_morse(_group_buffer, _wpm, false, 0);
+                _morse.start_morse(_group_buffer, _wpm);
                 break;
                 
             case PHASE_NUMBERS:
                 generate_next_number_group();
-                _morse.start_morse(_group_buffer, _wpm, false, 0);
+                _morse.start_morse(_group_buffer, _wpm);
                 break;
                 
             case PHASE_ENDING:
                 generate_ending_sequence();
-                _morse.start_morse(_group_buffer, _wpm, false, 0);
-                break;            case PHASE_CYCLE_DELAY:
+                _morse.start_morse(_group_buffer, _wpm);
+                break;case PHASE_CYCLE_DELAY:
                 // Cycle complete, restart with interval signal
                 _current_phase = PHASE_INTERVAL_SIGNAL;
                 _interval_repeats_sent = 0;
@@ -178,9 +176,8 @@ bool SimNumbers::step(unsigned long time)
                 // Immediately update the wave generator frequency to reflect the drift
                 // This ensures the audio frequency changes right away, not just when user tunes
                 force_frequency_update();
-                
-                generate_interval_signal();
-                _morse.start_morse(_group_buffer, _wpm, false, 0);
+                  generate_interval_signal();
+                _morse.start_morse(_group_buffer, _wpm);
                 break;
         }
     }

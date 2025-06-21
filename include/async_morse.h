@@ -6,7 +6,6 @@
 #define PHASE_DONE 0
 #define PHASE_CHAR 1
 #define PHASE_SPACE 2
-#define PHASE_WAIT 3
 
 #define MAX_ELEMENT 6
 
@@ -23,41 +22,32 @@
 class AsyncMorse
 {
 public:
-    AsyncMorse();
-
-    void start_morse(const char *s, int wpm, bool repeat, int wait_seconds);
+    AsyncMorse();    void start_morse(const char *s, int wpm);
     int step_morse(unsigned long time);
     bool is_done() const;  // Check if current transmission is complete
     
-private:
-    // ========================================
+private:    // ========================================
     // INTERNAL HELPER METHODS
     // ========================================
     char lookup_morse_char(char c);
     bool start_step_element(unsigned long time);
-    void restart_morse();
     unsigned long compute_element_time(unsigned long time, byte element_count, bool is_space);
     int step_element(unsigned long time);
     bool step_position(unsigned long time);
     void step_space(unsigned long time);
-    void start_wait(unsigned long time);
-    void step_wait(unsigned long time);
     void handle_transmission_complete(unsigned long time);
     bool is_time_ready(unsigned long current_time);
 
     // ========================================
     // STATE VARIABLES
     // ========================================
-    
-    // Text configuration
+      // Text configuration
     const char *async_str = NULL;          // String being transmitted
     int async_length;                      // Length of text string
     int async_element_del;                 // Base timing unit in milliseconds (from WPM)
-    bool async_repeat;                     // Whether to repeat transmission
-    int async_wait_seconds;                // Seconds to wait between repeats
     
     // Current transmission state  
-    byte async_phase;                      // Current phase: PHASE_DONE, PHASE_CHAR, PHASE_SPACE, PHASE_WAIT
+    byte async_phase;                      // Current phase: PHASE_DONE, PHASE_CHAR, PHASE_SPACE
     byte async_position;                   // Current position in text string
     char async_char;                       // Morse table index for current character
     byte async_morse;                      // Bit pattern for current character
@@ -71,8 +61,5 @@ private:
     bool async_just_completed;             // True for one step after message completion
 
 };
-
-extern void start_morse(const char *s, int wpm, bool repeat);
-extern int step_morse(unsigned long time);
 
 #endif
