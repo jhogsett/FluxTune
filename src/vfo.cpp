@@ -49,6 +49,11 @@ void VFO::update_display(HT16K33Disp *display){
 
 void VFO::update_realization(){
     _realization_pool->update(this);
+    
+    // Update VFO frequency tracking for dynamic station management when VFO is switched
+    float freq_mhz = (float)_frequency / 1000000.0f;
+    _realization_pool->set_current_vfo_frequency(freq_mhz);
+    
     // for(byte i = 0; i < _nrealizations; i++){
     //     _realizations[i]->update(this);
     // }
