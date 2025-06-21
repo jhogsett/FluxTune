@@ -16,8 +16,8 @@ class SignalMeter; // Forward declaration
 class SimNumbers : public SimTransmitter
 {
 public:
-    SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter);
-    virtual bool begin(unsigned long time, float fixed_freq, int wpm = 18);
+    SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm = 18);
+    virtual bool begin(unsigned long time);
     
     virtual bool update(Mode *mode);
     virtual bool step(unsigned long time);
@@ -38,6 +38,7 @@ private:
     bool _transmission_active;      // Track if morse is currently transmitting
     int _wpm;                       // Store WPM setting for consistent use
     SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses
+    float _stored_fixed_freq;       // Stored frequency from constructor
     
     // Enhanced numbers station state
     enum NumbersPhase {

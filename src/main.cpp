@@ -199,15 +199,15 @@ SignalMeter signal_meter;
 // ============================================================================
 
 // Mixed station pool - conservative memory usage
-SimStation cw_station1(&realizer_pool, &signal_meter);
-SimStation cw_station2(&realizer_pool, &signal_meter);
+SimStation cw_station1(&realizer_pool, &signal_meter, 7.002, "CQ CQ DE N6CCM N6CCM K    ", 11);
+SimStation cw_station2(&realizer_pool, &signal_meter, 7.010, "CQ CQ DE W1AW W1AW K      ", 13);
 
-SimNumbers numbers_station1(&realizer_pool, &signal_meter);
-SimNumbers numbers_station2(&realizer_pool, &signal_meter);
+SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7.0027, 18);  // 7.0027 MHz, 18 WPM
+SimNumbers numbers_station2(&realizer_pool, &signal_meter, 7.011, 20);   // 7.011 MHz, 20 WPM
 
-SimRTTY rtty_station1(&realizer_pool, &signal_meter);
+SimRTTY rtty_station1(&realizer_pool, &signal_meter, 7.0041);  // 7.0041 MHz
 
-SimPager pager_station1(&realizer_pool, &signal_meter);
+SimPager pager_station1(&realizer_pool, &signal_meter, 7.006);   // 7.006 MHz
 
 // Expanded station array - 6 stations total for dynamic management
 // First 4 slots are "primary" (initially audible), remaining 2 are "secondary" (dormant/silent)
@@ -473,10 +473,10 @@ void loop()
 	// ============================================================================
 	
 	// Initialize primary stations (first 4 - will be AUDIBLE with AD9833 generators)
-	cw_station1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+	cw_station1.begin(time + random(1000));  // Parameters now come from constructor
 	cw_station1.set_station_state(AUDIBLE);
 	
-	numbers_station1.begin(time + random(1000), 7002700.0, 18);  // Spooky 18 WPM!
+	numbers_station1.begin(time + random(1000));  // Parameters now come from constructor
 	numbers_station1.set_station_state(AUDIBLE);
 	
 	rtty_station1.begin(time + random(1000), 7004100.0);
