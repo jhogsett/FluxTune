@@ -137,8 +137,10 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 - ✅ **Enhanced SimNumbers station** - Added interval signals ("FT") and ending sequence ("00000")
 - ✅ **Signal meter carrier integration** - Charge pulses only on actual carrier events
 - ✅ **Numbers station authenticity research** - Documented real-world patterns and behaviors
+- ✅ **Station initialization refactoring** - Moved all config parameters to constructors for dynamic station management
+- ✅ **Fixed frequency units bug** - Corrected MHz/Hz mismatch that prevented stations from being audible
 
 ---
 
-*Last Updated: June 20, 2025*
+*Last Updated: June 21, 2025*
 *Use this document to park minor issues and ideas to avoid distraction during major feature development.*
