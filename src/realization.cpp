@@ -14,6 +14,11 @@ bool Realization::update(Mode *mode){
 
 // returns true on successful begin
 bool Realization::begin(unsigned long time){
+    // If already have a realizer, begin() is idempotent - just return success
+    if(_realizer != -1) {
+        return true;
+    }
+    
     // attempt to acquire a realizer
     _realizer = _realizer_pool->get_realizer();
     if(_realizer == -1)
@@ -35,6 +40,8 @@ bool Realization::step(unsigned long time){
 // }
 
 void Realization::end(){
-    if(_realizer != -1)
+    if(_realizer != -1) {
         _realizer_pool->free_realizer(_realizer);
+        _realizer = -1;  // Reset to avoid double-free or invalid access
+    }
 }

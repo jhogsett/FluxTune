@@ -17,6 +17,7 @@
 #include "utils.h"
 #include "signal_meter.h"
 #include "station_config.h"
+#include "station_manager.h"
 
 // #define ENCODER_DO_NOT_USE_INTERRUPTS
 #ifndef PLATFORM_NATIVE
@@ -199,28 +200,39 @@ SignalMeter signal_meter;
 // ============================================================================
 
 // Mixed station pool - conservative memory usage
-SimStation cw_station1(&realizer_pool, &signal_meter);
-SimStation cw_station2(&realizer_pool, &signal_meter);
+SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+// SimStation cw_station2(&realizer_pool, &signal_meter, 7010000.0, "CQ CQ DE W1AW W1AW K      ", 13);
 
-SimNumbers numbers_station1(&realizer_pool, &signal_meter);
-SimNumbers numbers_station2(&realizer_pool, &signal_meter);
+SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 18);  // 7002700.0 Hz, 18 WPM
+// SimNumbers numbers_station2(&realizer_pool, &signal_meter, 7011000.0, 20);   // 7011000.0 Hz, 20 WPM
 
-SimRTTY rtty_station1(&realizer_pool, &signal_meter);
+SimRTTY rtty_station1(&realizer_pool, &signal_meter, 7004100.0);  // 7004100.0 Hz
 
-SimPager pager_station1(&realizer_pool, &signal_meter);
+SimPager pager_station1(&realizer_pool, &signal_meter, 7006000.0);   // 7006000.0 Hz
 
-// Expanded station array - 6 stations total for dynamic management
-// First 4 slots are "primary" (initially audible), remaining 2 are "secondary" (dormant/silent)
-Realization *realizations[6] = {
+// ============================================================================
+// STATION MANAGER - Create but don't use yet (testing instantiation)
+// ============================================================================
+SimTransmitter *station_pool[4] = {
+    &cw_station1,
+    &numbers_station1,
+    &rtty_station1,
+    &pager_station1
+};
+
+StationManager station_manager(station_pool);
+
+// Expanded station array - 4 stations total (back to original)
+Realization *realizations[4] = {
     // Primary stations (initially AUDIBLE with AD9833 generators)
     &cw_station1,
     &numbers_station1, 
     &rtty_station1,
-    &pager_station1,
+    &pager_station1
     
-    // Secondary stations (initially DORMANT, become ACTIVE/SILENT as needed)
-    &cw_station2,
-    &numbers_station2
+    // Secondary stations commented out for testing
+    // &cw_station2,
+    // &numbers_station2
 };
 
 WaveOut waveout1(&realizer_pool);
@@ -228,8 +240,8 @@ WaveOut waveout2(&realizer_pool);
 WaveOut waveout3(&realizer_pool);
 WaveOut waveout4(&realizer_pool);
 
-// Expanded realization status array for 6 stations  
-bool realization_stats[6] = {false, false, false, false, false, false};
+// Realization status array back to 4 stations  
+bool realization_stats[4] = {false, false, false, false};
 
 /* Dynamic array initialization - not needed with static initialization
 void initialize_station_arrays() {
@@ -261,7 +273,7 @@ void initialize_station_arrays() {
 }
 */
 
-RealizationPool realization_pool(realizations, realization_stats, 6);
+RealizationPool realization_pool(realizations, realization_stats, 4);
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
@@ -380,11 +392,13 @@ void setup(){
 	AD3.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD3.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD3.setMode(MD_AD9833::MODE_SINE);
-
 	AD4.begin();
 	AD4.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD4.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD4.setMode(MD_AD9833::MODE_SINE);
+
+	// Test StationManager method call in setup (safe location)
+	station_manager.updateStations(7000000);
 }	
 
 bool main_menu(){
@@ -473,16 +487,16 @@ void loop()
 	// ============================================================================
 	
 	// Initialize primary stations (first 4 - will be AUDIBLE with AD9833 generators)
-	cw_station1.begin(time + random(1000), 7002000.0, "CQ CQ DE N6CCM N6CCM K    ", 11);
+	cw_station1.begin(time + random(1000));  // Parameters now come from constructor
 	cw_station1.set_station_state(AUDIBLE);
 	
-	numbers_station1.begin(time + random(1000), 7002700.0, 18);  // Spooky 18 WPM!
+	numbers_station1.begin(time + random(1000));  // Parameters now come from constructor
 	numbers_station1.set_station_state(AUDIBLE);
 	
-	rtty_station1.begin(time + random(1000), 7004100.0);
+	rtty_station1.begin(time + random(1000));
 	rtty_station1.set_station_state(AUDIBLE);
 	
-	pager_station1.begin(time + random(1000), 7006000.0);
+	pager_station1.begin(time + random(1000));
 	pager_station1.set_station_state(AUDIBLE);
 	
 	// Secondary stations remain DORMANT until StationManager activates them
@@ -506,9 +520,11 @@ void loop()
 	// bool freq = false;	// bool last_active = true;
 	while(true){
 		unsigned long time = millis();
-		
-		// Update signal meter decay (capacitor-like discharge)
+				// Update signal meter decay (capacitor-like discharge)
 		signal_meter.update(time);
+		
+		// Test StationManager call in main loop (safe location)
+		station_manager.updateStations(7000000);
 
 		// Remove old random signal meter - now using frequency-based signal meter
 
@@ -544,13 +560,13 @@ void loop()
         }
         // Comment out the old animation:
         // panel_leds.step(time);
-
 		realization_pool.step(time);
 
-		// simstation1.step(time);
-		// simstation2.step(time);
-		// simstation3.step(time);
-		// simstation4.step(time);
+		// Step all active stations
+		cw_station1.step(time);
+		numbers_station1.step(time);
+		rtty_station1.step(time);
+		pager_station1.step(time);
 
 		encoder_handlerA.step();
 		encoder_handlerB.step();
@@ -598,25 +614,20 @@ void loop()
 				// encoder_handlerB.long_pressed();
 			}
 		}
-		
-		if(encoder_handlerA.changed()){
+				if(encoder_handlerA.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 #ifndef DISABLE_DISPLAY_OPERATIONS
 			dispatcher->update_display(&display);
 #endif
 			dispatcher->update_signal_meter(&signal_meter);
+			
+			// Test: Add StationManager call in encoder A handling (where the problem occurred)
+			station_manager.updateStations(7000000);
+			
 			dispatcher->update_realization();
 		}
-		
-		if(encoder_handlerB.changed()){
-			int diff_value = encoder_handlerB.diff();
-			// Diagnostic: Print encoder B events to demonstrate phantom event bug
-			Serial.print("EncoderB: diff=");
-			Serial.print(diff_value);
-			Serial.print(" time=");
-			Serial.println(millis());
-			
-			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, diff_value, 0);
+				if(encoder_handlerB.changed()){
+			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
 			purge_events();  // Clear any noise/overshoot after mode change
 			
 			// Note: No immediate update_display() call here - let show_title() finish first

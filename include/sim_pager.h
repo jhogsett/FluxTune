@@ -14,10 +14,10 @@ class SignalMeter; // Forward declaration
 class SimPager : public SimTransmitter
 {
 public:
-    SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter);
-    
-    virtual bool begin(unsigned long time, float fixed_freq);
-    virtual bool update(Mode *mode);    virtual bool step(unsigned long time);
+    SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq);
+      virtual bool begin(unsigned long time) override;
+    virtual bool update(Mode *mode) override;
+    virtual bool step(unsigned long time) override;
       void realize();
       // Debug method to display current tone pair
     void debug_print_tone_pair() const;

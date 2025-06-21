@@ -11,15 +11,12 @@ class SignalMeter; // Forward declaration
 class SimRTTY : public SimTransmitter
 {
 public:
-    SimRTTY(RealizerPool *realizer_pool, SignalMeter *signal_meter);
-      virtual bool begin(unsigned long time, float fixed_freq);
+    SimRTTY(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq);    virtual bool begin(unsigned long time) override;
     
-    virtual bool update(Mode *mode);
-    virtual bool step(unsigned long time);
+    virtual bool update(Mode *mode) override;
+    virtual bool step(unsigned long time) override;
     
-    void realize();
-
-    AsyncRTTY _rtty;
+    void realize();    AsyncRTTY _rtty;
     int _phase;
     SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses
 };

@@ -57,10 +57,8 @@ bool SimTransmitter::check_frequency_bounds()
 
 void SimTransmitter::end()
 {
-    if(_realizer != -1) {
-        _realizer_pool->free_realizer(_realizer);
-        _realizer = -1;  // Reset to avoid double-free or invalid access
-    }
+    // Call base class end() which properly handles the realizer cleanup
+    Realization::end();
 }
 
 void SimTransmitter::force_wave_generator_refresh()
@@ -79,10 +77,8 @@ bool SimTransmitter::reinitialize(unsigned long time, float fixed_freq)
     // Reinitialize station with new frequency for dynamic management
     // This allows reusing dormant stations for new frequencies
     
-    // Clean up any existing state
-    if(_station_state == AUDIBLE && _realizer != -1) {
-        end();  // Release realizer if currently assigned
-    }
+    // Clean up any existing realizer assignment
+    end();  // Safe to call multiple times
     
     // Set new parameters
     _fixed_freq = fixed_freq;
@@ -134,4 +130,29 @@ void SimTransmitter::setActive(bool active) {
 
 bool SimTransmitter::isActive() const {
     return _active;
+}
+
+void SimTransmitter::force_frequency_update()
+{
+    // Immediately recalculate _frequency and update wave generator
+    // This is used when _fixed_freq changes outside of the normal update() cycle
+    // (e.g., frequency drift, dynamic station reallocation)
+    // 
+    // Without this, frequency changes would only take effect when the user turns
+    // the tuning knob, causing the audio to stay at the old frequency while the
+    // signal meter correctly shows the new frequency (confusing behavior).
+    //
+    // NOTE: This assumes the station currently holds a wave generator. When full
+    // dynamic pipelining is implemented (wave generators allocated/freed based on
+    // VFO proximity), this method should be made more defensive and frequency
+    // changes should be deferred until a generator is re-allocated.
+    if(_enabled && _realizer != -1) {
+        // Recalculate _frequency with current _fixed_freq and _vfo_freq
+        float raw_frequency = _vfo_freq - _fixed_freq;
+        _frequency = raw_frequency + option_bfo_offset;
+        
+        // Update the wave generator with the new frequency
+        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+        wavegen->set_frequency(_frequency);
+    }
 }

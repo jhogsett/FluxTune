@@ -27,6 +27,11 @@ enum StationState {
 /**
  * Base class for simulated transmitters (CW/RTTY).
  * Provides common functionality and interface for station simulation.
+ * 
+ * IMPORTANT: begin() and end() are designed to be idempotent and safe for repeated calls.
+ * This supports dynamic station management where stations may be restarted with new
+ * frequencies or reallocated to different wave generators. The pattern end() followed
+ * by begin() properly reinitializes the station with any frequency changes.
  */
 class SimTransmitter : public Realization
 {
@@ -54,7 +59,8 @@ public:
 protected:    // Common utility methods
     bool check_frequency_bounds();  // Returns true if frequency is in audible range
     bool common_begin(unsigned long time, float fixed_freq);  // Common initialization logic
-    void common_frequency_update(Mode *mode);  // Common frequency calculation (mode must be VFO)    // Common member variables
+    void common_frequency_update(Mode *mode);  // Common frequency calculation (mode must be VFO)
+    void force_frequency_update();  // Immediately update wave generator after _fixed_freq changes// Common member variables
     float _fixed_freq;  // Target frequency for this station
     bool _enabled;      // True when frequency is in audible range
     float _frequency;   // Current frequency difference from VFO

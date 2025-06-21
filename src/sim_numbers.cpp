@@ -14,14 +14,16 @@
 #define INTER_GROUP_DELAY 2000  // 2 seconds delay between number groups (more distinct)
 #define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 
-SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter) : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
+SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
+    : SimTransmitter(realizer_pool), _wpm(wpm), _signal_meter(signal_meter)
 {
-    // Base class initializes all common variables
+    // Base class initializes all common variables, including _fixed_freq
+    _fixed_freq = fixed_freq;  // Set the base class frequency directly
     _groups_sent = 0;
     _total_groups_per_cycle = 13;  // 13 groups for creepiness
     _in_inter_group_delay = false;
     _next_group_time = 0;
-    _transmission_active = false;    _wpm = 18;  // Default WPM
+    _transmission_active = false;
     
     // Enhanced numbers station state
     _current_phase = PHASE_INTERVAL_SIGNAL;
@@ -29,12 +31,12 @@ SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter) :
     _total_interval_repeats = DEFAULT_INTERVAL_REPEATS;  // Default interval repeats for optimal anticipation
 }
 
-bool SimNumbers::begin(unsigned long time, float fixed_freq, int wpm)
+bool SimNumbers::begin(unsigned long time)
 {
-    if(!common_begin(time, fixed_freq))
+    if(!common_begin(time, _fixed_freq))
         return false;
     
-    _wpm = wpm;  // Store WPM setting for consistent use
+    // WPM is already stored from constructor, no need to update it
     
     // Start with interval signal phase
     _current_phase = PHASE_INTERVAL_SIGNAL;
@@ -164,13 +166,19 @@ bool SimNumbers::step(unsigned long time)
             case PHASE_ENDING:
                 generate_ending_sequence();
                 _morse.start_morse(_group_buffer, _wpm, false, 0);
-                break;
-                
-            case PHASE_CYCLE_DELAY:
+                break;            case PHASE_CYCLE_DELAY:
                 // Cycle complete, restart with interval signal
                 _current_phase = PHASE_INTERVAL_SIGNAL;
                 _interval_repeats_sent = 0;
                 _groups_sent = 0;
+                
+                // Add creepy frequency drift for new transmission cycle
+                apply_frequency_drift();
+                
+                // Immediately update the wave generator frequency to reflect the drift
+                // This ensures the audio frequency changes right away, not just when user tunes
+                force_frequency_update();
+                
                 generate_interval_signal();
                 _morse.start_morse(_group_buffer, _wpm, false, 0);
                 break;
@@ -224,4 +232,21 @@ void SimNumbers::generate_ending_sequence()
 #else
     sprintf(_group_buffer, "00000");
 #endif
+}
+
+void SimNumbers::apply_frequency_drift()
+{
+    // Add slight frequency drift for authentic numbers station creepiness
+    // Real numbers stations often drift slightly between transmissions
+    // Drift range: ±200 Hz around the original frequency
+    const float DRIFT_RANGE = 200.0f;
+    
+#ifdef PLATFORM_NATIVE
+    // Use standard rand() for native builds
+    float drift = ((float)rand() / RAND_MAX) * (2.0f * DRIFT_RANGE) - DRIFT_RANGE;
+#else
+    // Use Arduino random() function
+    float drift = ((float)random(0, (long)(2.0f * DRIFT_RANGE * 100))) / 100.0f - DRIFT_RANGE;
+#endif    // Apply drift to the base class frequency - the station will use this on next cycle
+    _fixed_freq = _fixed_freq + drift;
 }
