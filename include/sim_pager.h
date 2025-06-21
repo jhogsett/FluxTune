@@ -14,9 +14,9 @@ class SignalMeter; // Forward declaration
 class SimPager : public SimTransmitter
 {
 public:
-    SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter);
+    SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq);
     
-    virtual bool begin(unsigned long time, float fixed_freq);
+    virtual bool begin(unsigned long time);
     virtual bool update(Mode *mode);    virtual bool step(unsigned long time);
       void realize();
       // Debug method to display current tone pair
@@ -30,6 +30,7 @@ private:
     float _current_tone_a_offset;
     float _current_tone_b_offset;
     SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses
+    float _fixed_freq;
 };
 
 #endif

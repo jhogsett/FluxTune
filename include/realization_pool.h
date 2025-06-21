@@ -4,6 +4,9 @@
 #include "mode.h"
 #include "realization.h"
 
+// Forward declaration
+class StationManager;
+
 // initialize with an array of realizers
 // tracks whether they are in use
 // can request 1 or more realizers
@@ -21,12 +24,21 @@ public:
     void update(Mode *mode);
     void force_sim_transmitter_refresh();  // Force hardware refresh for SimTransmitter objects
     void mark_dirty();  // Mark hardware state as unknown - triggers refresh on next update
+    
+    // Dynamic station management integration
+    void set_station_manager(StationManager* station_manager);
+    void set_current_vfo_frequency(float vfo_freq);
 
 private:
     Realization **_realizations;
     bool *_statuses;
     int _nrealizations;
     bool _hardware_dirty;  // True when hardware state is unknown and needs refresh
+    
+    // Dynamic station management
+    StationManager* _station_manager;
+    float _current_vfo_freq;
+    bool _vfo_freq_changed;
 };
 
 

@@ -25,6 +25,12 @@ bool VFO_Tuner::event_sink(int event, int event_data){
         }
     }
 
+    // Update VFO frequency tracking in RealizationPool for dynamic station management
+    if(vfo->_frequency != _old_freq) {
+        float freq_mhz = (float)vfo->_frequency / 1000000.0f;
+        vfo->_realization_pool->set_current_vfo_frequency(freq_mhz);
+    }
+
     return true;
 }
 
