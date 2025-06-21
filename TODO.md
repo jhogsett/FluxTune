@@ -2,6 +2,14 @@
 
 A centralized list of minor issues, enhancements, and technical debt to address when time permits.
 
+## Uncategories Jots
+- Find a use for the second (blue) panel LED (for example, light when either of the encoders' buttons are pressed as a visual confirmation of button activation)
+- Make the upper and lower audio frequency ranges settable in the Settings section
+- Make the Numbers station **slightly** move off its _fixed frequency_ after each cycle is completed, adding further creep
+- Deal with the branding hack
+- option: for morse training, you can tune up the dial and the WPM advances the further you go up
+- Rename "RealizerPool" to be more different from "RealizationPool" to avoid confusion 
+
 ## 🔧 Code Quality & Technical Debt
 
 ### LED Handler Improvements
@@ -131,7 +139,46 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 
 ---
 
-## 📋 Completed Recently
+## � Dynamic Station Pipelining (In Progress)
+
+### Current Implementation Status
+- ✅ **Station pool infrastructure** - 6-station array with state management
+- ✅ **StationState enum and transitions** - DORMANT/ACTIVE/AUDIBLE/SILENT states
+- ✅ **Generator allocation/deallocation** - SimTransmitter::end() properly releases AD9833s
+- ✅ **Base class refactoring** - Shared charge pulse logic and state management
+- ✅ **On-device validation** - 4 active stations work with safe RAM usage
+- ✅ **VFO frequency tracking integration** - RealizationPool calls StationManager on frequency changes
+
+### Next Steps (Priority Order)
+- ✅ **Implement VFO frequency tracking in StationManager**
+  - Added StationManager pointer to RealizationPool
+  - Wired up updateStations() to be called from realization_pool.step() when VFO changes
+  - Frequency tracking integrated in VFO_Tuner event handler
+- [ ] **Implement automatic station activation/deactivation**
+  - Calculate proximity between VFO and station frequencies
+  - Auto-transition stations between DORMANT/ACTIVE/AUDIBLE based on proximity
+  - Respect 4-generator limit for AUDIBLE stations
+- [ ] **Complete StationManager AD9833 assignment tracking**
+  - Populate ad9833_assignment[] array with actual assignments
+  - Implement allocateAD9833() method for intelligent generator distribution
+  - Add priority system (closer stations get generators first)
+- [ ] **Implement station recycling for new frequencies**
+  - Complete recycleDormantStations() method
+  - Allow DORMANT stations to be reinitialized with new frequencies
+  - Enable truly dynamic frequency-based station population
+
+### Advanced Enhancements (Future)
+- [ ] **Station priority and persistence algorithms**
+  - Keep recently-tuned stations active longer
+  - Implement hysteresis to prevent rapid state changes
+- [ ] **Realistic station density modeling**
+  - Vary station density by frequency band
+  - Add band-appropriate station types and characteristics
+
+## �📋 Completed Recently
+- ✅ **Panel lock LED indicator** - WHITE LED responds to station lock with fast decay
+- ✅ **Negative charge pulse convention** - Lock window detection via negative pulses
+- ✅ **Hardware pin naming cleanup** - WHITE/BLUE panel LED macros match physical device
 - ✅ **Capacitor-like signal meter** - Implemented authentic charge/discharge behavior
 - ✅ **Adjustable BFO offset** - Added user-controlled 0-2000Hz BFO with EEPROM persistence  
 - ✅ **Enhanced SimNumbers station** - Added interval signals ("FT") and ending sequence ("00000")

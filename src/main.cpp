@@ -59,6 +59,7 @@
 #include "async_morse.h"
 
 #include "realizer_pool.h"
+#include "station_manager.h"
 
 #ifndef PLATFORM_NATIVE
 // Already included in platform.h for native builds  
@@ -262,6 +263,26 @@ void initialize_station_arrays() {
 */
 
 RealizationPool realization_pool(realizations, realization_stats, 6);
+
+// ============================================================================
+// STATION MANAGER SETUP FOR DYNAMIC PIPELINING
+// ============================================================================
+
+// Create station pointer array for StationManager (all realizations are SimTransmitters)
+SimTransmitter* station_ptrs[6] = {
+    &cw_station1,
+    &numbers_station1,
+    &rtty_station1, 
+    &pager_station1,
+    &cw_station2,
+    &numbers_station2
+};
+
+// Initialize StationManager and integrate with RealizationPool
+StationManager station_manager(station_ptrs);
+
+// Set up VFO frequency tracking in RealizationPool
+realization_pool.set_station_manager(&station_manager);
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
@@ -467,6 +488,11 @@ void loop()
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	
+	// for branding photos
+	if(digitalRead(SWA) == LOW){
+		while(true);
+	}
+
 	// ============================================================================
 	// INITIALIZE 12-STATION DYNAMIC POOL
 	// Start with 4 primary stations active, rest dormant until needed

@@ -1,6 +1,7 @@
 #include "basic_types.h"
 #include "realization.h"
 #include "realization_pool.h"
+#include "station_manager.h"
 
 // pass array of realizer addresses, array of free/in-use bools, count of realizers 
 RealizationPool::RealizationPool(Realization **realizations, bool *statuses,  int nrealizations){
@@ -8,6 +9,11 @@ RealizationPool::RealizationPool(Realization **realizations, bool *statuses,  in
     _statuses = statuses;
     _nrealizations = nrealizations; 
     _hardware_dirty = false;  // Initialize as clean
+    
+    // Dynamic station management initialization
+    _station_manager = nullptr;
+    _current_vfo_freq = 0.0f;
+    _vfo_freq_changed = false;
 
     // for(int i = 0; i < _nrealizations; i++){
     //     free_realization(i);
@@ -23,6 +29,15 @@ bool RealizationPool::step(unsigned long time){
         if(!_realizations[i]->step(time))
             return false;
     }
+    
+    // Check if VFO frequency has changed and update StationManager
+    if(_vfo_freq_changed && _station_manager != nullptr) {
+        // Convert float frequency to uint32_t in Hz for StationManager
+        uint32_t vfo_freq_hz = (uint32_t)(_current_vfo_freq * 1000000.0f); // Convert MHz to Hz
+        _station_manager->updateStations(vfo_freq_hz);
+        _vfo_freq_changed = false; // Clear the flag
+    }
+    
     return true;
 }
 
@@ -88,4 +103,16 @@ void RealizationPool::mark_dirty(){
     // Mark hardware state as unknown - will trigger refresh on next update
     // This is called when switching applications that may affect hardware state
     _hardware_dirty = true;
+}
+
+// Dynamic station management methods
+void RealizationPool::set_station_manager(StationManager* station_manager) {
+    _station_manager = station_manager;
+}
+
+void RealizationPool::set_current_vfo_frequency(float vfo_freq) {
+    if (_current_vfo_freq != vfo_freq) {
+        _current_vfo_freq = vfo_freq;
+        _vfo_freq_changed = true; // Flag that frequency has changed
+    }
 }
