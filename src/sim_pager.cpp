@@ -13,8 +13,8 @@
 SimPager::SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq) 
     : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
 {
-    // Base class initializes all common variables
-    _stored_fixed_freq = fixed_freq;
+    // Store fixed frequency in base class
+    _fixed_freq = fixed_freq;
     // Generate initial tone pair
     generate_new_tone_pair();
     // Pager transmission will be started in begin() method
@@ -22,7 +22,7 @@ SimPager::SimPager(RealizerPool *realizer_pool, SignalMeter *signal_meter, float
 
 bool SimPager::begin(unsigned long time)
 {
-    if(!common_begin(time, _stored_fixed_freq))
+    if(!common_begin(time, _fixed_freq))
         return false;// Start pager transmission with repeat enabled
     _pager.start_pager_transmission(true);
 

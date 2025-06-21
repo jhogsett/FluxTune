@@ -8,16 +8,14 @@
 
 // mode is expected to be a derivative of VFO
 SimStation::SimStation(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, const char *message, int wpm) 
-    : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
+    : SimTransmitter(realizer_pool), _signal_meter(signal_meter), _stored_message(message), _stored_wpm(wpm)
 {
-    // Base class now initializes all common variables
-    _stored_fixed_freq = fixed_freq;
-    _stored_message = message;
-    _stored_wpm = wpm;
+    // Store fixed frequency in base class
+    _fixed_freq = fixed_freq;
 }
 
 bool SimStation::begin(unsigned long time){
-    if(!common_begin(time, _stored_fixed_freq))
+    if(!common_begin(time, _fixed_freq))
         return false;
         
     _morse.start_morse(_stored_message, _stored_wpm, true, WAIT_SECONDS);

@@ -8,13 +8,13 @@
 SimRTTY::SimRTTY(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq) 
     : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
 {
-    // Base class now initializes all common variables
-    _stored_fixed_freq = fixed_freq;
+    // Store fixed frequency in base class
+    _fixed_freq = fixed_freq;
     _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
 }
 
 bool SimRTTY::begin(unsigned long time){
-    if(!common_begin(time, _stored_fixed_freq))
+    if(!common_begin(time, _fixed_freq))
         return false;
 
     WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));

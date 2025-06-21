@@ -17,19 +17,18 @@ class SimNumbers : public SimTransmitter
 {
 public:
     SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm = 18);
-    virtual bool begin(unsigned long time);
+    virtual bool begin(unsigned long time) override;
     
-    virtual bool update(Mode *mode);
-    virtual bool step(unsigned long time);
+    virtual bool update(Mode *mode) override;
+    virtual bool step(unsigned long time) override;
 
     void realize();
 
-private:
-    void generate_next_number_group();
+private:    void generate_next_number_group();
     void generate_interval_signal();
     void generate_ending_sequence();
-    
-    AsyncMorse _morse;
+    void apply_frequency_drift();   // Add slight frequency drift for creepiness
+      AsyncMorse _morse;
     char _group_buffer[6];          // Buffer for single 5-digit group + null ("12345")
     int _groups_sent;               // Count of groups sent in current cycle
     int _total_groups_per_cycle;    // Total groups to send per cycle (13 for creepiness)
@@ -38,7 +37,7 @@ private:
     bool _transmission_active;      // Track if morse is currently transmitting
     int _wpm;                       // Store WPM setting for consistent use
     SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses
-    float _stored_fixed_freq;       // Stored frequency from constructor
+    // Note: Using base class _fixed_freq instead of redundant _stored_fixed_freq
     
     // Enhanced numbers station state
     enum NumbersPhase {

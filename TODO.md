@@ -139,6 +139,23 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 - ✅ **Numbers station authenticity research** - Documented real-world patterns and behaviors
 - ✅ **Station initialization refactoring** - Moved all config parameters to constructors for dynamic station management
 - ✅ **Fixed frequency units bug** - Corrected MHz/Hz mismatch that prevented stations from being audible
+- ✅ **StationManager baseline integration** - Added basic StationManager class with working encoder functionality
+- ✅ **Constructor code quality improvements** - Fixed initializer lists and added override specifiers per PR review
+- ✅ **Station begin/end safety** - Made begin() and end() idempotent and safe for repeated calls to support dynamic pipelining
+- ✅ **Member variable cleanup** - Removed redundant _stored_fixed_freq variables, using only base class _fixed_freq
+- ✅ **Fixed frequency drift wave generator update** - Fixed bug where frequency drift didn't update audio until next tuning knob turn
+
+## 🚧 In Progress: Dynamic Station Pipelining
+- ✅ **Basic StationManager integration** - Class instantiated and basic method calls working
+- ✅ **Station begin/end consistency** - All stations now support safe restart via end() followed by begin()
+- ⏸️ **Advanced StationManager features** - Distance calculations, state management, generator assignment (paused for mental break)
+- 📋 **Need to implement**: Full state machine (DORMANT→ACTIVE→AUDIBLE→SILENT), frequency-based activation/deactivation
+
+## 🎯 Fun Station Enhancements (Mental Diversion)
+- [ ] **Numbers station frequency drift** - Add slight frequency changes between transmission cycles for creepiness
+- [ ] **Pager station realistic timing** - Add authentic pager transmission patterns and delays
+- [ ] **CW station QSB simulation** - Add subtle signal strength variation to simulate propagation
+- [ ] **RTTY station frequency stability** - Add slight frequency wobble like old mechanical equipment
 
 ---
 
