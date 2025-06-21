@@ -161,8 +161,8 @@ A centralized list of minor issues, enhancements, and technical debt to address 
   - Calculate proximity between VFO and station frequencies (±50kHz range)
   - Auto-transition stations between DORMANT/ACTIVE/AUDIBLE based on proximity
   - Respect 4-generator limit for AUDIBLE stations with priority selection
-  - Proper station initialization with type-specific begin() parameters
-  - Cleanup via end() method when deactivating stations
+  - Refactored station initialization: moved parameters to constructors for cleaner design
+  - Self-contained stations with simplified begin(time) interface
 - [ ] **Complete StationManager AD9833 assignment tracking**
   - Populate ad9833_assignment[] array with actual assignments
   - Implement allocateAD9833() method for intelligent generator distribution
