@@ -23,32 +23,25 @@ StationManager::StationManager(SimTransmitter* station_ptrs[MAX_STATIONS]) {
 void StationManager::updateStations(uint32_t vfo_freq) {
     // Define proximity range for station activation (±50 kHz seems reasonable for HF)
     const uint32_t ACTIVATION_RANGE = 50000; // 50 kHz in Hz
-    
-    // Get current station frequencies (these would ideally be stored in the StationManager)
-    // For now, hardcode the current frequencies - TODO: make this data-driven
+      // Get current station frequencies from their constructors
     uint32_t station_frequencies[MAX_STATIONS] = {
         7002000,  // cw_station1: 7.002 MHz
         7002700,  // numbers_station1: 7.0027 MHz  
         7004100,  // rtty_station1: 7.0041 MHz
         7006000,  // pager_station1: 7.006 MHz
-        0,        // cw_station2: not assigned yet
-        0         // numbers_station2: not assigned yet
+        7010000,  // cw_station2: 7.010 MHz
+        7011000   // numbers_station2: 7.011 MHz
     };
     
     // Calculate which stations should be active based on VFO proximity
     bool should_be_active[MAX_STATIONS];
     int active_count = 0;
-    
-    for (int i = 0; i < MAX_STATIONS; i++) {
-        if (station_frequencies[i] == 0) {
-            should_be_active[i] = false; // Unassigned stations stay dormant
-        } else {
-            uint32_t freq_diff = (vfo_freq > station_frequencies[i]) 
-                ? (vfo_freq - station_frequencies[i])
-                : (station_frequencies[i] - vfo_freq);
-            should_be_active[i] = (freq_diff <= ACTIVATION_RANGE);
-            if (should_be_active[i]) active_count++;
-        }
+      for (int i = 0; i < MAX_STATIONS; i++) {
+        uint32_t freq_diff = (vfo_freq > station_frequencies[i]) 
+            ? (vfo_freq - station_frequencies[i])
+            : (station_frequencies[i] - vfo_freq);
+        should_be_active[i] = (freq_diff <= ACTIVATION_RANGE);
+        if (should_be_active[i]) active_count++;
     }
     
     // If too many stations would be active, prioritize by proximity
@@ -106,35 +99,8 @@ void StationManager::activateStation(int idx, uint32_t freq) {
     // Get current time for station initialization
     unsigned long time = millis();
     
-    // Initialize station based on its index/type
-    // This is a temporary hardcoded approach - TODO: make this data-driven
-    switch(idx) {
-        case 0: // cw_station1
-            // Cast to SimStation and initialize with CW parameters
-            ((SimStation*)stations[idx])->begin(time + random(1000), freq / 1000000.0f, "CQ CQ DE N6CCM N6CCM K    ", 11);
-            break;
-        case 1: // numbers_station1
-            // Cast to SimNumbers and initialize
-            ((SimNumbers*)stations[idx])->begin(time + random(1000), freq / 1000000.0f, 18);
-            break;
-        case 2: // rtty_station1
-            // Cast to SimRTTY and initialize
-            ((SimRTTY*)stations[idx])->begin(time + random(1000), freq / 1000000.0f);
-            break;
-        case 3: // pager_station1
-            // Cast to SimPager and initialize
-            ((SimPager*)stations[idx])->begin(time + random(1000), freq / 1000000.0f);
-            break;
-        case 4: // cw_station2
-            // Second CW station with different message
-            ((SimStation*)stations[idx])->begin(time + random(1000), freq / 1000000.0f, "CQ CQ DE W1AW W1AW K    ", 13);
-            break;
-        case 5: // numbers_station2
-            // Second numbers station with different WPM
-            ((SimNumbers*)stations[idx])->begin(time + random(1000), freq / 1000000.0f, 20);
-            break;
-    }
-    
+    // Simply call begin() - each station now has its configuration built-in
+    stations[idx]->begin(time + random(1000));
     stations[idx]->setActive(true);
 }
 

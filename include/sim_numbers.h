@@ -16,8 +16,8 @@ class SignalMeter; // Forward declaration
 class SimNumbers : public SimTransmitter
 {
 public:
-    SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter);
-    virtual bool begin(unsigned long time, float fixed_freq, int wpm = 18);
+    SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm = 18);
+    virtual bool begin(unsigned long time);
     
     virtual bool update(Mode *mode);
     virtual bool step(unsigned long time);
@@ -31,8 +31,7 @@ private:
     
     AsyncMorse _morse;
     char _group_buffer[6];          // Buffer for single 5-digit group + null ("12345")
-    int _groups_sent;               // Count of groups sent in current cycle
-    int _total_groups_per_cycle;    // Total groups to send per cycle (13 for creepiness)
+    int _groups_sent;               // Count of groups sent in current cycle    int _total_groups_per_cycle;    // Total groups to send per cycle (13 for creepiness)
     bool _in_inter_group_delay;     // True when waiting between groups
     unsigned long _next_group_time; // When to send next group
     bool _transmission_active;      // Track if morse is currently transmitting
@@ -50,6 +49,9 @@ private:
     NumbersPhase _current_phase;
     int _interval_repeats_sent;     // Count of "FT" repeats sent
     int _total_interval_repeats;    // Total "FT" repeats to send (e.g., 6 for authentic feel)
+    
+private:
+    float _fixed_freq;
 };
 
 #endif
