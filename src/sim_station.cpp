@@ -182,7 +182,15 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
     const char *letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     
 #ifdef PLATFORM_NATIVE
-    // Simple format: W/K/N + doubled digit + 2-3 letters
+    // Improved randomness: Use time-based seeding for better distribution
+    static unsigned long last_seed_time = 0;
+    unsigned long current_time = millis();
+    if (current_time - last_seed_time > 1000) {  // Re-seed every second for better randomness
+        srand(current_time);
+        last_seed_time = current_time;
+    }
+    
+    // More random prefix selection
     int prefix_idx = rand() % 3;
     int digit = rand() % 10;  // 0-9, will be doubled
     int suffix_len = 2 + (rand() % 2);  // 2 or 3 letters
@@ -195,7 +203,10 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
         strncat(callsign_buffer, letter, buffer_size - strlen(callsign_buffer) - 1);
     }
 #else
-    // Arduino version
+    // Arduino version with improved randomness
+    // Mix current time with existing randomSeed for better distribution
+    randomSeed(randomSeed() + millis());
+    
     int prefix_idx = random(3);
     int digit = random(10);  // 0-9, will be doubled
     int suffix_len = 2 + random(2);  // 2 or 3 letters
@@ -238,6 +249,11 @@ void SimStation::apply_operator_frustration_drift()
     
     // Apply drift to the base class frequency
     _fixed_freq = _fixed_freq + drift;
+    
+    // ENHANCEMENT: Generate new callsign to simulate a completely different operator
+    // This makes it appear that a new station has come on frequency instead of
+    // the same operator continuing to call CQ after frequency adjustment
+    generate_cq_message();
     
     // Immediately update the wave generator frequency
     force_frequency_update();
