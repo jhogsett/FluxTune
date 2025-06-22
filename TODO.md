@@ -2,6 +2,14 @@
 
 A centralized list of minor issues, enhancements, and technical debt to address when time permits.
 
+## ✅ Recently Completed
+
+### Dynamic WaveGen Allocation (COMPLETED)
+- [x] **SimStation and SimNumbers dynamic allocation** - Successfully implemented per-message-cycle allocation/freeing
+- [x] **Fixed first morse element bug** - Removed premature force_frequency_update() calls that used stale _vfo_freq
+- [x] **Verified device functionality** - Both SimStation and SimNumbers work correctly on real hardware
+- [x] **Resource sharing verified** - Multiple stations properly share WaveGen resources during idle periods
+
 ## 🔧 Code Quality & Technical Debt
 
 ### WaveGenPool Resource Management
