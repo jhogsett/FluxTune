@@ -43,14 +43,15 @@ bool SimStation::begin(unsigned long time){
     printf("DEBUG: SimStation::begin() - realizer=%d, time=%lu\n", _realizer, time);
     #endif
       WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
-    wavegen->set_frequency(SPACE_FREQUENCY, false);
-      // Set _enabled for frequency calculations, but don't force update yet
-    // The frequency will be properly set when update() is called
+    wavegen->set_frequency(SPACE_FREQUENCY, false);    // Set _enabled and force frequency update with existing _vfo_freq
+    // _vfo_freq should retain its value from the previous cycle
     _enabled = true;
+    force_frequency_update();
+    realize();  // CRITICAL: Set active state for audio output!
     
     #ifdef PLATFORM_NATIVE
-    printf("DEBUG: SimStation::begin() - _enabled=%s, waiting for update() to set frequency\n", 
-           _enabled ? "true" : "false");
+    printf("DEBUG: SimStation::begin() - _enabled=%s, _vfo_freq=%f, _frequency=%f\n", 
+           _enabled ? "true" : "false", _vfo_freq, _frequency);
     #endif
     
     // Start first CQ immediately (after frequencies are set)
