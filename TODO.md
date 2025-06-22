@@ -4,6 +4,15 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 
 ## 🔧 Code Quality & Technical Debt
 
+### WaveGenPool Resource Management
+- [ ] **Evaluate defensive programming vs Flash memory tradeoffs** 
+  - Current WaveGenPool lacks bounds checking in `free_realizer()` and `access_realizer()`
+  - Runtime bounds checks would add Flash overhead on resource-constrained Arduino
+  - **Recommendation**: Maintain current implementation, rely on sound coding practices and comprehensive testing
+  - Alternative: Add conditional debug-only bounds checking (`#ifdef DEBUG_BOUNDS_CHECK`)
+  - Current testing demonstrates allocation/freeing works correctly for normal use cases
+  - Core functionality is solid: allocation, freeing, exhaustion handling, and resource reuse all work
+
 ### LED Handler Improvements
 - [ ] **Add LED style for all activated during show period** (`led_handler.h:32`)
   - Currently missing a style option for when all LEDs are active during display periods
