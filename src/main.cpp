@@ -53,6 +53,12 @@
 
 #include "realizer_pool.h"
 
+// ============================================================================
+// BRANDING MODE FOR PRODUCT PHOTOGRAPHY
+// Comment out this #define to disable branding mode
+// ============================================================================
+#define ENABLE_BRANDING_MODE
+
 // Create an ledStrip object and specify the pin it will use.
 PololuLedStrip<12> ledStrip;
 
@@ -294,10 +300,48 @@ void setup(){
 	AD4.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD4.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD4.setMode(MD_AD9833::MODE_SINE);
-
 	// Test StationManager method call in setup (safe location)
 	station_manager.updateStations(7000000);
-}	
+}
+
+#ifdef ENABLE_BRANDING_MODE
+// ============================================================================
+// BRANDING MODE - Easter egg for product photography
+// Activates when encoder A button is pressed during startup
+// Sets signal meter to full strength and lights panel LEDs at max brightness
+// ============================================================================
+void activate_branding_mode() {
+    // Show "PHOTO MODE" on display for branding
+    #ifndef DISABLE_DISPLAY_OPERATIONS
+    display.scroll_string(FSTR("PHOTO MODE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
+    #endif
+    
+    // Directly set signal meter LEDs to full brightness (bypass dynamic system)
+    rgb_color full_colors[LED_COUNT] = 
+    {
+      { 15, 15, 0 },   // Full brightness for all LEDs
+      { 15, 15, 0 }, 
+      { 15, 15, 0 }, 
+      { 15, 15, 0 }, 
+      { 15, 15, 0 }, 
+      { 15, 15, 0 }, 
+      { 15, 0, 0 }     // Red at the end
+    };
+    
+    // Enter infinite loop for photography - device stays in perfect display state
+    while(true) {
+        // Keep signal meter LEDs at full brightness
+        ledStrip.write(full_colors, LED_COUNT);
+        
+        // Keep both panel LEDs at maximum brightness
+        analogWrite(WHITE_PANEL_LED, PANEL_LOCK_LED_FULL_BRIGHTNESS / PANEL_LED_BRIGHTNESS_DIVISOR);
+        analogWrite(BLUE_PANEL_LED, PANEL_LOCK_LED_FULL_BRIGHTNESS / PANEL_LED_BRIGHTNESS_DIVISOR);
+        
+        // Small delay to prevent overwhelming the processor
+        delay(100);
+    }
+}
+#endif
 
 bool main_menu(){
     return true;
@@ -376,6 +420,15 @@ void loop()
 #ifndef DISABLE_DISPLAY_OPERATIONS
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
 #endif
+
+#ifdef ENABLE_BRANDING_MODE
+    // BRANDING MODE EASTER EGG - Check if encoder A button is pressed during startup
+    // Pin 4 (SWA) goes LOW when button is pressed
+    if (digitalRead(SWA) == LOW) {
+        activate_branding_mode();  // Never returns - infinite loop for photography
+    }
+#endif
+
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	
