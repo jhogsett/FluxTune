@@ -1,4 +1,5 @@
 #include "signal_meter.h"
+#include "hardware.h"
 
 #ifndef NATIVE_BUILD
 extern PololuLedStrip<12> ledStrip;  // Defined in main.cpp
@@ -127,12 +128,11 @@ void SignalMeter::write_leds()
         _led_buffer[on_leds-1].green = (_led_buffer[on_leds-1].green * remain) / 16;
         _led_buffer[on_leds-1].blue = (_led_buffer[on_leds-1].blue * remain) / 16;
     }
-    
-    // Apply contrast adjustment
+      // Apply contrast adjustment and device variant scaling
     for (int i = 0; i < LED_COUNT; i++) {
-        _led_buffer[i].red = (_led_buffer[i].red * option_contrast) / 1;
-        _led_buffer[i].green = (_led_buffer[i].green * option_contrast) / 1;
-        _led_buffer[i].blue = (_led_buffer[i].blue * option_contrast) / 1;
+        _led_buffer[i].red = (_led_buffer[i].red * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
+        _led_buffer[i].green = (_led_buffer[i].green * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
+        _led_buffer[i].blue = (_led_buffer[i].blue * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
     }
     
     // Write to hardware
