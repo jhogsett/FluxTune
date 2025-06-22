@@ -123,9 +123,18 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 - [ ] **Memory optimization opportunities**
   - Review buffer sizes and memory usage
   - Optimize for Arduino memory constraints
-- [ ] **Code style consistency**
-  - Standardize comment styles across files
+- [ ] **Code style consistency**  - Standardize comment styles across files
   - Ensure consistent naming conventions
+
+## 🐛 Known Issues (Parked for Monitoring)
+
+### Signal Meter Anomalies
+- [ ] **Intermittent blue flash anomaly** 
+  - **Trigger**: Tuning to Pager station on 2-meter band (VFO C)        
+  - **Behavior**: Signal meter displays bright blue flash then stops responding
+  - **Recovery**: Switch VFOs and tune to different station - meter resumes normal operation
+  - **Frequency**: Rare/intermittent - needs more observation to determine pattern
+  - **Status**: Parked until more data available
 
 ## 💡 Future Ideas (Blue Sky)
 
