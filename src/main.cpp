@@ -311,10 +311,7 @@ void setup(){
 // Sets signal meter to full strength and lights panel LEDs at max brightness
 // ============================================================================
 void activate_branding_mode() {
-    // Show "PHOTO MODE" on display for branding
-    #ifndef DISABLE_DISPLAY_OPERATIONS
-    display.scroll_string(FSTR("PHOTO MODE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-    #endif
+    // Keep display showing "FluxTune" from previous code - perfect for branding photos!
     
     // Directly set signal meter LEDs to full brightness (bypass dynamic system)
     rgb_color full_colors[LED_COUNT] = 
