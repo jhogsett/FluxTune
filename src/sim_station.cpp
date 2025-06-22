@@ -40,17 +40,24 @@ bool SimStation::begin(unsigned long time){
     
     // Start first CQ immediately
     _morse.start_morse(_generated_message, _stored_wpm);
-    _in_wait_delay = false;    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+    _in_wait_delay = false;
+    
+    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_frequency(SPACE_FREQUENCY, false);
 
     return true;
 }
 
 void SimStation::realize(){
+    if(_realizer == -1) {
+        return;  // No WaveGen allocated
+    }
+    
     if(!check_frequency_bounds()) {
         return;  // Out of audible range
     }
-      WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+    
+    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
 
@@ -58,7 +65,7 @@ void SimStation::realize(){
 bool SimStation::update(Mode *mode){
     common_frequency_update(mode);
     
-    if(_enabled){
+    if(_enabled && _realizer != -1){
         WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency);
     }
@@ -91,8 +98,7 @@ bool SimStation::step(unsigned long time){
             realize();
             // No charge pulse when carrier turns off
     		break;
-    		
-    	case STEP_MORSE_MESSAGE_COMPLETE:
+       	case STEP_MORSE_MESSAGE_COMPLETE:
             // CQ cycle completed! Check if operator gets frustrated and start wait delay
             _active = false;
             realize();
@@ -110,16 +116,29 @@ bool SimStation::step(unsigned long time){
 #endif
             }
             
+            // DYNAMIC PIPELINING: Free WaveGen at end of message cycle
+            // This allows other stations to use the WaveGen during our wait period
+            end();
+            
             // Start wait delay before next CQ
             _in_wait_delay = true;
             _next_cq_time = time + (WAIT_SECONDS * 1000);
             break;
-    }
-    
-    // Check if it's time to start next CQ cycle
+    }    // Check if it's time to start next CQ cycle
     if(_in_wait_delay && time >= _next_cq_time) {
-        _in_wait_delay = false;
-        _morse.start_morse(_generated_message, _stored_wpm);
+        // DYNAMIC PIPELINING: Try to reallocate WaveGen for next message cycle
+        if(begin(time)) {  // Only proceed if WaveGen is available
+            _in_wait_delay = false;
+            
+            // CRITICAL: Force frequency update after reallocation
+            // New WaveGen needs current frequency set, otherwise no audible tone
+            force_frequency_update();
+            
+            // Note: begin() already calls _morse.start_morse()
+        } else {
+            // WaveGen not available - extend wait period and try again later
+            _next_cq_time = time + 1000;  // Try again in 1 second
+        }
     }
     
     return true;

@@ -36,13 +36,12 @@ bool SimNumbers::begin(unsigned long time)
     if(!common_begin(time, _fixed_freq))
         return false;
     
-    // WPM is already stored from constructor, no need to update it
-    
-    // Start with interval signal phase
+    // WPM is already stored from constructor, no need to update it    // Start with interval signal phase
     _current_phase = PHASE_INTERVAL_SIGNAL;
     _interval_repeats_sent = 0;
     _groups_sent = 0;
-      generate_interval_signal();
+    
+    generate_interval_signal();
     _morse.start_morse(_group_buffer, _wpm);  // No repeat, stations handle their own repetition
 
     WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
@@ -53,6 +52,10 @@ bool SimNumbers::begin(unsigned long time)
 
 void SimNumbers::realize()
 {
+    if(_realizer == -1) {
+        return;  // No WaveGen allocated
+    }
+    
     if(!check_frequency_bounds()) {
         return;  // Out of audible range
     }
@@ -65,7 +68,7 @@ bool SimNumbers::update(Mode *mode)
 {
     common_frequency_update(mode);
     
-    if(_enabled){
+    if(_enabled && _realizer != -1){
         WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency);
     }
@@ -133,11 +136,14 @@ bool SimNumbers::step(unsigned long time)
                         _next_group_time = time + INTER_GROUP_DELAY;
                     }
                     break;
-                    
-                case PHASE_ENDING:
+                      case PHASE_ENDING:
                     // Ending sequence complete, start cycle delay
                     _current_phase = PHASE_CYCLE_DELAY;
                     _next_group_time = time + INTER_CYCLE_DELAY;
+                    
+                    // DYNAMIC PIPELINING: Free WaveGen at end of complete cycle
+                    // This allows other stations to use the WaveGen during our cycle delay
+                    end();
                     break;
                     
                 case PHASE_CYCLE_DELAY:
@@ -164,20 +170,26 @@ bool SimNumbers::step(unsigned long time)
             case PHASE_ENDING:
                 generate_ending_sequence();
                 _morse.start_morse(_group_buffer, _wpm);
-                break;case PHASE_CYCLE_DELAY:
-                // Cycle complete, restart with interval signal
-                _current_phase = PHASE_INTERVAL_SIGNAL;
-                _interval_repeats_sent = 0;
-                _groups_sent = 0;
-                
-                // Add creepy frequency drift for new transmission cycle
-                apply_frequency_drift();
-                
-                // Immediately update the wave generator frequency to reflect the drift
-                // This ensures the audio frequency changes right away, not just when user tunes
-                force_frequency_update();
-                  generate_interval_signal();
-                _morse.start_morse(_group_buffer, _wpm);
+                break;            case PHASE_CYCLE_DELAY:
+                // DYNAMIC PIPELINING: Try to reallocate WaveGen for next cycle
+                if(begin(time)) {  // Only proceed if WaveGen is available
+                    // Cycle complete, restart with interval signal
+                    _current_phase = PHASE_INTERVAL_SIGNAL;
+                    _interval_repeats_sent = 0;
+                    _groups_sent = 0;
+                    
+                    // Add creepy frequency drift for new transmission cycle
+                    apply_frequency_drift();
+                    
+                    // Immediately update the wave generator frequency to reflect the drift
+                    // This ensures the audio frequency changes right away, not just when user tunes
+                    force_frequency_update();
+                      generate_interval_signal();
+                    _morse.start_morse(_group_buffer, _wpm);
+                } else {
+                    // WaveGen not available - extend cycle delay and try again later
+                    _next_group_time = time + 1000;  // Try again in 1 second
+                }
                 break;
         }
     }
