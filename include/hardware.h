@@ -12,6 +12,24 @@
 #define BLUE_PANEL_LED 10   // Pin 10: Blue panel LED
 #define PANEL_LOCK_LED_FULL_BRIGHTNESS 60
 
+// ============================================================================
+// DEVICE VARIANT CONFIGURATION
+// Comment/uncomment one of these to match your hardware variant:
+// ============================================================================
+// #define DEVICE_VARIANT_GREEN_DISPLAY    // Original green display version
+#define DEVICE_VARIANT_RED_DISPLAY      // Red display version with dimmer LEDs
+
+// Device-specific scaling factors
+#ifdef DEVICE_VARIANT_RED_DISPLAY
+    // Red display variant: LEDs are much brighter, scale down significantly
+    #define SIGNAL_METER_BRIGHTNESS_DIVISOR 5      // Divide by 5 for red display
+    #define PANEL_LED_BRIGHTNESS_DIVISOR 5         // Divide by 5 for red display
+#else
+    // Green display variant (default): Original brightness
+    #define SIGNAL_METER_BRIGHTNESS_DIVISOR 1      // No scaling for green display
+    #define PANEL_LED_BRIGHTNESS_DIVISOR 1         // No scaling for green display
+#endif
+
 // // Arduino Nano pins for the button LEDs
 // // digital pins
 // #define NUM_BUTTON_LEDS 3

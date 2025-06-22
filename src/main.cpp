@@ -548,12 +548,10 @@ void loop()
 		// 	case STEP_MORSE_TURN_OFF:
 		// 		AD2.setActiveFrequency((MD_AD9833::channel_t)1);
 		// 		break;
-		// }
-
-        // --- PANEL LOCK LED OVERRIDE ---
+		// }        // --- PANEL LOCK LED OVERRIDE ---
         int lock_brightness = signal_meter.get_panel_led_brightness();
         if (lock_brightness > 0) {
-            int pwm = (lock_brightness * PANEL_LOCK_LED_FULL_BRIGHTNESS) / 255;
+            int pwm = (lock_brightness * PANEL_LOCK_LED_FULL_BRIGHTNESS) / (255 * PANEL_LED_BRIGHTNESS_DIVISOR);
             analogWrite(WHITE_PANEL_LED, pwm); // White LED lock indicator
         } else {
             analogWrite(WHITE_PANEL_LED, 0);
