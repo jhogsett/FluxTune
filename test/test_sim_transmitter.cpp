@@ -3,7 +3,6 @@
 #include "sim_transmitter.h"
 #include "sim_station.h"
 #include "sim_numbers.h"
-#include "../native/mock_realization_pool.h"
 
 // Mock components for testing
 SignalMeter mock_signal_meter;
