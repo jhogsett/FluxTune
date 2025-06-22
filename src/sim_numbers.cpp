@@ -36,16 +36,21 @@ bool SimNumbers::begin(unsigned long time)
     if(!common_begin(time, _fixed_freq))
         return false;
     
-    // WPM is already stored from constructor, no need to update it    // Start with interval signal phase
+    // WPM is already stored from constructor, no need to update it
+    
+    // Start with interval signal phase
     _current_phase = PHASE_INTERVAL_SIGNAL;
     _interval_repeats_sent = 0;
     _groups_sent = 0;
     
-    generate_interval_signal();
-    _morse.start_morse(_group_buffer, _wpm);  // No repeat, stations handle their own repetition
-
     WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_frequency(NUMBERS_SPACE_FREQUENCY, false);
+      // Set _enabled for frequency calculations, but don't force update yet
+    // The frequency will be properly set when update() is called
+    _enabled = true;
+    
+    generate_interval_signal();
+    _morse.start_morse(_group_buffer, _wpm);  // No repeat, stations handle their own repetition
 
     return true;
 }

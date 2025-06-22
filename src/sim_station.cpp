@@ -38,12 +38,24 @@ bool SimStation::begin(unsigned long time){
     if(!common_begin(time, _fixed_freq))
         return false;
     
-    // Start first CQ immediately
+    // DEBUG: Track reallocation and frequency setting
+    #ifdef PLATFORM_NATIVE
+    printf("DEBUG: SimStation::begin() - realizer=%d, time=%lu\n", _realizer, time);
+    #endif
+      WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+    wavegen->set_frequency(SPACE_FREQUENCY, false);
+      // Set _enabled for frequency calculations, but don't force update yet
+    // The frequency will be properly set when update() is called
+    _enabled = true;
+    
+    #ifdef PLATFORM_NATIVE
+    printf("DEBUG: SimStation::begin() - _enabled=%s, waiting for update() to set frequency\n", 
+           _enabled ? "true" : "false");
+    #endif
+    
+    // Start first CQ immediately (after frequencies are set)
     _morse.start_morse(_generated_message, _stored_wpm);
     _in_wait_delay = false;
-    
-    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
-    wavegen->set_frequency(SPACE_FREQUENCY, false);
 
     return true;
 }
@@ -57,6 +69,11 @@ void SimStation::realize(){
         return;  // Out of audible range
     }
     
+    #ifdef PLATFORM_NATIVE
+    printf("DEBUG: SimStation::realize() - _active=%s, _frequency=%f\n", 
+           _active ? "true" : "false", _frequency);
+    #endif
+    
     WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
@@ -64,6 +81,15 @@ void SimStation::realize(){
 // returns true on successful update
 bool SimStation::update(Mode *mode){
     common_frequency_update(mode);
+    
+    #ifdef PLATFORM_NATIVE
+    static int update_count = 0;
+    if(update_count < 5) {  // Only show first few updates to avoid spam
+        printf("DEBUG: SimStation::update() - _frequency=%f, _enabled=%s, _realizer=%d\n", 
+               _frequency, _enabled ? "true" : "false", _realizer);
+        update_count++;
+    }
+    #endif
     
     if(_enabled && _realizer != -1){
         WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
@@ -80,9 +106,12 @@ bool SimStation::update(Mode *mode){
 bool SimStation::step(unsigned long time){
     // Handle morse code timing
     int morse_state = _morse.step_morse(time);
-    
-    switch(morse_state){
+      switch(morse_state){
     	case STEP_MORSE_TURN_ON:
+            #ifdef PLATFORM_NATIVE
+            printf("DEBUG: STEP_MORSE_TURN_ON - _frequency=%f, _enabled=%s, _realizer=%d\n", 
+                   _frequency, _enabled ? "true" : "false", _realizer);
+            #endif
             _active = true;
             realize();
             send_carrier_charge_pulse(_signal_meter);  // Send charge pulse when carrier turns on
@@ -130,11 +159,7 @@ bool SimStation::step(unsigned long time){
         if(begin(time)) {  // Only proceed if WaveGen is available
             _in_wait_delay = false;
             
-            // CRITICAL: Force frequency update after reallocation
-            // New WaveGen needs current frequency set, otherwise no audible tone
-            force_frequency_update();
-            
-            // Note: begin() already calls _morse.start_morse()
+            // Note: begin() now handles frequency update internally
         } else {
             // WaveGen not available - extend wait period and try again later
             _next_cq_time = time + 1000;  // Try again in 1 second
