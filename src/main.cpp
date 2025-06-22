@@ -19,12 +19,6 @@
 #include "station_config.h"
 #include "station_manager.h"
 
-// #define ENCODER_DO_NOT_USE_INTERRUPTS
-#ifndef PLATFORM_NATIVE
-// These are already included in platform.h for native builds
-#include <Encoder.h>
-#include <PololuLedStrip.h>
-#endif
 #include "encoder_handler.h"
 
 #include "vfo.h"
@@ -38,8 +32,6 @@
 
 #include "wavegen.h"
 #include "wave_out.h"
-
-#include "station_config.h"
 
 #ifdef ENABLE_MORSE_STATION
 #include "sim_station.h"
@@ -61,16 +53,6 @@
 
 #include "realizer_pool.h"
 
-#ifndef PLATFORM_NATIVE
-// Already included in platform.h for native builds  
-#include <PololuLedStrip.h>
-#endif
-
-// extend visual apparent range by modulating last led's brightness
-// establish brightness baseline and ability to adjust overall brightness
-// apply a damping function
-
-
 // Create an ledStrip object and specify the pin it will use.
 PololuLedStrip<12> ledStrip;
 
@@ -87,63 +69,7 @@ rgb_color colors[LED_COUNT] =
   { 15, 0, 0 } 
 };
 
-// ========================================
-// OLD RANDOM SIGNAL METER VARIABLES (REPLACED)
-// ========================================
-// These were replaced by the new SignalMeter class
 
-/*
-// Global LED buffer to avoid stack allocation in step_sm()
-rgb_color led_buffer[LED_COUNT];
-
-#define INTERVAL 100
-unsigned long next_time = 0;
-int value = 127;
-*/
-
-// ========================================
-// OLD RANDOM SIGNAL METER (REPLACED)
-// ========================================
-// This was replaced by the new frequency-based SignalMeter class
-
-/*
-void step_sm(unsigned long time)
-{
-	if(time < next_time)
-		return;
-	next_time = time + INTERVAL;
-
-	int r = random(11) - 5;
-	value += r;
-
-	if(value > 255)
-		value = 255;
-	if(value < 0)
-		value = 0;
-
-	int sample = value * 2;
-	int on_leds = (sample / 73) + 1;
-	int remain = ((sample % 73) * 16) / 73;
-
-	memcpy(led_buffer, colors, on_leds * sizeof(rgb_color));
-	// Clear the remaining LEDs to off (black)
-	memset(led_buffer + on_leds, 0, (LED_COUNT - on_leds) * sizeof(rgb_color));
-
-	// for the last copied LED, modify it according to the remain value
-	led_buffer[on_leds-1].red = (led_buffer[on_leds-1].red * remain) / 16;
-	led_buffer[on_leds-1].green = (led_buffer[on_leds-1].green * remain) / 16;
-	led_buffer[on_leds-1].blue = (led_buffer[on_leds-1].blue * remain) / 16;
-
-	// modify whole display per display contrast
-	for(byte i = 0; i < LED_COUNT; i++){
-		led_buffer[i].red = (led_buffer[i].red * option_contrast)	/ 1;
-		led_buffer[i].green = (led_buffer[i].green * option_contrast)	/ 1;
-		led_buffer[i].blue = (led_buffer[i].blue * option_contrast)	/ 1;
-	}
-
-	ledStrip.write(led_buffer, LED_COUNT);
-}
-*/
 
 
 #define CLKA 3
@@ -243,35 +169,7 @@ WaveOut waveout4(&realizer_pool);
 // Realization status array back to 4 stations  
 bool realization_stats[4] = {false, false, false, false};
 
-/* Dynamic array initialization - not needed with static initialization
-void initialize_station_arrays() {
-    int index = 0;
-    
-#ifdef ENABLE_MORSE_STATION
-    realizations[index] = &simstation1;
-    realization_stats[index] = false;
-    index++;
-#endif
 
-#ifdef ENABLE_NUMBERS_STATION
-    realizations[index] = &simnumbers2;
-    realization_stats[index] = false;
-    index++;
-#endif
-
-#ifdef ENABLE_PAGER_STATION
-    realizations[index] = &simpager3;
-    realization_stats[index] = false;
-    index++;
-#endif
-
-#ifdef ENABLE_RTTY_STATION
-    realizations[index] = &simstation4;
-    realization_stats[index] = false;
-    index++;
-#endif
-}
-*/
 
 RealizationPool realization_pool(realizations, realization_stats, 4);
 
@@ -501,54 +399,16 @@ void loop()
 	
 	// Secondary stations remain DORMANT until StationManager activates them
 	// (No .begin() calls - they start in DORMANT state and will be initialized dynamically)
-
 	set_application(APP_SIMRADIO, &display);
 
-	// AsyncMorse morse1;
-	// AsyncMorse morse2;
-	// // start_morse("CQ CQ CQ DE N6CCM N6CCM K              ", 20, true);
-	// morse1.start_morse("CQ CQ DE N6CCM N6CCM K              ", 5, true);
-	// morse2.start_morse("CQ CQ DE N6CCM N6CCM K              ", 13, true);
-
-	// AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	// AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
-
-	// AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	// AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
-
-	// bool active = false;
-	// bool freq = false;	// bool last_active = true;
 	while(true){
 		unsigned long time = millis();
 				// Update signal meter decay (capacitor-like discharge)
 		signal_meter.update(time);
-		
-		// Test StationManager call in main loop (safe location)
+				// Test StationManager call in main loop (safe location)
 		station_manager.updateStations(7000000);
 
-		// Remove old random signal meter - now using frequency-based signal meter
-
-		// switch(morse1.step_morse(time)){
-		// 	case STEP_MORSE_TURN_ON:
-		// 		AD1.setActiveFrequency((MD_AD9833::channel_t)0);
-		// 		// AD1.setFrequency((MD_AD9833::channel_t)0, 900.0);
-		// 		break;
-
-		// 	case STEP_MORSE_TURN_OFF:
-		// 		AD1.setActiveFrequency((MD_AD9833::channel_t)1);
-		// 		// AD1.setFrequency((MD_AD9833::channel_t)0, 0.0);
-		// 		break;
-		// }
-
-		// switch(morse2.step_morse(time)){
-		// 	case STEP_MORSE_TURN_ON:
-		// 		AD2.setActiveFrequency((MD_AD9833::channel_t)0);
-		// 		break;
-
-		// 	case STEP_MORSE_TURN_OFF:
-		// 		AD2.setActiveFrequency((MD_AD9833::channel_t)1);
-		// 		break;
-		// }        // --- PANEL LOCK LED OVERRIDE ---
+        // --- PANEL LOCK LED OVERRIDE ---
         int lock_brightness = signal_meter.get_panel_led_brightness();
         if (lock_brightness > 0) {
             int pwm = (lock_brightness * PANEL_LOCK_LED_FULL_BRIGHTNESS) / (255 * PANEL_LED_BRIGHTNESS_DIVISOR);
