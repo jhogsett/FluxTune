@@ -10,6 +10,7 @@ SimTransmitter::SimTransmitter(WaveGenPool *realizer_pool) : Realization(realize
     _enabled = false;
     _frequency = 0.0;
     _active = false;
+    _vfo_freq = 0.0;  // Initialize VFO frequency to prevent garbage values
     
     // Initialize dynamic station management state
     _station_state = DORMANT;
@@ -38,10 +39,6 @@ void SimTransmitter::common_frequency_update(Mode *mode)
 
 bool SimTransmitter::check_frequency_bounds()
 {
-    if(_realizer == -1) {
-        return false;  // No WaveGen allocated, treat as out of bounds
-    }
-    
     WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
@@ -51,7 +48,7 @@ bool SimTransmitter::check_frequency_bounds()
             wavegen->set_frequency(SILENT_FREQ, false);
         }
         return false;  // Out of bounds
-    }
+    } 
         
     if(!_enabled){
         _enabled = true;
