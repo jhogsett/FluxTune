@@ -177,9 +177,7 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
     // Uses doubled digits (00, 11, 22, etc.) to avoid generating real callsigns
     // This is like using "555" phone numbers in movies - sounds authentic but can't be real
     // Format: [W/K/N][XX][AAA] where XX = doubled digit (00-99)
-    
-    const char *prefixes[] = {"W", "K", "N"};
-    const char *letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const char *prefixes[] = {"W", "K", "N"};
     
 #ifdef PLATFORM_NATIVE
     // Improved randomness: Use time-based seeding for better distribution
@@ -197,15 +195,13 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
     
     // Use doubled digit to ensure fictional callsign (e.g., W00ABC, K55XYZ, N99QRP)
     snprintf(callsign_buffer, buffer_size, "%s%d%d", prefixes[prefix_idx], digit, digit);
-    
-    for(int i = 0; i < suffix_len; i++) {
-        char letter[2] = {letters[rand() % 26], '\0'};
+      for(int i = 0; i < suffix_len; i++) {
+        char letter[2] = {'A' + (rand() % 26), '\0'};
         strncat(callsign_buffer, letter, buffer_size - strlen(callsign_buffer) - 1);
     }
-#else
-    // Arduino version with improved randomness
-    // Mix current time with existing randomSeed for better distribution
-    randomSeed(randomSeed() + millis());
+#else    // Arduino version with improved randomness
+    // Use current time for better seed distribution
+    randomSeed(millis());
     
     int prefix_idx = random(3);
     int digit = random(10);  // 0-9, will be doubled
@@ -213,9 +209,8 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
     
     // Use doubled digit to ensure fictional callsign
     sprintf(callsign_buffer, "%s%d%d", prefixes[prefix_idx], digit, digit);
-    
-    for(int i = 0; i < suffix_len; i++) {
-        char letter[2] = {letters[random(26)], '\0'};
+      for(int i = 0; i < suffix_len; i++) {
+        char letter[2] = {'A' + random(26), '\0'};
         strcat(callsign_buffer, letter);
     }
 #endif

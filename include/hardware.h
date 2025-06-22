@@ -16,8 +16,8 @@
 // DEVICE VARIANT CONFIGURATION
 // Comment/uncomment one of these to match your hardware variant:
 // ============================================================================
-// #define DEVICE_VARIANT_GREEN_DISPLAY    // Original green display version
-#define DEVICE_VARIANT_RED_DISPLAY      // Red display version with dimmer LEDs
+#define DEVICE_VARIANT_GREEN_DISPLAY    // Original green display version
+// #define DEVICE_VARIANT_RED_DISPLAY      // Red display version with dimmer LEDs
 
 // Device-specific scaling factors
 #ifdef DEVICE_VARIANT_RED_DISPLAY
