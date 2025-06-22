@@ -7,7 +7,7 @@
 class SimSignal : public Realization
 {
 public:
-    SimSignal(RealizerPool *realizer_pool);
+    SimSignal(WaveGenPool *realizer_pool);
     
     virtual bool update(Mode *mode);
 

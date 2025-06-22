@@ -14,7 +14,7 @@
 #define WAIT_SECONDS 4
 
 // mode is expected to be a derivative of VFO
-SimStation::SimStation(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
+SimStation::SimStation(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
     : SimTransmitter(realizer_pool), _signal_meter(signal_meter), _stored_wpm(wpm)
 {
     // Store fixed frequency in base class
@@ -40,9 +40,7 @@ bool SimStation::begin(unsigned long time){
     
     // Start first CQ immediately
     _morse.start_morse(_generated_message, _stored_wpm);
-    _in_wait_delay = false;
-
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+    _in_wait_delay = false;    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_frequency(SPACE_FREQUENCY, false);
 
     return true;
@@ -52,8 +50,7 @@ void SimStation::realize(){
     if(!check_frequency_bounds()) {
         return;  // Out of audible range
     }
-    
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+      WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
 
@@ -62,7 +59,7 @@ bool SimStation::update(Mode *mode){
     common_frequency_update(mode);
     
     if(_enabled){
-        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+        WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency);
     }
 

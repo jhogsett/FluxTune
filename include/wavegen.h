@@ -1,11 +1,13 @@
-#ifdef PLATFORM_NATIVE
+#ifndef __WAVEGEN_H__
+#define __WAVEGEN_H__
+
+#ifdef NATIVE_BUILD
 #include "../native/platform.h"
 #else
 #include <MD_AD9833.h>
 #endif
-#include "realizer.h"
 
-class WaveGen : public Realizer
+class WaveGen
 {
 public:
     WaveGen(MD_AD9833 * sig_gen);
@@ -18,3 +20,5 @@ public:
     float _frequency;
     bool _main;
 };
+
+#endif

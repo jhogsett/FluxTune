@@ -18,7 +18,7 @@ void test_station_sends_charge_pulse_on_carrier_turn_on(void) {
     signal_meter.init();
     
     // Setup mock realizer pool
-    RealizerPool realizer_pool(nullptr, nullptr, 0);
+    WaveGenPool realizer_pool(nullptr, nullptr, 0);
     
     // Create station with signal meter
     SimStation station(&realizer_pool, &signal_meter);
@@ -59,7 +59,7 @@ void test_station_no_charge_when_vfo_far_away(void) {
     signal_meter.init();
     
     // Setup mock realizer pool
-    RealizerPool realizer_pool(nullptr, nullptr, 0);
+    WaveGenPool realizer_pool(nullptr, nullptr, 0);
     
     // Create station with signal meter
     SimStation station(&realizer_pool, &signal_meter);

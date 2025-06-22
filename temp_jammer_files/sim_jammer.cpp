@@ -8,7 +8,7 @@
 #include <iomanip>
 #endif
 
-SimJammer::SimJammer(RealizerPool *realizer_pool) : SimTransmitter(realizer_pool)
+SimJammer::SimJammer(WaveGenPool *realizer_pool) : SimTransmitter(realizer_pool)
 {
     // Base class initializes all common variables
     // Jammer transmission will be started in begin() method
@@ -22,7 +22,7 @@ bool SimJammer::begin(unsigned long time, float fixed_freq)
     // Start jammer transmission with repeat enabled (jammers run continuously)
     _jammer.start_jammer_transmission(true);
 
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
 
     // Initialize both channels to silent
     wavegen->set_frequency(SILENT_FREQ, false);
@@ -37,7 +37,7 @@ void SimJammer::realize()
         return;  // Out of audible range
     }
     
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     
     if(_active && _jammer.get_current_state() == JAMMER_STATE_TRANSMITTING) {
         // Calculate current jamming frequency

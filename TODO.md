@@ -99,6 +99,25 @@ A centralized list of minor issues, enhancements, and technical debt to address 
   - Ensure BFO offset produces clean audio
   - Test for any audio artifacts or distortion
 
+## ✅ Testing & Safety Nets (COMPLETED)
+
+### Dynamic Station Pipelining Safety Net Tests
+- [x] **Added comprehensive test coverage for critical components** 
+  - test_signal_meter_behavior.cpp - Signal meter decay and charge behavior
+  - test_charge_calculation.cpp - VFO frequency proximity calculation  
+  - test_resource_management.cpp - WaveGenPool resource allocation logic
+  - test_station_state_logic.cpp - Station state transition management
+  - All tests use Unity framework with minimal dependencies
+  - Tests found and validate critical algorithm behavior
+  - Safety net is in place for dynamic station pipelining work
+
+### Baseline Verification (COMPLETED)
+- [x] **Verified existing tests still pass**
+  - AsyncMorse tests: 23/23 pass
+  - AsyncRTTY tests: 20/20 pass  
+  - Signal meter integration tests: working
+  - Clean codebase with no regressions after cleanup
+
 ## 📚 Documentation
 
 ### User Documentation

@@ -2,7 +2,7 @@
 #include "realizer_pool.h"
 #include "realization.h"
 
-Realization::Realization(RealizerPool *realizer_pool){
+Realization::Realization(WaveGenPool *realizer_pool){
     _realizer_pool = realizer_pool;
     _realizer = -1;
 }

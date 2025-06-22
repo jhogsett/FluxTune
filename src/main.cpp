@@ -112,9 +112,9 @@ WaveGen wavegen2(&AD2);
 WaveGen wavegen3(&AD3);
 WaveGen wavegen4(&AD4);
 
-Realizer *realizers[4] = {&wavegen1, &wavegen2, &wavegen3, &wavegen4};
+WaveGen *wavegens[4] = {&wavegen1, &wavegen2, &wavegen3, &wavegen4};
 bool realizer_stats[4] = {false, false, false, false};
-RealizerPool realizer_pool(realizers, realizer_stats, 4);
+WaveGenPool realizer_pool(wavegens, realizer_stats, 4);
 
 // Signal meter instance
 SignalMeter signal_meter;

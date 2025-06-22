@@ -3,18 +3,18 @@
 #include "basic_types.h"
 #include "realizer_pool.h"
 
-// pass array of realizer addresses, array of free/in-use bools, count of realizers 
-RealizerPool::RealizerPool(Realizer **realizers, bool *statuses,  int nrealizers){
-    _realizers = realizers;
+// pass array of wave generator addresses, array of free/in-use bools, count of wave generators 
+WaveGenPool::WaveGenPool(WaveGen **wavegens, bool *statuses,  int nwavegens){
+    _realizers = wavegens;
     _statuses = statuses;
-    _nrealizers = nrealizers; 
+    _nrealizers = nwavegens;
 
     for(int i = 0; i < _nrealizers; i++){
         free_realizer(i);
     }   
 }
 
-int RealizerPool::get_realizer(){
+int WaveGenPool::get_realizer(){
     for(int i = 0; i < _nrealizers; i++){
         if(!_statuses[i]){
             _statuses[i] = true;
@@ -30,7 +30,7 @@ int RealizerPool::get_realizer(){
 }
 
 // multiplely gotten realizers must be freed individually
-void RealizerPool::free_realizer(int nrealizer){
+void WaveGenPool::free_realizer(int nrealizer){
     _statuses[nrealizer] = false;
 
     // Serial.print("Free Realizer ");
@@ -38,7 +38,7 @@ void RealizerPool::free_realizer(int nrealizer){
 
 }
 
-Realizer * RealizerPool::access_realizer(int nrealizer){
+WaveGen * WaveGenPool::access_realizer(int nrealizer){
 
     // Serial.print("Access Realizer ");
     // Serial.println(nrealizer);

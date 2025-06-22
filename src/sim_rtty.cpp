@@ -5,7 +5,7 @@
 #include "signal_meter.h"
 
 // mode is expected to be a derivative of VFO
-SimRTTY::SimRTTY(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq) 
+SimRTTY::SimRTTY(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq) 
     : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
 {
     // Store fixed frequency in base class
@@ -17,7 +17,7 @@ bool SimRTTY::begin(unsigned long time){
     if(!common_begin(time, _fixed_freq))
         return false;
 
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
 
     wavegen->set_frequency(SILENT_FREQ, false);
     wavegen->set_frequency(SILENT_FREQ, true);
@@ -33,15 +33,14 @@ void SimRTTY::realize(){
     if(!check_frequency_bounds()) {
         return;  // Out of audible range
     }
-    
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+      WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
 
 // returns true on successful update
 bool SimRTTY::update(Mode *mode){
     common_frequency_update(mode);    if(_enabled){
-        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+        WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency, true);
         wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
     }

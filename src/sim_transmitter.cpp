@@ -3,7 +3,7 @@
 #include "vfo.h"
 #include "saved_data.h"  // For option_bfo_offset
 
-SimTransmitter::SimTransmitter(RealizerPool *realizer_pool) : Realization(realizer_pool)
+SimTransmitter::SimTransmitter(WaveGenPool *realizer_pool) : Realization(realizer_pool)
 {
     // Initialize common member variables
     _fixed_freq = 0.0;
@@ -38,7 +38,7 @@ void SimTransmitter::common_frequency_update(Mode *mode)
 
 bool SimTransmitter::check_frequency_bounds()
 {
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
@@ -62,11 +62,10 @@ void SimTransmitter::end()
 }
 
 void SimTransmitter::force_wave_generator_refresh()
-{
-    // Force wave generator hardware update regardless of cached state
+{    // Force wave generator hardware update regardless of cached state
     // This is needed when returning to SimRadio after application switches
     if(_realizer != -1) {
-        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+        WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
         wavegen->force_refresh();
     }
 }
@@ -150,9 +149,8 @@ void SimTransmitter::force_frequency_update()
         // Recalculate _frequency with current _fixed_freq and _vfo_freq
         float raw_frequency = _vfo_freq - _fixed_freq;
         _frequency = raw_frequency + option_bfo_offset;
-        
-        // Update the wave generator with the new frequency
-        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+          // Update the wave generator with the new frequency
+        WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency);
     }
 }

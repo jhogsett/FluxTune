@@ -2,13 +2,13 @@
 #define MOCK_REALIZATION_POOL_H
 
 class Realization;
-class Realizer;
+class WaveGen;
 
-// Mock for RealizerPool (not RealizationPool!)
-class RealizerPool {
+// Mock for WaveGenPool (not RealizationPool!)
+class WaveGenPool {
 public:
-    RealizerPool(Realizer **realizers, bool *statuses, int nrealizers) {}
-    int get_realizer() { return 0; }  // Always return first realizer for testing
+    WaveGenPool(WaveGen **wavegens, bool *statuses, int nwavegens) {}
+    int get_realizer() { return 0; }  // Always return first wave generator for testing
     void free_realizer(int realizer_index) {}
     
     // Add any other required methods as needed

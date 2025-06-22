@@ -5,7 +5,7 @@
 #include "sim_signal.h"
 
 // mode is expected to be a derivative of VFO
-SimSignal::SimSignal(RealizerPool *realizer_pool) : Realization(realizer_pool){
+SimSignal::SimSignal(WaveGenPool *realizer_pool) : Realization(realizer_pool){
     // _realizer = realizer;
     _phase = 0;
     _frequency = 0.0;

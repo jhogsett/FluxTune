@@ -42,7 +42,7 @@ The phantom encoder movements bug was fixed by:
 3. Removing aggressive event purging after mode changes
 
 ### Station Management
-- Stations are managed by `RealizationPool` (stepping) and `RealizerPool` (audio channels)
+- Stations are managed by `RealizationPool` (stepping) and `WaveGenPool` (audio channels)
 - All stations should be initialized in `loop()` and added to the realization array
 - Frequency constants are defined at the top of `main.cpp`
 

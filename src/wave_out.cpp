@@ -5,7 +5,7 @@
 #include "wave_out.h"
 
 // mode is expected to be a derivative of VFO
-WaveOut::WaveOut(RealizerPool *realizer_pool) : Realization(realizer_pool){
+WaveOut::WaveOut(WaveGenPool *waveGenPool) : Realization(waveGenPool){
     // _realizer = realizer;
 }
 

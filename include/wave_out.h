@@ -7,7 +7,7 @@
 class WaveOut : public Realization
 {
 public:
-    WaveOut(RealizerPool *realizerPool);
+    WaveOut(WaveGenPool *waveGenPool);
     
     virtual bool update(Mode *mode);
 

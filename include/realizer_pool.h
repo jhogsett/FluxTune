@@ -1,46 +1,32 @@
 
-#ifndef __REALIZER_POOL_H__
-#define __REALIZER_POOL_H__
+#ifndef __WAVEGEN_POOL_H__
+#define __WAVEGEN_POOL_H__
 
-#include "realizer.h"
+#include "wavegen.h"
 
-// initialize with an array of realizers
+// initialize with an array of wave generators
 // tracks whether they are in use
-// can request 1 or more realizers
+// can request 1 or more wave generators for station audio output
 
-class RealizerPool
+class WaveGenPool
 {
 public:
-    // pass array of realizer addresses, array of free/in-use bools, count of realizers 
-    RealizerPool(Realizer **realizers, bool *statuses,  int nrealizers);
+    // pass array of wave generator addresses, array of free/in-use bools, count of wave generators 
+    WaveGenPool(WaveGen **wavegens, bool *statuses,  int nwavegens);
 
-    // returns -1 if not available otherwise realizer index into array
+    // returns -1 if not available otherwise wave generator index into array
     int get_realizer();
 
-    // multiplely gotten realizers must be freed individually
+    // multiplely gotten wave generators must be freed individually
     void free_realizer(int nrealizer);
 
-    Realizer * access_realizer(int nrealizer);
+    WaveGen * access_realizer(int nrealizer);
 
 private:
-    Realizer **_realizers;
+    WaveGen **_realizers;
     bool *_statuses;
     int _nrealizers;
 
 };
 
-
-
-
-
-
-
-
-// realization pool
-// initialize with an array of realizations
-// tracks current dial frequency
-// queries realizations to see if they are able to start
-// queries also to see if they should stop due to being out of range
-// they'll stop on their own as well
-
-#endif // __REALIZER_POOL_H__
+#endif // __WAVEGEN_POOL_H__

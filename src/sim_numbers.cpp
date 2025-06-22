@@ -14,7 +14,7 @@
 #define INTER_GROUP_DELAY 2000  // 2 seconds delay between number groups (more distinct)
 #define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 
-SimNumbers::SimNumbers(RealizerPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
+SimNumbers::SimNumbers(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
     : SimTransmitter(realizer_pool), _wpm(wpm), _signal_meter(signal_meter)
 {
     // Base class initializes all common variables, including _fixed_freq
@@ -45,7 +45,7 @@ bool SimNumbers::begin(unsigned long time)
       generate_interval_signal();
     _morse.start_morse(_group_buffer, _wpm);  // No repeat, stations handle their own repetition
 
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_frequency(NUMBERS_SPACE_FREQUENCY, false);
 
     return true;
@@ -57,7 +57,7 @@ void SimNumbers::realize()
         return;  // Out of audible range
     }
     
-    WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
 
@@ -66,7 +66,7 @@ bool SimNumbers::update(Mode *mode)
     common_frequency_update(mode);
     
     if(_enabled){
-        WaveGen *wavegen = static_cast<WaveGen*>(_realizer_pool->access_realizer(_realizer));
+        WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency);
     }
 

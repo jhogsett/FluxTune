@@ -46,7 +46,7 @@ void RealizationPool::end(){
 // }
 
 // // multiplely gotten realizers must be freed individually
-// void RealizerPool::free_realizer(int nrealizer){
+// void WaveGenPool::free_realizer(int nrealizer){
 //     _statuses[nrealizer] = false;
 
 //     // Serial.print("Free Realizer ");
@@ -54,7 +54,7 @@ void RealizationPool::end(){
 
 // }
 
-// Realizer * RealizerPool::access_realizer(int nrealizer){
+// Realizer * WaveGenPool::access_realizer(int nrealizer){
 
 //     // Serial.print("Access Realizer ");
 //     // Serial.println(nrealizer);
