@@ -312,27 +312,25 @@ void setup(){
 // ============================================================================
 void activate_branding_mode() {
     // Keep display showing "FluxTune" from previous code - perfect for branding photos!
-    
-    // Directly set signal meter LEDs to full brightness (bypass dynamic system)
+      // Directly set signal meter LEDs to 4x brightness (bypass dynamic system)
     rgb_color full_colors[LED_COUNT] = 
     {
-      { 15, 15, 0 },   // Full brightness for all LEDs
-      { 15, 15, 0 }, 
-      { 15, 15, 0 }, 
-      { 15, 15, 0 }, 
-      { 15, 15, 0 }, 
-      { 15, 15, 0 }, 
-      { 15, 0, 0 }     // Red at the end
+      { 60, 60, 0 },   // 4x brightness for all LEDs (was 15)
+      { 60, 60, 0 }, 
+      { 60, 60, 0 }, 
+      { 60, 60, 0 }, 
+      { 60, 60, 0 }, 
+      { 60, 60, 0 }, 
+      { 60, 0, 0 }     // Red at the end
     };
     
     // Enter infinite loop for photography - device stays in perfect display state
     while(true) {
         // Keep signal meter LEDs at full brightness
         ledStrip.write(full_colors, LED_COUNT);
-        
-        // Keep both panel LEDs at maximum brightness
-        analogWrite(WHITE_PANEL_LED, PANEL_LOCK_LED_FULL_BRIGHTNESS / PANEL_LED_BRIGHTNESS_DIVISOR);
-        analogWrite(BLUE_PANEL_LED, PANEL_LOCK_LED_FULL_BRIGHTNESS / PANEL_LED_BRIGHTNESS_DIVISOR);
+          // Keep both panel LEDs at 4x maximum brightness
+        analogWrite(WHITE_PANEL_LED, (PANEL_LOCK_LED_FULL_BRIGHTNESS * 4) / PANEL_LED_BRIGHTNESS_DIVISOR);
+        analogWrite(BLUE_PANEL_LED, (PANEL_LOCK_LED_FULL_BRIGHTNESS * 4) / PANEL_LED_BRIGHTNESS_DIVISOR);
         
         // Small delay to prevent overwhelming the processor
         delay(100);
