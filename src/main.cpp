@@ -315,13 +315,13 @@ void activate_branding_mode() {
       // Directly set signal meter LEDs to 4x brightness (bypass dynamic system)
     rgb_color full_colors[LED_COUNT] = 
     {
-      { 60, 60, 0 },   // 4x brightness for all LEDs (was 15)
+      { 60, 0, 0 },   // 4x brightness for all LEDs (was 15)
+      { 60, 30, 0 }, 
       { 60, 60, 0 }, 
-      { 60, 60, 0 }, 
-      { 60, 60, 0 }, 
-      { 60, 60, 0 }, 
-      { 60, 60, 0 }, 
-      { 60, 0, 0 }     // Red at the end
+      { 0, 60, 0 }, 
+      { 0, 60, 60 }, 
+      { 0, 0, 60 }, 
+      { 30, 0, 60 }     // Red at the end
     };
     
     // Enter infinite loop for photography - device stays in perfect display state
