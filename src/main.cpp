@@ -128,25 +128,16 @@ WaveGenPool realizer_pool(wavegens, realizer_stats, 4);
 SignalMeter signal_meter;
 
 // ============================================================================
-// ENHANCED STATION POOL FOR DYNAMIC PIPELINING
-// 6 pre-allocated stations of mixed types for realistic band simulation
-// Only 4 can be AUDIBLE (have AD9833 generators) at any time
+// STATION CONFIGURATION - Conditional compilation based on station_config.h
 // ============================================================================
 
-// Mixed station pool - conservative memory usage
+#ifdef CONFIG_MIXED_STATIONS
+// DEFAULT: Mixed station types for testing and demonstration
 SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 11);
-// SimStation cw_station2(&realizer_pool, &signal_meter, 7010000.0, 13);
+SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 18);
+SimRTTY rtty_station1(&realizer_pool, &signal_meter, 14004100.0);
+SimPager pager_station1(&realizer_pool, &signal_meter, 146800000.0);
 
-SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 18);  // 7002700.0 Hz, 18 WPM
-// SimNumbers numbers_station2(&realizer_pool, &signal_meter, 7011000.0, 20);   // 7011000.0 Hz, 20 WPM
-
-SimRTTY rtty_station1(&realizer_pool, &signal_meter, 14004100.0);  // 7004100.0 Hz
-
-SimPager pager_station1(&realizer_pool, &signal_meter, 146800000.0);   // 7006000.0 Hz
-
-// ============================================================================
-// STATION MANAGER - Create but don't use yet (testing instantiation)
-// ============================================================================
 SimTransmitter *station_pool[4] = {
     &cw_station1,
     &numbers_station1,
@@ -154,32 +145,164 @@ SimTransmitter *station_pool[4] = {
     &pager_station1
 };
 
-StationManager station_manager(station_pool);
-
-// Expanded station array - 4 stations total (back to original)
 Realization *realizations[4] = {
-    // Primary stations (initially AUDIBLE with AD9833 generators)
     &cw_station1,
     &numbers_station1, 
     &rtty_station1,
     &pager_station1
-    
-    // Secondary stations commented out for testing
-    // &cw_station2,
-    // &numbers_station2
 };
+#endif
+
+#ifdef CONFIG_CW_CLUSTER
+// LISTENING PLEASURE: Four CW stations clustered in low 40m band
+// Frequencies chosen to often overlap in reception for realistic band activity
+SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 12);  // 12 WPM
+SimStation cw_station2(&realizer_pool, &signal_meter, 7003500.0, 16);  // 16 WPM  
+SimStation cw_station3(&realizer_pool, &signal_meter, 7004200.0, 18);  // 18 WPM
+SimStation cw_station4(&realizer_pool, &signal_meter, 7005800.0, 22);  // 22 WPM
+
+SimTransmitter *station_pool[4] = {
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4
+};
+
+Realization *realizations[4] = {
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4
+};
+#endif
+
+#ifdef CONFIG_FOUR_CW
+// TEST: Four CW stations with different speeds
+SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 11);
+SimStation cw_station2(&realizer_pool, &signal_meter, 7003000.0, 15);
+SimStation cw_station3(&realizer_pool, &signal_meter, 7004000.0, 20);
+SimStation cw_station4(&realizer_pool, &signal_meter, 7005000.0, 25);
+
+SimTransmitter *station_pool[4] = {
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4
+};
+
+Realization *realizations[4] = {
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4
+};
+#endif
+
+#ifdef CONFIG_FOUR_NUMBERS
+// TEST: Four Numbers stations with different frequencies  
+SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 12);
+SimNumbers numbers_station2(&realizer_pool, &signal_meter, 7003700.0, 15);
+SimNumbers numbers_station3(&realizer_pool, &signal_meter, 7004700.0, 18);
+SimNumbers numbers_station4(&realizer_pool, &signal_meter, 7005700.0, 22);
+
+SimTransmitter *station_pool[4] = {
+    &numbers_station1,
+    &numbers_station2,
+    &numbers_station3,
+    &numbers_station4
+};
+
+Realization *realizations[4] = {
+    &numbers_station1,
+    &numbers_station2,
+    &numbers_station3,
+    &numbers_station4
+};
+#endif
+
+#ifdef CONFIG_FOUR_PAGER
+// TEST: Four Pager stations
+SimPager pager_station1(&realizer_pool, &signal_meter, 7006000.0);
+SimPager pager_station2(&realizer_pool, &signal_meter, 7007000.0);
+SimPager pager_station3(&realizer_pool, &signal_meter, 7008000.0);
+SimPager pager_station4(&realizer_pool, &signal_meter, 7009000.0);
+
+SimTransmitter *station_pool[4] = {
+    &pager_station1,
+    &pager_station2,
+    &pager_station3,
+    &pager_station4
+};
+
+Realization *realizations[4] = {
+    &pager_station1,
+    &pager_station2,
+    &pager_station3,
+    &pager_station4
+};
+#endif
+
+#ifdef CONFIG_FOUR_RTTY
+// TEST: Four RTTY stations
+SimRTTY rtty_station1(&realizer_pool, &signal_meter, 7004100.0);
+SimRTTY rtty_station2(&realizer_pool, &signal_meter, 7005100.0);
+SimRTTY rtty_station3(&realizer_pool, &signal_meter, 7006100.0);
+SimRTTY rtty_station4(&realizer_pool, &signal_meter, 7007100.0);
+
+SimTransmitter *station_pool[4] = {
+    &rtty_station1,
+    &rtty_station2,
+    &rtty_station3,
+    &rtty_station4
+};
+
+Realization *realizations[4] = {
+    &rtty_station1,
+    &rtty_station2,
+    &rtty_station3,
+    &rtty_station4
+};
+#endif
+
+#ifdef CONFIG_MINIMAL_CW
+// MINIMAL: Single CW station for memory testing
+SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 15);
+
+SimTransmitter *station_pool[1] = {  // Only 1 entry for minimal config
+    &cw_station1
+};
+
+Realization *realizations[1] = {  // Only 1 entry for minimal config
+    &cw_station1
+};
+#endif
+
+// ============================================================================
+// REALIZATION POOL - Initialize with configured realizations
+// ============================================================================
+
+// Realization status array - sized based on configuration
+#ifdef CONFIG_MINIMAL_CW
+bool realization_stats[1] = {false};
+#else
+bool realization_stats[4] = {false, false, false, false};
+#endif
+
+#ifdef CONFIG_MINIMAL_CW
+RealizationPool realization_pool(realizations, realization_stats, 1);  // Only 1 station for minimal config
+#else
+RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stations for all other configs
+#endif
+
+// ============================================================================
+// STATION MANAGER - Initialize with configured station pool
+// ============================================================================
+StationManager station_manager(station_pool);
 
 WaveOut waveout1(&realizer_pool);
 WaveOut waveout2(&realizer_pool);
 WaveOut waveout3(&realizer_pool);
 WaveOut waveout4(&realizer_pool);
-
-// Realization status array back to 4 stations  
-bool realization_stats[4] = {false, false, false, false};
-
-
-
-RealizationPool realization_pool(realizations, realization_stats, 4);
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
@@ -432,15 +555,15 @@ void loop()
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	
 	// ============================================================================
-	// INITIALIZE 12-STATION DYNAMIC POOL
-	// Start with 4 primary stations active, rest dormant until needed
+	// INITIALIZE 12-STATION DYNAMIC POOL	// Start stations based on configuration
 	// ============================================================================
 	
-	// Initialize primary stations (first 4 - will be AUDIBLE with AD9833 generators)
-	cw_station1.begin(time + random(1000));  // Parameters now come from constructor
+#ifdef CONFIG_MIXED_STATIONS
+	// Initialize mixed station types
+	cw_station1.begin(time + random(1000));
 	cw_station1.set_station_state(AUDIBLE);
 	
-	numbers_station1.begin(time + random(1000));  // Parameters now come from constructor
+	numbers_station1.begin(time + random(1000));
 	numbers_station1.set_station_state(AUDIBLE);
 	
 	rtty_station1.begin(time + random(1000));
@@ -448,9 +571,88 @@ void loop()
 	
 	pager_station1.begin(time + random(1000));
 	pager_station1.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_CW_CLUSTER
+	// Initialize CW cluster for listening pleasure
+	cw_station1.begin(time + random(1000));
+	cw_station1.set_station_state(AUDIBLE);
 	
-	// Secondary stations remain DORMANT until StationManager activates them
-	// (No .begin() calls - they start in DORMANT state and will be initialized dynamically)
+	cw_station2.begin(time + random(2000));
+	cw_station2.set_station_state(AUDIBLE);
+	
+	cw_station3.begin(time + random(3000));
+	cw_station3.set_station_state(AUDIBLE);
+	
+	cw_station4.begin(time + random(4000));
+	cw_station4.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_FOUR_CW
+	// Initialize four CW test stations
+	cw_station1.begin(time + random(1000));
+	cw_station1.set_station_state(AUDIBLE);
+	
+	cw_station2.begin(time + random(2000));
+	cw_station2.set_station_state(AUDIBLE);
+	
+	cw_station3.begin(time + random(3000));
+	cw_station3.set_station_state(AUDIBLE);
+	
+	cw_station4.begin(time + random(4000));
+	cw_station4.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_FOUR_NUMBERS
+	// Initialize four Numbers test stations
+	numbers_station1.begin(time + random(1000));
+	numbers_station1.set_station_state(AUDIBLE);
+	
+	numbers_station2.begin(time + random(2000));
+	numbers_station2.set_station_state(AUDIBLE);
+	
+	numbers_station3.begin(time + random(3000));
+	numbers_station3.set_station_state(AUDIBLE);
+	
+	numbers_station4.begin(time + random(4000));
+	numbers_station4.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_FOUR_PAGER
+	// Initialize four Pager test stations
+	pager_station1.begin(time + random(1000));
+	pager_station1.set_station_state(AUDIBLE);
+	
+	pager_station2.begin(time + random(2000));
+	pager_station2.set_station_state(AUDIBLE);
+	
+	pager_station3.begin(time + random(3000));
+	pager_station3.set_station_state(AUDIBLE);
+	
+	pager_station4.begin(time + random(4000));
+	pager_station4.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_FOUR_RTTY
+	// Initialize four RTTY test stations
+	rtty_station1.begin(time + random(1000));
+	rtty_station1.set_station_state(AUDIBLE);
+	
+	rtty_station2.begin(time + random(2000));
+	rtty_station2.set_station_state(AUDIBLE);
+	
+	rtty_station3.begin(time + random(3000));
+	rtty_station3.set_station_state(AUDIBLE);
+	
+	rtty_station4.begin(time + random(4000));
+	rtty_station4.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_MINIMAL_CW
+	// Initialize single CW station
+	cw_station1.begin(time + random(1000));
+	cw_station1.set_station_state(AUDIBLE);
+#endif
 	set_application(APP_SIMRADIO, &display);
 
 	while(true){
@@ -467,16 +669,12 @@ void loop()
             analogWrite(WHITE_PANEL_LED, pwm); // White LED lock indicator
         } else {
             analogWrite(WHITE_PANEL_LED, 0);
-        }
-        // Comment out the old animation:
+        }        // Comment out the old animation:
         // panel_leds.step(time);
 		realization_pool.step(time);
 
-		// Step all active stations
-		cw_station1.step(time);
-		numbers_station1.step(time);
-		rtty_station1.step(time);
-		pager_station1.step(time);
+		// NOTE: Station step() calls are handled automatically by realization_pool.step()
+		// No need for manual step() calls - RealizationPool architecture handles this
 
 		encoder_handlerA.step();
 		encoder_handlerB.step();
@@ -552,3 +750,5 @@ void loop()
 		}
 	}
 }
+
+

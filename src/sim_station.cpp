@@ -194,23 +194,22 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
     int suffix_len = 2 + (rand() % 2);  // 2 or 3 letters
     
     // Use doubled digit to ensure fictional callsign (e.g., W00ABC, K55XYZ, N99QRP)
-    snprintf(callsign_buffer, buffer_size, "%s%d%d", prefixes[prefix_idx], digit, digit);
-      for(int i = 0; i < suffix_len; i++) {
-        char letter[2] = {'A' + (rand() % 26), '\0'};
+    snprintf(callsign_buffer, buffer_size, "%s%d%d", prefixes[prefix_idx], digit, digit);    for(int i = 0; i < suffix_len; i++) {
+        char letter[2] = {(char)('A' + (rand() % 26)), '\0'};
         strncat(callsign_buffer, letter, buffer_size - strlen(callsign_buffer) - 1);
     }
 #else    // Arduino version with improved randomness
     // Use current time for better seed distribution
-    randomSeed(millis());
+    // JH: no longer needed
+    // randomSeed(millis());
     
     int prefix_idx = random(3);
     int digit = random(10);  // 0-9, will be doubled
     int suffix_len = 2 + random(2);  // 2 or 3 letters
     
     // Use doubled digit to ensure fictional callsign
-    sprintf(callsign_buffer, "%s%d%d", prefixes[prefix_idx], digit, digit);
-      for(int i = 0; i < suffix_len; i++) {
-        char letter[2] = {'A' + random(26), '\0'};
+    sprintf(callsign_buffer, "%s%d%d", prefixes[prefix_idx], digit, digit);    for(int i = 0; i < suffix_len; i++) {
+        char letter[2] = {(char)('A' + random(26)), '\0'};
         strcat(callsign_buffer, letter);
     }
 #endif

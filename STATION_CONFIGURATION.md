@@ -23,6 +23,17 @@ Edit `include/station_config.h` and uncomment ONE configuration:
 - Best for normal operation and demonstration
 - Diverse RF environment for realistic tuning experience
 
+### Listening Pleasure Configuration
+```cpp
+#define CONFIG_CW_CLUSTER       // Four CW stations clustered in 40m for listening pleasure
+```
+- Four CW stations clustered in the low part of the 40m band
+- Frequencies: 7002, 7003.5, 7004.2, 7005.8 kHz
+- Speeds: 12, 16, 18, 22 WPM
+- Designed so multiple stations are often audible simultaneously
+- Each station has operator frustration drift and WPM variations
+- Perfect for realistic amateur radio listening experience
+
 ### Testing Configurations
 
 #### Four CW Stations
@@ -71,8 +82,10 @@ Edit `include/station_config.h` and uncomment ONE configuration:
 3. **Test**: The signal meter will automatically adapt to the active station frequencies
 4. **Tune**: Use the VFO to tune across the frequency range and observe signal strength
 
-## Testing Benefits
+## Configuration Benefits
 
+- **Mixed Stations**: Best for testing and demonstration - diverse RF environment
+- **CW Cluster**: Realistic amateur radio listening experience with overlapping signals
 - **Focused Testing**: Test specific protocols without interference from other types
 - **Signal Density**: Multiple stations create realistic crowded band conditions
 - **Speed Variations**: Different WPM settings test timing sensitivity
@@ -81,7 +94,8 @@ Edit `include/station_config.h` and uncomment ONE configuration:
 ## Memory Impact
 
 Each station configuration uses approximately the same total memory but allocates it differently:
-- **Mixed**: Moderate memory per station type, full feature set
+- **Mixed**: Moderate memory per station type, full feature set (79.7% Flash)
+- **CW Cluster**: Lower memory usage, focused on CW stations only (68.5% Flash)
 - **Four of Same**: Higher memory for one station type, others completely excluded  
 - **Minimal**: Lowest total memory usage
 
