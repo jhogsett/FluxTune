@@ -11,7 +11,7 @@ class SignalMeter; // Forward declaration
 class SimRTTY : public SimTransmitter
 {
 public:
-    SimRTTY(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq);    virtual bool begin(unsigned long time) override;
+    SimRTTY(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq);    virtual bool begin(unsigned long time) override;
     
     virtual bool update(Mode *mode) override;
     virtual bool step(unsigned long time) override;

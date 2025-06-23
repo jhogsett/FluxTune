@@ -1,11 +1,13 @@
 
 #include "vfo.h"
 #include "wavegen.h"
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 #include "sim_signal.h"
 
+// JH! The SimSignal class was an earlier dummy station and it and any references to it can be removed
+
 // mode is expected to be a derivative of VFO
-SimSignal::SimSignal(WaveGenPool *realizer_pool) : Realization(realizer_pool){
+SimSignal::SimSignal(WaveGenPool *wave_gen_pool) : Realization(wave_gen_pool){
     // _realizer = realizer;
     _phase = 0;
     _frequency = 0.0;
@@ -218,3 +220,4 @@ void SimSignal::internal_step(unsigned long time){
     // 	wavegen->set_frequency(10000000.0);
 }
 
+// JH!

@@ -26,30 +26,6 @@ extern int option_contrast;
 extern int option_bfo_offset;  // BFO offset in Hz (0-2000)
 extern int option_flashlight;  // Flashlight brightness (0-255)
 
-// // Whether to play sounds
-// extern bool option_sound;
-
-// // Whether to use vibration feedback
-// extern bool option_vibrate;
-
-// // vibration strength true=hi false=lo
-// extern bool option_vib_str;
-
-// Player's Cash
-// extern long purse;
-
-// // Player's best time in The TimeGame
-// extern unsigned long best_time;
-
-// // Whether to display 12 or 24 hour time
-// extern bool option_clock_24h;
-
-// // mode when mode none, sleep, clock
-// extern byte option_idle_mode;
-
-// Current bank
-// extern unsigned long bank;
-
 // Saved data structure version 1
 struct SavedData{
 	byte version;

@@ -4,6 +4,8 @@
 #include "../native/platform.h"
 #include "../include/async_rtty.h"
 
+// JH! is this file needed?
+
 // Baudot code lookup table (5-bit codes) - stored in PROGMEM to save RAM
 // Index corresponds to ASCII character, value is 5-bit Baudot code
 // 0xFF means character not supported in Baudot
@@ -73,3 +75,5 @@ void test_baudot_encoding() {
         }
     }
 }
+
+// JH! 

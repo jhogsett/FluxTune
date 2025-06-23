@@ -5,6 +5,8 @@
 // Baudot code lookup table (5-bit codes) - stored in PROGMEM to save RAM
 // Index corresponds to ASCII character, value is 5-bit Baudot code
 // 0xFF means character not supported in Baudot
+
+// JH! to preserve valuable Flash memory, let's create a #define option to either use the real baudot code here when sending, or just send random bits for the character portion of the serial encoding, since this is a simulation and the rtty just needs to sound legitimate. In the case it's sending random bits, just ignore the incoming message string.
 const unsigned char baudot_letters[] PROGMEM = {
     // ASCII 0-31 (control characters) - most not supported
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // 0-7
@@ -34,7 +36,7 @@ const unsigned char baudot_letters[] PROGMEM = {
     0x1D, 0x13, 0x1B, 0x11, 0x15,                 // 118-122 (v-z)
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF                   // 123-127 (punctuation)
 };
-
+// JH!
 
 AsyncRTTY::AsyncRTTY()
 {

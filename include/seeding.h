@@ -10,7 +10,6 @@
 
 // LSB (noisiest bit) of an analog read on an unused analog pin
 // used to fill an int, one bit at a time, to create the random seed
-// JH: former pin A1 was tied to a wire and not generating noise
 #define RANDOM_SEED_PIN A7
 
 extern RandomSeed<RANDOM_SEED_PIN> randomizer;

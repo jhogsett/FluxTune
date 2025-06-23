@@ -1,6 +1,6 @@
 #include "vfo.h"
 #include "wavegen.h"
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 #include "sim_numbers.h"
 #include "signal_meter.h"
 
@@ -14,8 +14,8 @@
 #define INTER_GROUP_DELAY 2000  // 2 seconds delay between number groups (more distinct)
 #define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 
-SimNumbers::SimNumbers(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
-    : SimTransmitter(realizer_pool), _wpm(wpm), _signal_meter(signal_meter)
+SimNumbers::SimNumbers(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
+    : SimTransmitter(wave_gen_pool), _wpm(wpm), _signal_meter(signal_meter)
 {
     // Base class initializes all common variables, including _fixed_freq
     _fixed_freq = fixed_freq;  // Set the base class frequency directly
@@ -43,7 +43,7 @@ bool SimNumbers::begin(unsigned long time)
     _interval_repeats_sent = 0;
     _groups_sent = 0;
     
-    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     wavegen->set_frequency(NUMBERS_SPACE_FREQUENCY, false);    // Set _enabled and force frequency update with existing _vfo_freq
     // _vfo_freq should retain its value from the previous cycle
     _enabled = true;
@@ -66,7 +66,7 @@ void SimNumbers::realize()
         return;  // Out of audible range
     }
     
-    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
 
@@ -75,7 +75,7 @@ bool SimNumbers::update(Mode *mode)
     common_frequency_update(mode);
     
     if(_enabled && _realizer != -1){
-        WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+        WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency);
     }
 
@@ -83,6 +83,7 @@ bool SimNumbers::update(Mode *mode)
     return true;
 }
 
+// JH! platformio memory inspection shows this method as one of the top 5 largest objects
 bool SimNumbers::step(unsigned long time)
 {    // Handle morse code timing
     int morse_state = _morse.step_morse(time);
@@ -201,6 +202,7 @@ bool SimNumbers::step(unsigned long time)
     
     return true;
 }
+// JH! 
 
 void SimNumbers::generate_next_number_group()
 {

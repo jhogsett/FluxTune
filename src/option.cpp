@@ -11,4 +11,3 @@ void Option::next_option()
 void Option::prev_option()
 {
 }
-

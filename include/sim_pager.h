@@ -14,7 +14,7 @@ class SignalMeter; // Forward declaration
 class SimPager : public SimTransmitter
 {
 public:
-    SimPager(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq);
+    SimPager(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq);
       virtual bool begin(unsigned long time) override;
     virtual bool update(Mode *mode) override;
     virtual bool step(unsigned long time) override;

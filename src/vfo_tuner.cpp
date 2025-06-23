@@ -32,7 +32,3 @@ bool VFO_Tuner::event_sink(bool pressed, bool long_pressed){
     return false;
 }
 
-// // periodic timing events for dynamic activities
-// void VFO_Tuner::step(unsigned long time){
-
-// }

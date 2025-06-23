@@ -7,6 +7,7 @@
 
 // receives a VFO-derived mode 
 
+// JH! This class appears unused
 class VFO_Realizer
 {
 public:
@@ -17,6 +18,6 @@ public:
 private:
     Realization *_realization;    
 };
-
+// JH! 
 
 #endif

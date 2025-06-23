@@ -1,9 +1,9 @@
 #include "mode.h"
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 #include "realization.h"
 
-Realization::Realization(WaveGenPool *realizer_pool){
-    _realizer_pool = realizer_pool;
+Realization::Realization(WaveGenPool *wave_gen_pool){
+    _wave_gen_pool = wave_gen_pool;
     _realizer = -1;
 }
 
@@ -20,7 +20,7 @@ bool Realization::begin(unsigned long time){
     }
     
     // attempt to acquire a realizer
-    _realizer = _realizer_pool->get_realizer();
+    _realizer = _wave_gen_pool->get_realizer();
     if(_realizer == -1)
         return false;
     return true;
@@ -41,7 +41,7 @@ bool Realization::step(unsigned long time){
 
 void Realization::end(){
     if(_realizer != -1) {
-        _realizer_pool->free_realizer(_realizer);
+        _wave_gen_pool->free_realizer(_realizer);
         _realizer = -1;  // Reset to avoid double-free or invalid access
     }
 }

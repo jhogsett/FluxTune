@@ -1,6 +1,6 @@
 #include "unity.h"
 #include "../native/mock_arduino.h"   // Must be first for byte typedef
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 
 // Test to verify that SimStation and SimNumbers implement per-message-cycle 
 // WaveGen allocation/freeing for dynamic station pipelining
@@ -18,7 +18,7 @@ public:
 // Extended Mock that tracks allocation lifecycle for SimStation-like behavior
 class MockCWStation {
 private:
-    WaveGenPool* _realizer_pool;
+    WaveGenPool* _wave_gen_pool;
     int _realizer;
     bool _in_wait_delay;
     unsigned long _next_cq_time;
@@ -29,20 +29,20 @@ private:
     
 public:
     MockCWStation(WaveGenPool* pool) 
-        : _realizer_pool(pool), _realizer(-1), _in_wait_delay(false), 
+        : _wave_gen_pool(pool), _realizer(-1), _in_wait_delay(false), 
           _next_cq_time(0), _transmitting(false), _transmission_end_time(0) {}
     
     bool begin(unsigned long time) {
         if(_realizer != -1) {
             return true;  // Already have realizer (idempotent)
         }
-        _realizer = _realizer_pool->get_realizer();
+        _realizer = _wave_gen_pool->get_realizer();
         return (_realizer != -1);
     }
     
     void end() {
         if(_realizer != -1) {
-            _realizer_pool->free_realizer(_realizer);
+            _wave_gen_pool->free_realizer(_realizer);
             _realizer = -1;
         }
     }
@@ -93,7 +93,7 @@ public:
 // Extended Mock that tracks allocation lifecycle for SimNumbers-like behavior
 class MockNumbersStation {
 private:
-    WaveGenPool* _realizer_pool;
+    WaveGenPool* _wave_gen_pool;
     int _realizer;
     
     enum Phase { INTERVAL, NUMBERS, ENDING, CYCLE_DELAY };
@@ -110,7 +110,7 @@ private:
     
 public:
     MockNumbersStation(WaveGenPool* pool) 
-        : _realizer_pool(pool), _realizer(-1), _current_phase(INTERVAL),
+        : _wave_gen_pool(pool), _realizer(-1), _current_phase(INTERVAL),
           _in_delay(false), _next_transmission_time(0), _interval_repeats_sent(0),
           _groups_sent(0), _transmitting(false), _transmission_end_time(0) {}
     
@@ -118,13 +118,13 @@ public:
         if(_realizer != -1) {
             return true;  // Already have realizer (idempotent)
         }
-        _realizer = _realizer_pool->get_realizer();
+        _realizer = _wave_gen_pool->get_realizer();
         return (_realizer != -1);
     }
     
     void end() {
         if(_realizer != -1) {
-            _realizer_pool->free_realizer(_realizer);
+            _wave_gen_pool->free_realizer(_realizer);
             _realizer = -1;
         }
     }

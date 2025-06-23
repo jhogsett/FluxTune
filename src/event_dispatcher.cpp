@@ -16,12 +16,13 @@ void EventDispatcher::set_mode(int nhandler){
     _mode_handler = _mode_handlers[_ncurrent_handler];
 }
 
-void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){
-    set_mode(nhandler);
+void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){    set_mode(nhandler);
+
 #ifndef DISABLE_DISPLAY_OPERATIONS
     _mode_handler->show_title(display);
     update_display(display);
 #endif
+
     update_realization();
 }
 
@@ -80,8 +81,3 @@ void EventDispatcher::update_realization(){
 Mode* EventDispatcher::get_current_mode(){
     return _mode_handler->get_mode();
 }
-
-
-
-
-// need an array of mode handlers that can be cycled through

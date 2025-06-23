@@ -2,18 +2,14 @@
 #define __SIM_SIGNAL_H__
 
 #include "realization.h"
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 
 class SimSignal : public Realization
 {
 public:
-    SimSignal(WaveGenPool *realizer_pool);
+    SimSignal(WaveGenPool *wave_gen_pool);
     
     virtual bool update(Mode *mode);
-
-    // virtual void begin(unsigned long time);
-    // virtual bool step(unsigned long time);
-    // virtual void end();
 
     virtual void internal_step(unsigned long time);
 

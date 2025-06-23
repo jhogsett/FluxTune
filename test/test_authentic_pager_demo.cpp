@@ -2,7 +2,7 @@
 #include "../native/platform.h"
 #include "../include/async_pager.h"
 #include "../include/sim_pager.h"
-#include "../include/realizer_pool.h"
+#include "../include/wave_gen_pool.h"
 #include <iostream>
 #include <iomanip>
 

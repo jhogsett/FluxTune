@@ -6,6 +6,8 @@
 #include "hardware.h"
 #include "speaker.h"
 
+// JH! this is old code that is not needed
+
 void beep(int freq, int time){
     int pulse_width = (int)((1000000L / freq) / 2L);
     int pulses = (int)((time * 1000L) / (pulse_width * 2L));
@@ -40,3 +42,5 @@ void alert(int times, int gap, int beep_times, int freq, int time){
 		delay(gap);
 	}
 }
+
+// JH!
