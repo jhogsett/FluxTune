@@ -14,6 +14,12 @@
 // #define CONFIG_FOUR_RTTY        // Four RTTY stations for RTTY testing
 // #define CONFIG_MINIMAL_CW       // Single CW station (minimal memory)
 
+// ===== LISTENING PLEASURE CONFIGURATION =====
+// #define CONFIG_CW_CLUSTER       // Four CW stations clustered in 40m for listening pleasure
+                                   // Frequencies: 7002, 7003.5, 7004.2, 7005.8 kHz
+                                   // Speeds: 12, 16, 18, 22 WPM  
+                                   // Designed to often overlap in reception for realistic band activity
+
 // ===== CONFIGURATION IMPLEMENTATION =====
 #ifdef CONFIG_MIXED_STATIONS
     // Production: Mixed station types (default)
@@ -55,6 +61,13 @@
     // Minimal: Single CW station for memory testing
     #define ENABLE_MORSE_STATION
     // All other stations disabled
+#endif
+
+#ifdef CONFIG_CW_CLUSTER
+    // Listening pleasure: Four CW stations clustered in 40m band
+    #define ENABLE_CW_CLUSTER_STATIONS
+    #define ENABLE_MORSE_STATION
+    // Other stations disabled for focused CW listening
 #endif
 
 #endif // STATION_CONFIG_H

@@ -15,7 +15,7 @@
 
 // mode is expected to be a derivative of VFO
 SimStation::SimStation(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
-    : SimTransmitter(realizer_pool), _signal_meter(signal_meter), _stored_wpm(wpm)
+    : SimTransmitter(realizer_pool), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
 {
     // Store fixed frequency in base class
     _fixed_freq = fixed_freq;    // Initialize operator frustration drift tracking
@@ -194,23 +194,22 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
     int suffix_len = 2 + (rand() % 2);  // 2 or 3 letters
     
     // Use doubled digit to ensure fictional callsign (e.g., W00ABC, K55XYZ, N99QRP)
-    snprintf(callsign_buffer, buffer_size, "%s%d%d", prefixes[prefix_idx], digit, digit);
-      for(int i = 0; i < suffix_len; i++) {
-        char letter[2] = {'A' + (rand() % 26), '\0'};
+    snprintf(callsign_buffer, buffer_size, "%s%d%d", prefixes[prefix_idx], digit, digit);    for(int i = 0; i < suffix_len; i++) {
+        char letter[2] = {(char)('A' + (rand() % 26)), '\0'};
         strncat(callsign_buffer, letter, buffer_size - strlen(callsign_buffer) - 1);
     }
 #else    // Arduino version with improved randomness
     // Use current time for better seed distribution
-    randomSeed(millis());
+    // JH: no longer needed
+    // randomSeed(millis());
     
     int prefix_idx = random(3);
     int digit = random(10);  // 0-9, will be doubled
     int suffix_len = 2 + random(2);  // 2 or 3 letters
     
     // Use doubled digit to ensure fictional callsign
-    sprintf(callsign_buffer, "%s%d%d", prefixes[prefix_idx], digit, digit);
-      for(int i = 0; i < suffix_len; i++) {
-        char letter[2] = {'A' + random(26), '\0'};
+    sprintf(callsign_buffer, "%s%d%d", prefixes[prefix_idx], digit, digit);    for(int i = 0; i < suffix_len; i++) {
+        char letter[2] = {(char)('A' + random(26)), '\0'};
         strcat(callsign_buffer, letter);
     }
 #endif
@@ -244,12 +243,34 @@ void SimStation::apply_operator_frustration_drift()
     
     // Apply drift to the base class frequency
     _fixed_freq = _fixed_freq + drift;
-    
-    // ENHANCEMENT: Generate new callsign to simulate a completely different operator
+      // ENHANCEMENT: Generate new callsign to simulate a completely different operator
     // This makes it appear that a new station has come on frequency instead of
     // the same operator continuing to call CQ after frequency adjustment
     generate_cq_message();
     
+    // ENHANCEMENT: Apply WPM drift to simulate different operator or mood change
+    apply_wpm_drift();
+    
     // Immediately update the wave generator frequency
     force_frequency_update();
+}
+
+void SimStation::apply_wpm_drift()
+{    // Add slight WPM drift for authentic operator variation
+    // Real CW operators vary their sending speed slightly, or different operators take over
+    // WPM drift range: ±4 WPM around the original speed (increased for testing)
+    const int WPM_DRIFT_RANGE = 4;
+    
+#ifdef PLATFORM_NATIVE
+    // Use standard rand() for native builds
+    int drift = (rand() % (2 * WPM_DRIFT_RANGE + 1)) - WPM_DRIFT_RANGE;
+#else
+    // Use Arduino random() function
+    int drift = random(-WPM_DRIFT_RANGE, WPM_DRIFT_RANGE + 1);
+#endif
+    
+    // Apply drift to current WPM, but keep within reasonable bounds (8-25 WPM for CW)
+    _stored_wpm = _base_wpm + drift;
+    if (_stored_wpm < 8) _stored_wpm = 8;
+    if (_stored_wpm > 25) _stored_wpm = 25;
 }
