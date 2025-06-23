@@ -5,14 +5,14 @@
 // Choose ONE configuration mode by uncommenting it
 
 // ===== PRODUCTION CONFIGURATION =====
-// #define CONFIG_MIXED_STATIONS    // Default: All different station types
+#define CONFIG_MIXED_STATIONS    // Default: All different station types
 
 // ===== TEST CONFIGURATIONS =====
 // #define CONFIG_FOUR_CW          // Four CW/Morse stations for CW testing
 // #define CONFIG_FOUR_NUMBERS     // Four Numbers stations for spooky testing
 // #define CONFIG_FOUR_PAGER       // Four Pager stations for digital testing
 // #define CONFIG_FOUR_RTTY        // Four RTTY stations for RTTY testing
-#define CONFIG_FOUR_JAMMER      // Four Jammer stations for interference testing
+// #define CONFIG_FOUR_JAMMER      // Four Jammer stations for interference testing
 // #define CONFIG_MINIMAL_CW       // Single CW station (minimal memory)
 
 // ===== LISTENING PLEASURE CONFIGURATION =====
