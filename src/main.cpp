@@ -29,8 +29,6 @@
 #include "contrast_handler.h"
 #include "bfo.h"
 #include "bfo_handler.h"
-#include "flashlight.h"
-#include "flashlight_handler.h"
 
 #include "wavegen.h"
 #include "wave_out.h"
@@ -54,12 +52,6 @@
 #include "async_morse.h"
 
 #include "realizer_pool.h"
-
-// ============================================================================
-// BRANDING MODE FOR PRODUCT PHOTOGRAPHY
-// Comment out this #define to disable branding mode and save Flash memory
-// ============================================================================
-// #define ENABLE_BRANDING_MODE  // OPTIMIZATION: Disabled by default to save Flash
 
 // Create an ledStrip object and specify the pin it will use.
 PololuLedStrip<12> ledStrip;
@@ -193,7 +185,6 @@ VFO vfof("CHAN 3", 1000000.0, 100L, &realization_pool);
 
 Contrast contrast("Contrast");
 BFO bfo("BFO");
-Flashlight flashlight("Light");
 
 VFO_Tuner tunera(&vfoa);
 VFO_Tuner tunerb(&vfob);
@@ -205,15 +196,14 @@ VFO_Tuner tunerf(&vfof);
 
 ContrastHandler contrast_handler(&contrast);
 BFOHandler bfo_handler(&bfo);
-FlashlightHandler flashlight_handler(&flashlight);
 
 ModeHandler *handlers1[3] = {&tunera, &tunerb, &tunerc};
 ModeHandler *handlers2[3] = {&tunerd, &tunere, &tunerf};
-ModeHandler *handlers3[3] = {&contrast_handler, &bfo_handler, &flashlight_handler};
+ModeHandler *handlers3[2] = {&contrast_handler, &bfo_handler};
 
 EventDispatcher dispatcher1(handlers1, 3);
 EventDispatcher dispatcher2(handlers2, 3);
-EventDispatcher dispatcher3(handlers3, 3);
+EventDispatcher dispatcher3(handlers3, 2);
 
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
@@ -304,43 +294,10 @@ void setup(){
 	AD4.setFrequency((MD_AD9833::channel_t)0, 0.1);
 	AD4.setFrequency((MD_AD9833::channel_t)1, 0.1);
 	AD4.setMode(MD_AD9833::MODE_SINE);
+
 	// Test StationManager method call in setup (safe location)
 	station_manager.updateStations(7000000);
-}
-
-#ifdef ENABLE_BRANDING_MODE
-// ============================================================================
-// BRANDING MODE - Easter egg for product photography
-// Activates when encoder A button is pressed during startup
-// Sets signal meter to full strength and lights panel LEDs at max brightness
-// ============================================================================
-void activate_branding_mode() {
-    // Keep display showing "FluxTune" from previous code - perfect for branding photos!
-      // Directly set signal meter LEDs to 4x brightness (bypass dynamic system)
-    rgb_color full_colors[LED_COUNT] = 
-    {
-      { 60, 0, 0 },   // 4x brightness for all LEDs (was 15)
-      { 60, 30, 0 }, 
-      { 60, 60, 0 }, 
-      { 0, 60, 0 }, 
-      { 0, 60, 60 }, 
-      { 0, 0, 60 }, 
-      { 30, 0, 60 }     // Red at the end
-    };
-    
-    // Enter infinite loop for photography - device stays in perfect display state
-    while(true) {
-        // Keep signal meter LEDs at full brightness
-        ledStrip.write(full_colors, LED_COUNT);
-          // Keep both panel LEDs at 4x maximum brightness
-        analogWrite(WHITE_PANEL_LED, (PANEL_LOCK_LED_FULL_BRIGHTNESS * 4) / PANEL_LED_BRIGHTNESS_DIVISOR);
-        analogWrite(BLUE_PANEL_LED, (PANEL_LOCK_LED_FULL_BRIGHTNESS * 4) / PANEL_LED_BRIGHTNESS_DIVISOR);
-        
-        // Small delay to prevent overwhelming the processor
-        delay(100);
-    }
-}
-#endif
+}	
 
 bool main_menu(){
     return true;
@@ -419,15 +376,6 @@ void loop()
 #ifndef DISABLE_DISPLAY_OPERATIONS
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
 #endif
-
-#ifdef ENABLE_BRANDING_MODE
-    // BRANDING MODE EASTER EGG - Check if encoder A button is pressed during startup
-    // Pin 4 (SWA) goes LOW when button is pressed
-    if (digitalRead(SWA) == LOW) {
-        activate_branding_mode();  // Never returns - infinite loop for photography
-    }
-#endif
-
     unsigned long time = millis();
     panel_leds.begin(time, LEDHandler::STYLE_PLAIN | LEDHandler::STYLE_BLANKING, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 	
@@ -501,9 +449,8 @@ void loop()
 						// current_dispatcher = 3;
 						// title = (FSTR("Settings"));
 						break;
-								case 3:
-						// Clear flashlight mode when leaving settings
-						signal_meter.clear_flashlight_mode();
+						
+						case 3:
 						// 
 						dispatcher = set_application(APP_SIMRADIO, &display); // &dispatcher1;
 						// current_dispatcher = 1;

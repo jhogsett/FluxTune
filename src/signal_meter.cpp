@@ -25,8 +25,6 @@ SignalMeter::SignalMeter()
     _current_strength = 0;
     _last_decay_time = 0;
     _panel_led_accumulator = 0;
-    _flashlight_mode = false;
-    _flashlight_brightness = 0;
 }
 
 void SignalMeter::init()
@@ -106,68 +104,35 @@ void SignalMeter::clear_panel_led()
     _panel_led_accumulator = 0;
 }
 
-void SignalMeter::set_flashlight_mode(int brightness)
-{
-    _flashlight_mode = true;
-    _flashlight_brightness = brightness;
-    if (brightness < 0) _flashlight_brightness = 0;
-    if (brightness > 255) _flashlight_brightness = 255;
-    
-    // Update LEDs immediately
-    write_leds();
-}
-
-void SignalMeter::clear_flashlight_mode()
-{
-    _flashlight_mode = false;
-    _flashlight_brightness = 0;
-    
-    // Update LEDs immediately to return to normal operation
-    write_leds();
-}
-
 void SignalMeter::write_leds()
 {
 #ifndef NATIVE_BUILD
-    if (_flashlight_mode) {
-        // Flashlight mode: set all LEDs to white at specified brightness
-        // White is created using RGB mix since these are RGB LEDs, not RGBW
-        int white_brightness = _flashlight_brightness / SIGNAL_METER_BRIGHTNESS_DIVISOR;
-        
-        for (int i = 0; i < LED_COUNT; i++) {
-            _led_buffer[i].red = white_brightness;
-            _led_buffer[i].green = white_brightness;
-            _led_buffer[i].blue = white_brightness;
-        }
-    } else {
-        // Normal signal meter mode
-        // Convert 0-255 strength to LED display
-        int sample = _current_strength * 2;  // Scale to 0-510
-        int on_leds = (sample / 73) + 1;     // How many full LEDs to light
-        int remain = ((sample % 73) * 16) / 73;  // Brightness of partial LED
-        
-        // Ensure we don't exceed LED count
-        if (on_leds > LED_COUNT) on_leds = LED_COUNT;
-        if (on_leds < 0) on_leds = 0;
-        
-        // Copy base colors for lit LEDs
-        memcpy(_led_buffer, _led_colors, on_leds * sizeof(rgb_color));
-        
-        // Clear remaining LEDs
-        memset(_led_buffer + on_leds, 0, (LED_COUNT - on_leds) * sizeof(rgb_color));
-        
-        // Apply partial brightness to last LED if needed
-        if (on_leds > 0) {
-            _led_buffer[on_leds-1].red = (_led_buffer[on_leds-1].red * remain) / 16;
-            _led_buffer[on_leds-1].green = (_led_buffer[on_leds-1].green * remain) / 16;
-            _led_buffer[on_leds-1].blue = (_led_buffer[on_leds-1].blue * remain) / 16;
-        }
-          // Apply contrast adjustment and device variant scaling
-        for (int i = 0; i < LED_COUNT; i++) {
-            _led_buffer[i].red = (_led_buffer[i].red * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
-            _led_buffer[i].green = (_led_buffer[i].green * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
-            _led_buffer[i].blue = (_led_buffer[i].blue * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
-        }
+    // Convert 0-255 strength to LED display
+    int sample = _current_strength * 2;  // Scale to 0-510
+    int on_leds = (sample / 73) + 1;     // How many full LEDs to light
+    int remain = ((sample % 73) * 16) / 73;  // Brightness of partial LED
+    
+    // Ensure we don't exceed LED count
+    if (on_leds > LED_COUNT) on_leds = LED_COUNT;
+    if (on_leds < 0) on_leds = 0;
+    
+    // Copy base colors for lit LEDs
+    memcpy(_led_buffer, _led_colors, on_leds * sizeof(rgb_color));
+    
+    // Clear remaining LEDs
+    memset(_led_buffer + on_leds, 0, (LED_COUNT - on_leds) * sizeof(rgb_color));
+    
+    // Apply partial brightness to last LED if needed
+    if (on_leds > 0) {
+        _led_buffer[on_leds-1].red = (_led_buffer[on_leds-1].red * remain) / 16;
+        _led_buffer[on_leds-1].green = (_led_buffer[on_leds-1].green * remain) / 16;
+        _led_buffer[on_leds-1].blue = (_led_buffer[on_leds-1].blue * remain) / 16;
+    }
+      // Apply contrast adjustment and device variant scaling
+    for (int i = 0; i < LED_COUNT; i++) {
+        _led_buffer[i].red = (_led_buffer[i].red * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
+        _led_buffer[i].green = (_led_buffer[i].green * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
+        _led_buffer[i].blue = (_led_buffer[i].blue * option_contrast) / SIGNAL_METER_BRIGHTNESS_DIVISOR;
     }
     
     // Write to hardware
