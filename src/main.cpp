@@ -57,9 +57,9 @@
 
 // ============================================================================
 // BRANDING MODE FOR PRODUCT PHOTOGRAPHY
-// Comment out this #define to disable branding mode
+// Comment out this #define to disable branding mode and save Flash memory
 // ============================================================================
-#define ENABLE_BRANDING_MODE
+// #define ENABLE_BRANDING_MODE  // OPTIMIZATION: Disabled by default to save Flash
 
 // Create an ledStrip object and specify the pin it will use.
 PololuLedStrip<12> ledStrip;
