@@ -1,6 +1,8 @@
 # FluxTune
 Arduino Based Artificial Radio
 
+![20250622_153218(2)](https://github.com/user-attachments/assets/0506e151-d5c0-4904-bd3c-40e6352cefdd)
+
 ## Features
 
 FluxTune is a sophisticated radio simulation system with multiple station types and a frequency-aware signal meter:
