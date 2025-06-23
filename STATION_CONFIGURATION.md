@@ -10,6 +10,7 @@ FluxTune supports multiple simulated station types that can be individually enab
 | Numbers | `SimNumbers` | Spooky numbers station with random number groups | 7002.7-7005.7 kHz |
 | Pager | `SimPager` | Pager simulation station | 7006-7009 kHz |
 | RTTY | `SimRTTY` | RTTY digital mode station | 7004.1-7007.1 kHz |
+| Jammer | `SimJammer` | Spread spectrum interference station with brownian drift | 7003-7006 kHz |
 
 ## Configuration Modes
 
@@ -68,6 +69,16 @@ Edit `include/station_config.h` and uncomment ONE configuration:
 - Frequencies: 7004.1, 7005.1, 7006.1, 7007.1 kHz
 - Test RTTY decoding with multiple simultaneous signals
 
+#### Four Jammer Stations
+```cpp
+#define CONFIG_FOUR_JAMMER      // Four Jammer stations for interference testing
+```
+- Four spread spectrum jammer stations with realistic interference patterns
+- Frequencies: 7003, 7004, 7005, 7006 kHz
+- Features brownian motion frequency drift (±2kHz range) and random muting
+- 50ms update intervals for characteristic "buzzy" jamming behavior
+- Perfect for testing receiver performance under interference conditions
+
 #### Minimal Configuration
 ```cpp
 #define CONFIG_MINIMAL_CW       // Single CW station (minimal memory)
@@ -87,9 +98,30 @@ Edit `include/station_config.h` and uncomment ONE configuration:
 - **Mixed Stations**: Best for testing and demonstration - diverse RF environment
 - **CW Cluster**: Realistic amateur radio listening experience with overlapping signals
 - **Focused Testing**: Test specific protocols without interference from other types
+- **Jammer Testing**: Realistic interference patterns for receiver performance evaluation
 - **Signal Density**: Multiple stations create realistic crowded band conditions
 - **Speed Variations**: Different WPM settings test timing sensitivity
 - **Frequency Spread**: Stations spread across the band for tuning practice
+
+## Special Feature: Jammer Station Integration
+
+The jammer station can be enabled in mixed mode by editing `station_config.h`:
+
+```cpp
+#ifdef CONFIG_MIXED_STATIONS
+    #define ENABLE_MORSE_STATION    // Basic CW/Morse station (SimStation)
+    #define ENABLE_NUMBERS_STATION  // Numbers Station (SimNumbers) 
+    #define ENABLE_PAGER_STATION    // Pager Station (SimPager)
+    // #define ENABLE_RTTY_STATION     // RTTY Station (SimRTTY) - comment out
+    #define ENABLE_JAMMER_STATION   // Jammer Station (SimJammer) - enable this
+#endif
+```
+
+This replaces the RTTY station with a realistic spread spectrum jammer that:
+- Uses brownian motion for authentic frequency wandering (±2kHz)
+- Implements random muting (15% probability, 20-200ms duration)
+- Updates at 50ms intervals for characteristic interference behavior
+- Provides realistic interference testing for receivers
 
 ## Memory Impact
 

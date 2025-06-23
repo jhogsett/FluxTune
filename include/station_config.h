@@ -5,13 +5,14 @@
 // Choose ONE configuration mode by uncommenting it
 
 // ===== PRODUCTION CONFIGURATION =====
-#define CONFIG_MIXED_STATIONS    // Default: All different station types
+// #define CONFIG_MIXED_STATIONS    // Default: All different station types
 
 // ===== TEST CONFIGURATIONS =====
 // #define CONFIG_FOUR_CW          // Four CW/Morse stations for CW testing
 // #define CONFIG_FOUR_NUMBERS     // Four Numbers stations for spooky testing
 // #define CONFIG_FOUR_PAGER       // Four Pager stations for digital testing
 // #define CONFIG_FOUR_RTTY        // Four RTTY stations for RTTY testing
+#define CONFIG_FOUR_JAMMER      // Four Jammer stations for interference testing
 // #define CONFIG_MINIMAL_CW       // Single CW station (minimal memory)
 
 // ===== LISTENING PLEASURE CONFIGURATION =====
@@ -27,6 +28,8 @@
     #define ENABLE_NUMBERS_STATION  // Numbers Station (SimNumbers) 
     #define ENABLE_PAGER_STATION    // Pager Station (SimPager)
     #define ENABLE_RTTY_STATION     // RTTY Station (SimRTTY)
+    // NOTE: To enable jammer, comment out RTTY and uncomment below:
+    // #define ENABLE_JAMMER_STATION   // Jammer Station (SimJammer) - replaces RTTY
 #endif
 
 #ifdef CONFIG_FOUR_CW
@@ -55,6 +58,13 @@
     #define ENABLE_FOUR_RTTY_STATIONS
     #define ENABLE_RTTY_STATION
     // Other stations disabled for focused RTTY testing
+#endif
+
+#ifdef CONFIG_FOUR_JAMMER
+    // Test: Four Jammer stations for interference testing
+    #define ENABLE_FOUR_JAMMER_STATIONS
+    #define ENABLE_JAMMER_STATION
+    // Other stations disabled for focused Jammer testing
 #endif
 
 #ifdef CONFIG_MINIMAL_CW

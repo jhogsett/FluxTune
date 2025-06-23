@@ -51,6 +51,10 @@
 #include "sim_pager.h"
 #endif
 
+#ifdef ENABLE_JAMMER_STATION
+#include "sim_jammer.h"
+#endif
+
 #include "async_morse.h"
 
 #include "realizer_pool.h"
@@ -133,23 +137,56 @@ SignalMeter signal_meter;
 
 #ifdef CONFIG_MIXED_STATIONS
 // DEFAULT: Mixed station types for testing and demonstration
+#ifdef ENABLE_MORSE_STATION
 SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 11);
+#endif
+#ifdef ENABLE_NUMBERS_STATION
 SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 18);
+#endif
+#ifdef ENABLE_RTTY_STATION
 SimRTTY rtty_station1(&realizer_pool, &signal_meter, 14004100.0);
+#endif
+#ifdef ENABLE_JAMMER_STATION
+SimJammer jammer_station1(&realizer_pool);
+#endif
+#ifdef ENABLE_PAGER_STATION
 SimPager pager_station1(&realizer_pool, &signal_meter, 146800000.0);
+#endif
 
 SimTransmitter *station_pool[4] = {
+#ifdef ENABLE_MORSE_STATION
     &cw_station1,
+#endif
+#ifdef ENABLE_NUMBERS_STATION
     &numbers_station1,
+#endif
+#ifdef ENABLE_RTTY_STATION
     &rtty_station1,
+#endif
+#ifdef ENABLE_JAMMER_STATION
+    &jammer_station1,
+#endif
+#ifdef ENABLE_PAGER_STATION
     &pager_station1
+#endif
 };
 
 Realization *realizations[4] = {
+#ifdef ENABLE_MORSE_STATION
     &cw_station1,
+#endif
+#ifdef ENABLE_NUMBERS_STATION
     &numbers_station1, 
+#endif
+#ifdef ENABLE_RTTY_STATION
     &rtty_station1,
+#endif
+#ifdef ENABLE_JAMMER_STATION
+    &jammer_station1,
+#endif
+#ifdef ENABLE_PAGER_STATION
     &pager_station1
+#endif
 };
 #endif
 
@@ -261,6 +298,28 @@ Realization *realizations[4] = {
     &rtty_station2,
     &rtty_station3,
     &rtty_station4
+};
+#endif
+
+#ifdef CONFIG_FOUR_JAMMER
+// TEST: Four Jammer stations for interference testing
+SimJammer jammer_station1(&realizer_pool);
+SimJammer jammer_station2(&realizer_pool);
+SimJammer jammer_station3(&realizer_pool);
+SimJammer jammer_station4(&realizer_pool);
+
+SimTransmitter *station_pool[4] = {
+    &jammer_station1,
+    &jammer_station2,
+    &jammer_station3,
+    &jammer_station4
+};
+
+Realization *realizations[4] = {
+    &jammer_station1,
+    &jammer_station2,
+    &jammer_station3,
+    &jammer_station4
 };
 #endif
 
@@ -560,17 +619,30 @@ void loop()
 	
 #ifdef CONFIG_MIXED_STATIONS
 	// Initialize mixed station types
+#ifdef ENABLE_MORSE_STATION
 	cw_station1.begin(time + random(1000));
 	cw_station1.set_station_state(AUDIBLE);
+#endif
 	
+#ifdef ENABLE_NUMBERS_STATION
 	numbers_station1.begin(time + random(1000));
 	numbers_station1.set_station_state(AUDIBLE);
+#endif
 	
+#ifdef ENABLE_RTTY_STATION
 	rtty_station1.begin(time + random(1000));
 	rtty_station1.set_station_state(AUDIBLE);
+#endif
+
+#ifdef ENABLE_JAMMER_STATION
+	jammer_station1.begin(time + random(1000), 14004100.0);
+	jammer_station1.set_station_state(AUDIBLE);
+#endif
 	
+#ifdef ENABLE_PAGER_STATION
 	pager_station1.begin(time + random(1000));
 	pager_station1.set_station_state(AUDIBLE);
+#endif
 #endif
 
 #ifdef CONFIG_CW_CLUSTER
@@ -646,6 +718,21 @@ void loop()
 	
 	rtty_station4.begin(time + random(4000));
 	rtty_station4.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_FOUR_JAMMER
+	// Initialize four Jammer test stations with different frequencies
+	jammer_station1.begin(time + random(1000), 7003000.0);
+	jammer_station1.set_station_state(AUDIBLE);
+	
+	jammer_station2.begin(time + random(2000), 7004000.0);
+	jammer_station2.set_station_state(AUDIBLE);
+	
+	jammer_station3.begin(time + random(3000), 7005000.0);
+	jammer_station3.set_station_state(AUDIBLE);
+	
+	jammer_station4.begin(time + random(4000), 7006000.0);
+	jammer_station4.set_station_state(AUDIBLE);
 #endif
 
 #ifdef CONFIG_MINIMAL_CW
