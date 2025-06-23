@@ -29,6 +29,8 @@
 #include "contrast_handler.h"
 #include "bfo.h"
 #include "bfo_handler.h"
+#include "flashlight.h"
+#include "flashlight_handler.h"
 
 #include "wavegen.h"
 #include "wave_out.h"
@@ -191,6 +193,7 @@ VFO vfof("CHAN 3", 1000000.0, 100L, &realization_pool);
 
 Contrast contrast("Contrast");
 BFO bfo("BFO");
+Flashlight flashlight("Light");
 
 VFO_Tuner tunera(&vfoa);
 VFO_Tuner tunerb(&vfob);
@@ -202,14 +205,15 @@ VFO_Tuner tunerf(&vfof);
 
 ContrastHandler contrast_handler(&contrast);
 BFOHandler bfo_handler(&bfo);
+FlashlightHandler flashlight_handler(&flashlight);
 
 ModeHandler *handlers1[3] = {&tunera, &tunerb, &tunerc};
 ModeHandler *handlers2[3] = {&tunerd, &tunere, &tunerf};
-ModeHandler *handlers3[2] = {&contrast_handler, &bfo_handler};
+ModeHandler *handlers3[3] = {&contrast_handler, &bfo_handler, &flashlight_handler};
 
 EventDispatcher dispatcher1(handlers1, 3);
 EventDispatcher dispatcher2(handlers2, 3);
-EventDispatcher dispatcher3(handlers3, 2);
+EventDispatcher dispatcher3(handlers3, 3);
 
 EventDispatcher * dispatcher = &dispatcher1;
 int current_dispatcher = 1;
@@ -497,8 +501,9 @@ void loop()
 						// current_dispatcher = 3;
 						// title = (FSTR("Settings"));
 						break;
-						
-						case 3:
+								case 3:
+						// Clear flashlight mode when leaving settings
+						signal_meter.clear_flashlight_mode();
 						// 
 						dispatcher = set_application(APP_SIMRADIO, &display); // &dispatcher1;
 						// current_dispatcher = 1;

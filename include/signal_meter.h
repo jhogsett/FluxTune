@@ -38,10 +38,13 @@ public:
     void update_signal_strength(int strength);
     
     // Test accessor
-    int get_current_strength() const { return _current_strength; }
-    // Panel LED lock indicator accessor
+    int get_current_strength() const { return _current_strength; }    // Panel LED lock indicator accessor
     int get_panel_led_brightness() const { return _panel_led_accumulator; }
     void clear_panel_led();
+    
+    // Flashlight mode control
+    void set_flashlight_mode(int brightness);  // Set LEDs to white at specified brightness (0-255)
+    void clear_flashlight_mode();              // Return to normal signal meter operation
 
 private:
     void write_leds();    static const int LED_COUNT = 7;
@@ -60,6 +63,9 @@ private:
     unsigned long _last_decay_time;             // Last time decay was applied
     
     int _panel_led_accumulator;                 // Accumulator for panel LED lock indicator (0 to PANEL_LED_MAX_ACCUMULATOR)
+    
+    bool _flashlight_mode;                      // True when in flashlight mode
+    int _flashlight_brightness;                 // Brightness level for flashlight mode (0-255)
 
 #ifndef NATIVE_BUILD
     rgb_color _led_buffer[LED_COUNT];

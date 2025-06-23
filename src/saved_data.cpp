@@ -9,6 +9,7 @@
 
 int option_contrast = DEFAULT_CONTRAST;
 int option_bfo_offset = DEFAULT_BFO_OFFSET;
+int option_flashlight = DEFAULT_FLASHLIGHT;
 
 void load_save_data(){
 	SavedData saved_data;
@@ -18,9 +19,9 @@ void load_save_data(){
 		reset_options();
 		return;
 	}
-
 	option_contrast = saved_data.option_contrast;
 	option_bfo_offset = saved_data.option_bfo_offset;
+	option_flashlight = saved_data.option_flashlight;
 	// option_clock_24h = saved_data.option_clock_24h;
 	// option_idle_mode = saved_data.option_idle_mode;
 	// // bank = saved_data.bank;
@@ -39,10 +40,10 @@ void load_save_data(){
 	// ##DATA Load new persisted play data variables into memory here
 }
 
-void save_data(){	SavedData saved_data;
-	saved_data.version = SAVE_DATA_VERSION;
+void save_data(){	SavedData saved_data;	saved_data.version = SAVE_DATA_VERSION;
 	saved_data.option_contrast = option_contrast;
 	saved_data.option_bfo_offset = option_bfo_offset;
+	saved_data.option_flashlight = option_flashlight;
 
 	EEPROM.put(0, saved_data);
 }
