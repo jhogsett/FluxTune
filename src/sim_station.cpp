@@ -47,7 +47,6 @@ bool SimStation::begin(unsigned long time){
     // _vfo_freq should retain its value from the previous cycle
     _enabled = true;
     force_frequency_update();
-    realize();  // CRITICAL: Set active state for audio output!
     
     #ifdef PLATFORM_NATIVE
     printf("DEBUG: SimStation::begin() - _enabled=%s, _vfo_freq=%f, _frequency=%f\n", 
@@ -177,40 +176,34 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
     // Uses doubled digits (00, 11, 22, etc.) to avoid generating real callsigns
     // This is like using "555" phone numbers in movies - sounds authentic but can't be real
     // Format: [W/K/N][XX][AAA] where XX = doubled digit (00-99)
-      const char *prefixes[] = {"W", "K", "N"};
+    
+    const char *prefixes[] = {"W", "K", "N"};
+    const char *letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     
 #ifdef PLATFORM_NATIVE
-    // Improved randomness: Use time-based seeding for better distribution
-    static unsigned long last_seed_time = 0;
-    unsigned long current_time = millis();
-    if (current_time - last_seed_time > 1000) {  // Re-seed every second for better randomness
-        srand(current_time);
-        last_seed_time = current_time;
-    }
-    
-    // More random prefix selection
+    // Simple format: W/K/N + doubled digit + 2-3 letters
     int prefix_idx = rand() % 3;
     int digit = rand() % 10;  // 0-9, will be doubled
     int suffix_len = 2 + (rand() % 2);  // 2 or 3 letters
     
     // Use doubled digit to ensure fictional callsign (e.g., W00ABC, K55XYZ, N99QRP)
     snprintf(callsign_buffer, buffer_size, "%s%d%d", prefixes[prefix_idx], digit, digit);
-      for(int i = 0; i < suffix_len; i++) {
-        char letter[2] = {'A' + (rand() % 26), '\0'};
+    
+    for(int i = 0; i < suffix_len; i++) {
+        char letter[2] = {letters[rand() % 26], '\0'};
         strncat(callsign_buffer, letter, buffer_size - strlen(callsign_buffer) - 1);
     }
-#else    // Arduino version with improved randomness
-    // Use current time for better seed distribution
-    randomSeed(millis());
-    
+#else
+    // Arduino version
     int prefix_idx = random(3);
     int digit = random(10);  // 0-9, will be doubled
     int suffix_len = 2 + random(2);  // 2 or 3 letters
     
     // Use doubled digit to ensure fictional callsign
     sprintf(callsign_buffer, "%s%d%d", prefixes[prefix_idx], digit, digit);
-      for(int i = 0; i < suffix_len; i++) {
-        char letter[2] = {'A' + random(26), '\0'};
+    
+    for(int i = 0; i < suffix_len; i++) {
+        char letter[2] = {letters[random(26)], '\0'};
         strcat(callsign_buffer, letter);
     }
 #endif
@@ -244,11 +237,6 @@ void SimStation::apply_operator_frustration_drift()
     
     // Apply drift to the base class frequency
     _fixed_freq = _fixed_freq + drift;
-    
-    // ENHANCEMENT: Generate new callsign to simulate a completely different operator
-    // This makes it appear that a new station has come on frequency instead of
-    // the same operator continuing to call CQ after frequency adjustment
-    generate_cq_message();
     
     // Immediately update the wave generator frequency
     force_frequency_update();

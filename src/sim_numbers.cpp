@@ -48,7 +48,6 @@ bool SimNumbers::begin(unsigned long time)
     // _vfo_freq should retain its value from the previous cycle
     _enabled = true;
     force_frequency_update();
-    realize();  // CRITICAL: Set active state for audio output!
     
     generate_interval_signal();
     _morse.start_morse(_group_buffer, _wpm);  // No repeat, stations handle their own repetition
@@ -183,13 +182,13 @@ bool SimNumbers::step(unsigned long time)
                     _current_phase = PHASE_INTERVAL_SIGNAL;
                     _interval_repeats_sent = 0;
                     _groups_sent = 0;
-                      // Add creepy frequency drift for new transmission cycle
+                    
+                    // Add creepy frequency drift for new transmission cycle
                     apply_frequency_drift();
                     
                     // Immediately update the wave generator frequency to reflect the drift
                     // This ensures the audio frequency changes right away, not just when user tunes
                     force_frequency_update();
-                    realize();  // CRITICAL: Reactivate after frequency drift update!
                       generate_interval_signal();
                     _morse.start_morse(_group_buffer, _wpm);
                 } else {
