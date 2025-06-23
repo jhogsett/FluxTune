@@ -15,11 +15,17 @@ public:
     virtual bool begin(unsigned long time) override;
     
     virtual bool update(Mode *mode) override;
-    virtual bool step(unsigned long time) override;void realize();    AsyncMorse _morse;
+    virtual bool step(unsigned long time) override;
+
+    void realize();
+    void apply_wpm_drift();         // Add slight WPM drift for realism
+
+private:
+    AsyncMorse _morse;
     bool _changed;
-    SignalMeter *_signal_meter;
-    char _generated_message[40];     // Generated CQ message with random callsign
-    int _stored_wpm;                // Stored WPM from constructor
+    SignalMeter *_signal_meter;char _generated_message[40];     // Generated CQ message with random callsign
+    int _stored_wpm;                // Stored WPM from constructor  
+    int _base_wpm;                  // Store original WPM for drift calculations
       // Operator frustration frequency drift
     int _cycles_completed;          // Number of complete CQ cycles sent
     int _cycles_until_qsy;          // Random number of cycles before operator gets frustrated and QSYs

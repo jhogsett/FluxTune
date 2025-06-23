@@ -182,8 +182,7 @@ bool SimNumbers::step(unsigned long time)
                     // Cycle complete, restart with interval signal
                     _current_phase = PHASE_INTERVAL_SIGNAL;
                     _interval_repeats_sent = 0;
-                    _groups_sent = 0;
-                      // Add creepy frequency drift for new transmission cycle
+                    _groups_sent = 0;                      // Add creepy frequency drift for new transmission cycle
                     apply_frequency_drift();
                     
                     // Immediately update the wave generator frequency to reflect the drift
@@ -262,6 +261,5 @@ void SimNumbers::apply_frequency_drift()
 #else
     // Use Arduino random() function
     float drift = ((float)random(0, (long)(2.0f * DRIFT_RANGE * 100))) / 100.0f - DRIFT_RANGE;
-#endif    // Apply drift to the base class frequency - the station will use this on next cycle
-    _fixed_freq = _fixed_freq + drift;
+#endif    // Apply drift to the base class frequency - the station will use this on next cycle    _fixed_freq = _fixed_freq + drift;
 }
