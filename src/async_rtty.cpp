@@ -168,4 +168,9 @@ int AsyncRTTY::step_rtty(unsigned long time){
     }
 }
 
+bool AsyncRTTY::is_message_complete() const {
+    // Message is complete if we've reached the end and not repeating
+    return (async_str == NULL || (async_str_pos >= async_length && !async_repeat));
+}
+
 

@@ -4,15 +4,22 @@
 #include "sim_rtty.h"
 #include "signal_meter.h"
 
+// Single authentic RTTY message for realistic station simulation
+static const char rtty_message[] = "CQ CQ DE N6CCM K       ";
+
 // mode is expected to be a derivative of VFO
 SimRTTY::SimRTTY(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq) 
     : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter)
 {
     // Store fixed frequency in base class
-    _fixed_freq = fixed_freq;
+    _fixed_freq = fixed_freq;    // Initialize message cycling state - start with first message
+    _in_wait_delay = false;
+    _next_message_time = 0;
+    _message_repeat_count = 3;  // Repeat each message 3 times for longer transmission
+    _current_repeat = 0;
     
-    // Start RTTY transmission with standard message
-    _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
+    // Start first message transmission immediately
+    start_next_message();
 }
 
 bool SimRTTY::begin(unsigned long time){
@@ -53,6 +60,20 @@ bool SimRTTY::update(Mode *mode){
 // call periodically to keep realization dynamic
 // returns true if it should keep going
 bool SimRTTY::step(unsigned long time){
+    // Handle state transitions for message cycling and idle patterns
+    if (_in_wait_delay) {
+        // Check if wait period is over
+        if (time >= _next_message_time) {
+            _in_wait_delay = false;
+            
+            // Skip idle pattern and start next message directly  
+            start_next_message();
+        }
+        // During wait, keep transmitter silent
+        return true;
+    }
+    
+    // Process RTTY state machine
     switch(_rtty.step_rtty(time)){
     	case STEP_RTTY_TURN_ON:
             _active = true;
@@ -72,5 +93,28 @@ bool SimRTTY::step(unsigned long time){
     		break;
     }
 
+    // Check for message completion to trigger state transitions
+    if (_rtty.is_message_complete()) {
+        if (!_in_wait_delay) {
+            // Regular message finished - check if we need more repetitions            
+            _current_repeat++;
+            if (_current_repeat < _message_repeat_count) {
+                // Send the same message again
+                _rtty.start_rtty_message(rtty_message, false);
+            } else {
+                // All repetitions done, start wait delay
+                _in_wait_delay = true;
+                _next_message_time = time + (RTTY_WAIT_SECONDS * 1000);
+            }
+        }
+    }
+
     return true;
+}
+
+void SimRTTY::start_next_message()
+{
+    // Reset repetition counter and start transmission of the message
+    _current_repeat = 0;
+    _rtty.start_rtty_message(rtty_message, false);
 }

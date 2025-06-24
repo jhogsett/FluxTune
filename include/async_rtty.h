@@ -35,6 +35,7 @@ public:
 
     void start_rtty_message(const char* message, bool repeat);
     int step_rtty(unsigned long time);
+    bool is_message_complete() const;  // Check if current message transmission is complete
     
 private:
     bool start_step_element(unsigned long time);

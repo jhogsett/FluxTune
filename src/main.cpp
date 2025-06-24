@@ -68,18 +68,7 @@
 // Create an ledStrip object and specify the pin it will use.
 PololuLedStrip<12> ledStrip;
 
-// Create a buffer for holding the colors (3 bytes per color).
 #define LED_COUNT 7
-rgb_color colors[LED_COUNT] = 
-{
-  { 0, 15, 0 }, 
-  { 0, 15, 0 }, 
-  { 0, 15, 0 }, 
-  { 0, 15, 0 }, 
-  { 15, 15, 0 }, 
-  { 15, 15, 0 }, 
-  { 15, 0, 0 } 
-};
 
 
 
@@ -336,6 +325,34 @@ Realization *realizations[1] = {  // Only 1 entry for minimal config
 };
 #endif
 
+#ifdef CONFIG_DEV_LOW_RAM
+// DEVELOPMENT: Low RAM configuration - only essential stations for development
+#ifdef ENABLE_MORSE_STATION
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 11);
+#endif
+#ifdef ENABLE_NUMBERS_STATION
+SimNumbers numbers_station1(&wave_gen_pool, &signal_meter, 7002700.0, 18);
+#endif
+
+SimTransmitter *station_pool[2] = {
+#ifdef ENABLE_MORSE_STATION
+    &cw_station1,
+#endif
+#ifdef ENABLE_NUMBERS_STATION
+    &numbers_station1
+#endif
+};
+
+Realization *realizations[2] = {
+#ifdef ENABLE_MORSE_STATION
+    &cw_station1,
+#endif
+#ifdef ENABLE_NUMBERS_STATION
+    &numbers_station1
+#endif
+};
+#endif
+
 // ============================================================================
 // REALIZATION POOL - Initialize with configured realizations
 // ============================================================================
@@ -343,12 +360,16 @@ Realization *realizations[1] = {  // Only 1 entry for minimal config
 // Realization status array - sized based on configuration
 #ifdef CONFIG_MINIMAL_CW
 bool realization_stats[1] = {false};
+#elif defined(CONFIG_DEV_LOW_RAM)
+bool realization_stats[2] = {false, false};
 #else
 bool realization_stats[4] = {false, false, false, false};
 #endif
 
 #ifdef CONFIG_MINIMAL_CW
 RealizationPool realization_pool(realizations, realization_stats, 1);  // Only 1 station for minimal config
+#elif defined(CONFIG_DEV_LOW_RAM)
+RealizationPool realization_pool(realizations, realization_stats, 2);  // Only 2 stations for development config
 #else
 RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stations for all other configs
 #endif
@@ -696,6 +717,19 @@ void loop()
 	// Initialize single CW station
 	cw_station1.begin(time + random(1000));
 	cw_station1.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_DEV_LOW_RAM
+	// Initialize development configuration stations
+#ifdef ENABLE_MORSE_STATION
+	cw_station1.begin(time + random(1000));
+	cw_station1.set_station_state(AUDIBLE);
+#endif
+	
+#ifdef ENABLE_NUMBERS_STATION
+	numbers_station1.begin(time + random(1000));
+	numbers_station1.set_station_state(AUDIBLE);
+#endif
 #endif
 	set_application(APP_SIMRADIO, &display);
 
