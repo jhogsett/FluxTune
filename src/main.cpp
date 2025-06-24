@@ -798,7 +798,6 @@ void loop()
 			dispatcher->update_signal_meter(&signal_meter);
 			
 			// Test: Add StationManager call in encoder A handling (where the problem occurred)
-			station_manager.updateStations(7000000);
 			
 			dispatcher->update_realization();
 		}
