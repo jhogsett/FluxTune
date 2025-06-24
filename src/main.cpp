@@ -541,9 +541,7 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 			current_dispatcher = APP_SETTINGS;
 			title = (FSTR("Settings"));
 		break;	}
-#ifndef DISABLE_DISPLAY_OPERATIONS
 	display->scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-#endif
 	
 	// Mark hardware state as dirty when switching to SimRadio  
 	// This ensures audio resumes properly after application switches
@@ -551,9 +549,7 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 		realization_pool.mark_dirty();
 	}
 	
-#ifndef DISABLE_DISPLAY_OPERATIONS
 	dispatcher->set_mode(display, 0);
-#endif
 	
 	// Force realization update when switching to SimRadio to ensure audio resumes immediately
 	if(application == APP_SIMRADIO) {
@@ -585,9 +581,7 @@ void purge_events(){
 
 void loop()
 {
-#ifndef DISABLE_DISPLAY_OPERATIONS
     display.scroll_string(FSTR("FLuXTuNE"), DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-#endif
 
 #ifdef ENABLE_BRANDING_MODE
     // BRANDING MODE EASTER EGG - Check if encoder A button is pressed during startup
@@ -800,9 +794,7 @@ void loop()
 		}
 		if(encoder_handlerA.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
-#ifndef DISABLE_DISPLAY_OPERATIONS
 			dispatcher->update_display(&display);
-#endif
 			dispatcher->update_signal_meter(&signal_meter);
 			
 			// Test: Add StationManager call in encoder A handling (where the problem occurred)

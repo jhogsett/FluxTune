@@ -22,10 +22,8 @@ void Contrast::prev_option(){
 }
 
 void Contrast::update_display(HT16K33Disp *display){
-#ifndef DISABLE_DISPLAY_OPERATIONS
 	const byte display_brightnesses[] = {(unsigned char)option_contrast, (unsigned char)option_contrast};
 	display->init(display_brightnesses);
     sprintf(display_text_buffer, "Level %d", option_contrast);
     display->scroll_string(display_text_buffer, 1, 1);
-#endif
 }
