@@ -21,6 +21,14 @@
                                    // Speeds: 12, 16, 18, 22 WPM  
                                    // Designed to often overlap in reception for realistic band activity
 
+// ===== MEMORY OPTIMIZATION OPTIONS =====
+
+// RTTY Memory Optimization
+// For minimal Flash usage, you can disable real Baudot encoding and just generate random bits
+// The RTTY simulation will sound authentic but won't transmit actual text
+// Saves ~128 bytes of Flash memory from the Baudot lookup table
+// #define RTTY_RANDOM_BITS_ONLY  // Uncomment to save Flash memory
+
 // ===== CONFIGURATION IMPLEMENTATION =====
 #ifdef CONFIG_MIXED_STATIONS
     // Production: Mixed station types (default)

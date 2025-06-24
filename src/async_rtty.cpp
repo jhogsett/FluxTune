@@ -1,12 +1,12 @@
 #include "../native/platform.h"
 #include "../include/async_rtty.h"
+#include "../include/station_config.h"
 
-
+#ifndef RTTY_RANDOM_BITS_ONLY
 // Baudot code lookup table (5-bit codes) - stored in PROGMEM to save RAM
 // Index corresponds to ASCII character, value is 5-bit Baudot code
 // 0xFF means character not supported in Baudot
-
-// JH! to preserve valuable Flash memory, let's create a #define option to either use the real baudot code here when sending, or just send random bits for the character portion of the serial encoding, since this is a simulation and the rtty just needs to sound legitimate. In the case it's sending random bits, just ignore the incoming message string.
+// This table can be disabled to save ~128 bytes Flash by defining RTTY_RANDOM_BITS_ONLY
 const unsigned char baudot_letters[] PROGMEM = {
     // ASCII 0-31 (control characters) - most not supported
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // 0-7
@@ -31,12 +31,11 @@ const unsigned char baudot_letters[] PROGMEM = {
     // ASCII 96-127 (` and lowercase letters)
     0xFF,                                           // 96 (`
     0x03, 0x19, 0x0E, 0x09, 0x01, 0x0D, 0x1A,     // 97-103 (a-g) same as uppercase
-    0x14, 0x06, 0x0B, 0x0F, 0x12, 0x1C, 0x18,     // 104-110 (h-n)
-    0x16, 0x17, 0x0A, 0x05, 0x10, 0x07, 0x1E,     // 111-117 (o-u)
+    0x14, 0x06, 0x0B, 0x0F, 0x12, 0x1C, 0x18,     // 104-110 (h-n)    0x16, 0x17, 0x0A, 0x05, 0x10, 0x07, 0x1E,     // 111-117 (o-u)
     0x1D, 0x13, 0x1B, 0x11, 0x15,                 // 118-122 (v-z)
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF                   // 123-127 (punctuation)
 };
-// JH!
+#endif // RTTY_RANDOM_BITS_ONLY
 
 AsyncRTTY::AsyncRTTY()
 {
@@ -53,10 +52,21 @@ AsyncRTTY::AsyncRTTY()
 
 unsigned char AsyncRTTY::get_baudot_code(char c) {
     // Get Baudot code for ASCII character
+#ifdef RTTY_RANDOM_BITS_ONLY
+    // Memory optimization: return random 5-bit value instead of real Baudot
+    // This saves ~128 bytes Flash but RTTY will sound authentic
+    #ifdef PLATFORM_NATIVE
+        return rand() & 0x1F;  // Random 5-bit value (0-31)
+    #else
+        return random(32);     // Random 5-bit value (0-31)
+    #endif
+#else
+    // Use real Baudot encoding
     if (c >= 0 && c < 128) {
         return pgm_read_byte(baudot_letters + c);
     }
     return 0xFF; // Unsupported character
+#endif
 }
 
 bool AsyncRTTY::start_step_element(unsigned long time){
