@@ -10,6 +10,8 @@ SimRTTY::SimRTTY(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fi
 {
     // Store fixed frequency in base class
     _fixed_freq = fixed_freq;
+    
+    // Start RTTY transmission with standard message
     _rtty.start_rtty_message("CQ CQ DE N6CCM K       ", true);
 }
 

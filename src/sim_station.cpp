@@ -215,7 +215,7 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
 
 void SimStation::generate_cq_message()
 {
-    char callsign[8];  // Enough for W1ABC format
+    char callsign[12];  // Increased buffer size for safety (e.g., "K99ABCD" + null)
     generate_random_callsign(callsign, sizeof(callsign));
     
     // Generate standard CQ message: "CQ CQ DE [CALL] [CALL] K    "
@@ -223,9 +223,7 @@ void SimStation::generate_cq_message()
     snprintf(_generated_message, sizeof(_generated_message), 
              "CQ CQ DE %s %s K    ", callsign, callsign);
 #else
-    // JH! string constants ought to be moved to PROGMEM if possible
     sprintf(_generated_message, "CQ CQ DE %s %s K    ", callsign, callsign);
-    // JH!
 #endif
 }
 

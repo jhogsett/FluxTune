@@ -216,9 +216,7 @@ void SimNumbers::generate_next_number_group()
 #else
         digits[i] = random(10);
 #endif
-    }
-    
-    // Format as "XXXXX" (5 digits only, no space - we handle pauses with timing)
+    }    // Format as "XXXXX" (5 digits only, no space - we handle pauses with timing)
 #ifdef PLATFORM_NATIVE
     snprintf(_group_buffer, sizeof(_group_buffer), "%d%d%d%d%d", 
              digits[0], digits[1], digits[2], digits[3], digits[4]);
@@ -263,5 +261,8 @@ void SimNumbers::apply_frequency_drift()
 #else
     // Use Arduino random() function
     float drift = ((float)random(0, (long)(2.0f * DRIFT_RANGE * 100))) / 100.0f - DRIFT_RANGE;
-#endif    // Apply drift to the base class frequency - the station will use this on next cycle    _fixed_freq = _fixed_freq + drift;
+#endif
+    
+    // Apply drift to the base class frequency - the station will use this on next cycle
+    _fixed_freq = _fixed_freq + drift;
 }
