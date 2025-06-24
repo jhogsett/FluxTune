@@ -2,7 +2,7 @@
 #define __LEDS_H__
 
 #include "hardware.h"
-#include "led_handler.h"
+// #include "led_handler.h"
 
 // default on/off time when animating all LEDs
 #define DEFAULT_ALL_LEDS_SHOW_TIME    1000
@@ -40,7 +40,7 @@ extern const int led_intensities[];
 // extern LEDHandler all_leds;
 
 // LED handler for just the panel LEDs
-extern LEDHandler panel_leds;
+// extern LEDHandler panel_leds;
 
 // LED handler for just the button LEDs
 // extern LEDHandler button_leds;
