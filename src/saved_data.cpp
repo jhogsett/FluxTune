@@ -22,20 +22,6 @@ void load_save_data(){
 	option_contrast = saved_data.option_contrast;
 	option_bfo_offset = saved_data.option_bfo_offset;
 	option_flashlight = saved_data.option_flashlight;
-	// option_clock_24h = saved_data.option_clock_24h;
-	// option_idle_mode = saved_data.option_idle_mode;
-	// // bank = saved_data.bank;
-	// best_time1 = saved_data.best_time1;
-	// best_time2 = saved_data.best_time2;
-	// best_time3 = saved_data.best_time3;
-	// // house = saved_data.house;
-	// // gang = saved_data.gang;
-	// option_idle_time = saved_data.option_idle_time;
-    // // vig = saved_data.vig;
-    // option_vib_str = saved_data.option_vib_str;
-    // option_clock_chime = saved_data.option_clock_chime;
-    // option_wpm = saved_data.option_wpm;
-    // auto_play_enabled = saved_data.auto_play_enabled;
 
 	// ##DATA Load new persisted play data variables into memory here
 }

@@ -2,7 +2,7 @@
 #define __REALIZATION_H__
 
 #include "mode.h"
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 
 // handles realization using a realizer
 // 
@@ -12,7 +12,7 @@ class Mode;
 class Realization
 {
 public:
-    Realization(WaveGenPool *realizer_pool);
+    Realization(WaveGenPool *wave_gen_pool);
 
     virtual bool update(Mode *mode);
 
@@ -22,7 +22,7 @@ public:
       // Virtual method for wave generator refresh - default does nothing
     virtual void force_wave_generator_refresh() {}
 
-    WaveGenPool *_realizer_pool;
+    WaveGenPool *_wave_gen_pool;
     int _realizer;
 };
 

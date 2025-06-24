@@ -1,6 +1,6 @@
 #include "unity.h"
 #include "../native/mock_arduino.h"   // Must be first for byte typedef
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 
 // Test SimStation WaveGen allocation lifecycle changes
 // This test verifies that SimStation now frees WaveGens between message cycles
@@ -25,26 +25,26 @@ public:
 // Mock Realization that simulates the key parts of SimStation behavior
 class MockSimStation {
 private:
-    WaveGenPool* _realizer_pool;
+    WaveGenPool* _wave_gen_pool;
     int _realizer;
     bool _in_wait_delay;
     unsigned long _next_cq_time;
     
 public:
-    MockSimStation(WaveGenPool* pool) : _realizer_pool(pool), _realizer(-1), 
+    MockSimStation(WaveGenPool* pool) : _wave_gen_pool(pool), _realizer(-1), 
                                        _in_wait_delay(false), _next_cq_time(0) {}
     
     bool begin(unsigned long time) {
         if(_realizer != -1) {
             return true;  // Already have realizer (idempotent)
         }
-        _realizer = _realizer_pool->get_realizer();
+        _realizer = _wave_gen_pool->get_realizer();
         return (_realizer != -1);
     }
     
     void end() {
         if(_realizer != -1) {
-            _realizer_pool->free_realizer(_realizer);
+            _wave_gen_pool->free_realizer(_realizer);
             _realizer = -1;
         }
     }

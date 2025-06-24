@@ -7,7 +7,7 @@
 class SimJammer : public SimTransmitter
 {
 public:
-    SimJammer(WaveGenPool *realizer_pool);
+    SimJammer(WaveGenPool *wave_gen_pool);
     
     virtual bool begin(unsigned long time, float fixed_freq);
     virtual bool update(Mode *mode);

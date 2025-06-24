@@ -29,18 +29,4 @@ private:
     bool _hardware_dirty;  // True when hardware state is unknown and needs refresh
 };
 
-
-
-
-
-
-
-
-// realization pool
-// initialize with an array of realizations
-// tracks current dial frequency
-// queries realizations to see if they are able to start
-// queries also to see if they should stop due to being out of range
-// they'll stop on their own as well
-
 #endif // __REALIZER_POOL_H__

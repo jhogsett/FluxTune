@@ -49,14 +49,6 @@ void VFO::update_display(HT16K33Disp *display){
 
 void VFO::update_realization(){
     _realization_pool->update(this);
-    // for(byte i = 0; i < _nrealizations; i++){
-    //     _realizations[i]->update(this);
-    // }
-
-    // float ffrequency = float(_frequency) + (_sub_frequency / 10.0);
-
-    // // WaveGen *wavegen = (WaveGen *)realization;
-	// wavegen->_sig_gen->setFrequency((MD_AD9833::channel_t)0, float(_frequency));
 }
 
 void VFO::force_transmitter_refresh(){

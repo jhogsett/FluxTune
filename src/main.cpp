@@ -57,7 +57,7 @@
 
 #include "async_morse.h"
 
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 
 // ============================================================================
 // BRANDING MODE FOR PRODUCT PHOTOGRAPHY
@@ -68,18 +68,7 @@
 // Create an ledStrip object and specify the pin it will use.
 PololuLedStrip<12> ledStrip;
 
-// Create a buffer for holding the colors (3 bytes per color).
 #define LED_COUNT 7
-rgb_color colors[LED_COUNT] = 
-{
-  { 0, 15, 0 }, 
-  { 0, 15, 0 }, 
-  { 0, 15, 0 }, 
-  { 0, 15, 0 }, 
-  { 15, 15, 0 }, 
-  { 15, 15, 0 }, 
-  { 15, 0, 0 } 
-};
 
 
 
@@ -126,7 +115,7 @@ WaveGen wavegen4(&AD4);
 
 WaveGen *wavegens[4] = {&wavegen1, &wavegen2, &wavegen3, &wavegen4};
 bool realizer_stats[4] = {false, false, false, false};
-WaveGenPool realizer_pool(wavegens, realizer_stats, 4);
+WaveGenPool wave_gen_pool(wavegens, realizer_stats, 4);
 
 // Signal meter instance
 SignalMeter signal_meter;
@@ -138,19 +127,19 @@ SignalMeter signal_meter;
 #ifdef CONFIG_MIXED_STATIONS
 // DEFAULT: Mixed station types for testing and demonstration
 #ifdef ENABLE_MORSE_STATION
-SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 11);
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 11);
 #endif
 #ifdef ENABLE_NUMBERS_STATION
-SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 18);
+SimNumbers numbers_station1(&wave_gen_pool, &signal_meter, 7002700.0, 18);
 #endif
 #ifdef ENABLE_RTTY_STATION
-SimRTTY rtty_station1(&realizer_pool, &signal_meter, 14004100.0);
+SimRTTY rtty_station1(&wave_gen_pool, &signal_meter, 14004100.0);
 #endif
 #ifdef ENABLE_JAMMER_STATION
-SimJammer jammer_station1(&realizer_pool);
+SimJammer jammer_station1(&wave_gen_pool);
 #endif
 #ifdef ENABLE_PAGER_STATION
-SimPager pager_station1(&realizer_pool, &signal_meter, 146800000.0);
+SimPager pager_station1(&wave_gen_pool, &signal_meter, 146800000.0);
 #endif
 
 SimTransmitter *station_pool[4] = {
@@ -193,10 +182,10 @@ Realization *realizations[4] = {
 #ifdef CONFIG_CW_CLUSTER
 // LISTENING PLEASURE: Four CW stations clustered in low 40m band
 // Frequencies chosen to often overlap in reception for realistic band activity
-SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 12);  // 12 WPM
-SimStation cw_station2(&realizer_pool, &signal_meter, 7003500.0, 16);  // 16 WPM  
-SimStation cw_station3(&realizer_pool, &signal_meter, 7004200.0, 18);  // 18 WPM
-SimStation cw_station4(&realizer_pool, &signal_meter, 7005800.0, 22);  // 22 WPM
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 12);  // 12 WPM
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7003500.0, 16);  // 16 WPM  
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7004200.0, 18);  // 18 WPM
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7005800.0, 22);  // 22 WPM
 
 SimTransmitter *station_pool[4] = {
     &cw_station1,
@@ -215,10 +204,10 @@ Realization *realizations[4] = {
 
 #ifdef CONFIG_FOUR_CW
 // TEST: Four CW stations with different speeds
-SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 11);
-SimStation cw_station2(&realizer_pool, &signal_meter, 7003000.0, 15);
-SimStation cw_station3(&realizer_pool, &signal_meter, 7004000.0, 20);
-SimStation cw_station4(&realizer_pool, &signal_meter, 7005000.0, 25);
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 11);
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7003000.0, 15);
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7004000.0, 20);
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7005000.0, 25);
 
 SimTransmitter *station_pool[4] = {
     &cw_station1,
@@ -237,10 +226,10 @@ Realization *realizations[4] = {
 
 #ifdef CONFIG_FOUR_NUMBERS
 // TEST: Four Numbers stations with different frequencies  
-SimNumbers numbers_station1(&realizer_pool, &signal_meter, 7002700.0, 12);
-SimNumbers numbers_station2(&realizer_pool, &signal_meter, 7003700.0, 15);
-SimNumbers numbers_station3(&realizer_pool, &signal_meter, 7004700.0, 18);
-SimNumbers numbers_station4(&realizer_pool, &signal_meter, 7005700.0, 22);
+SimNumbers numbers_station1(&wave_gen_pool, &signal_meter, 7002700.0, 12);
+SimNumbers numbers_station2(&wave_gen_pool, &signal_meter, 7003700.0, 15);
+SimNumbers numbers_station3(&wave_gen_pool, &signal_meter, 7004700.0, 18);
+SimNumbers numbers_station4(&wave_gen_pool, &signal_meter, 7005700.0, 22);
 
 SimTransmitter *station_pool[4] = {
     &numbers_station1,
@@ -259,10 +248,10 @@ Realization *realizations[4] = {
 
 #ifdef CONFIG_FOUR_PAGER
 // TEST: Four Pager stations
-SimPager pager_station1(&realizer_pool, &signal_meter, 7006000.0);
-SimPager pager_station2(&realizer_pool, &signal_meter, 7007000.0);
-SimPager pager_station3(&realizer_pool, &signal_meter, 7008000.0);
-SimPager pager_station4(&realizer_pool, &signal_meter, 7009000.0);
+SimPager pager_station1(&wave_gen_pool, &signal_meter, 7006000.0);
+SimPager pager_station2(&wave_gen_pool, &signal_meter, 7007000.0);
+SimPager pager_station3(&wave_gen_pool, &signal_meter, 7008000.0);
+SimPager pager_station4(&wave_gen_pool, &signal_meter, 7009000.0);
 
 SimTransmitter *station_pool[4] = {
     &pager_station1,
@@ -281,10 +270,10 @@ Realization *realizations[4] = {
 
 #ifdef CONFIG_FOUR_RTTY
 // TEST: Four RTTY stations
-SimRTTY rtty_station1(&realizer_pool, &signal_meter, 7004100.0);
-SimRTTY rtty_station2(&realizer_pool, &signal_meter, 7005100.0);
-SimRTTY rtty_station3(&realizer_pool, &signal_meter, 7006100.0);
-SimRTTY rtty_station4(&realizer_pool, &signal_meter, 7007100.0);
+SimRTTY rtty_station1(&wave_gen_pool, &signal_meter, 7004100.0);
+SimRTTY rtty_station2(&wave_gen_pool, &signal_meter, 7005100.0);
+SimRTTY rtty_station3(&wave_gen_pool, &signal_meter, 7006100.0);
+SimRTTY rtty_station4(&wave_gen_pool, &signal_meter, 7007100.0);
 
 SimTransmitter *station_pool[4] = {
     &rtty_station1,
@@ -303,10 +292,10 @@ Realization *realizations[4] = {
 
 #ifdef CONFIG_FOUR_JAMMER
 // TEST: Four Jammer stations for interference testing
-SimJammer jammer_station1(&realizer_pool);
-SimJammer jammer_station2(&realizer_pool);
-SimJammer jammer_station3(&realizer_pool);
-SimJammer jammer_station4(&realizer_pool);
+SimJammer jammer_station1(&wave_gen_pool);
+SimJammer jammer_station2(&wave_gen_pool);
+SimJammer jammer_station3(&wave_gen_pool);
+SimJammer jammer_station4(&wave_gen_pool);
 
 SimTransmitter *station_pool[4] = {
     &jammer_station1,
@@ -325,7 +314,7 @@ Realization *realizations[4] = {
 
 #ifdef CONFIG_MINIMAL_CW
 // MINIMAL: Single CW station for memory testing
-SimStation cw_station1(&realizer_pool, &signal_meter, 7002000.0, 15);
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 15);
 
 SimTransmitter *station_pool[1] = {  // Only 1 entry for minimal config
     &cw_station1
@@ -336,6 +325,34 @@ Realization *realizations[1] = {  // Only 1 entry for minimal config
 };
 #endif
 
+#ifdef CONFIG_DEV_LOW_RAM
+// DEVELOPMENT: Low RAM configuration - only essential stations for development
+#ifdef ENABLE_MORSE_STATION
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 11);
+#endif
+#ifdef ENABLE_NUMBERS_STATION
+SimNumbers numbers_station1(&wave_gen_pool, &signal_meter, 7002700.0, 18);
+#endif
+
+SimTransmitter *station_pool[2] = {
+#ifdef ENABLE_MORSE_STATION
+    &cw_station1,
+#endif
+#ifdef ENABLE_NUMBERS_STATION
+    &numbers_station1
+#endif
+};
+
+Realization *realizations[2] = {
+#ifdef ENABLE_MORSE_STATION
+    &cw_station1,
+#endif
+#ifdef ENABLE_NUMBERS_STATION
+    &numbers_station1
+#endif
+};
+#endif
+
 // ============================================================================
 // REALIZATION POOL - Initialize with configured realizations
 // ============================================================================
@@ -343,12 +360,16 @@ Realization *realizations[1] = {  // Only 1 entry for minimal config
 // Realization status array - sized based on configuration
 #ifdef CONFIG_MINIMAL_CW
 bool realization_stats[1] = {false};
+#elif defined(CONFIG_DEV_LOW_RAM)
+bool realization_stats[2] = {false, false};
 #else
 bool realization_stats[4] = {false, false, false, false};
 #endif
 
 #ifdef CONFIG_MINIMAL_CW
 RealizationPool realization_pool(realizations, realization_stats, 1);  // Only 1 station for minimal config
+#elif defined(CONFIG_DEV_LOW_RAM)
+RealizationPool realization_pool(realizations, realization_stats, 2);  // Only 2 stations for development config
 #else
 RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stations for all other configs
 #endif
@@ -358,10 +379,10 @@ RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stat
 // ============================================================================
 StationManager station_manager(station_pool);
 
-WaveOut waveout1(&realizer_pool);
-WaveOut waveout2(&realizer_pool);
-WaveOut waveout3(&realizer_pool);
-WaveOut waveout4(&realizer_pool);
+WaveOut waveout1(&wave_gen_pool);
+WaveOut waveout2(&wave_gen_pool);
+WaveOut waveout3(&wave_gen_pool);
+WaveOut waveout4(&wave_gen_pool);
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
@@ -409,10 +430,6 @@ void setup_display(){
 
 	const byte display_brightnesses[] = {(unsigned char)option_contrast, (unsigned char)option_contrast};
 	display.init(display_brightnesses);
-	/* the duplicated displays do not need reinitialization
-	disp1.init(brightness+0);
-	disp2.init(brightness+1);
-	disp3.init(brightness+2); */
 	display.clear();
 }
 
@@ -427,15 +444,6 @@ void setup_leds(){
 	}
 	unsigned long time = millis();
 	panel_leds.begin(time, LEDHandler::STYLE_RANDOM, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
-	// button_leds.begin(time, LEDHandler::STYLE_BLANKING, DEFAULT_BUTTON_LEDS_SHOW_TIME, DEFAULT_BUTTON_LEDS_BLANK_TIME);
-	// all_leds.begin(time, LEDHandler::STYLE_RANDOM | LEDHandler::STYLE_BLANKING | LEDHandler::STYLE_MIRROR, DEFAULT_ALL_LEDS_SHOW_TIME, DEFAULT_ALL_LEDS_BLANK_TIME);
-}
-
-void setup_buttons(){
-	// for(byte i = 0; i < NUM_BUTTONS; i++){
-	// 	pinMode(i + FIRST_BUTTON, 0x03); // INPUT_PULLDOWN ?!
-	// 	button_states[i] = false;
-	// }
 }
 
 void setup(){
@@ -447,26 +455,6 @@ void setup(){
 	setup_leds();
 	setup_display();
 	setup_signal_meter();
-	// setup_buttons();
-
-
-    // // if all three buttons are pressed, enable auto play
-    // if((digitalRead(GREEN_BUTTON) == HIGH) && (digitalRead(AMBER_BUTTON) == HIGH) && (digitalRead(RED_BUTTON) == HIGH)){
-    //     auto_play_enabled = true;
-    // }
-
-	// attachInterrupt(digitalPinToInterrupt(ANY_BUTTON), button_pressed_i, RISING);
-	// button_states[ANY_COLOR_ID] = false;
-
-    // send_morse("Infinity Game");
-
-	// if(option_sound)
-	// 	beep();
-
-	// if(option_vibrate)
-	// 	vibrate();
-
-	// dispatcher->set_mode(&display, 0);
 
 	AD1.begin();
 	AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
@@ -484,9 +472,9 @@ void setup(){
 	AD3.setMode(MD_AD9833::MODE_SINE);
 	AD4.begin();
 	AD4.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	AD4.setFrequency((MD_AD9833::channel_t)1, 0.1);
-	AD4.setMode(MD_AD9833::MODE_SINE);
-	// Test StationManager method call in setup (safe location)
+	AD4.setFrequency((MD_AD9833::channel_t)1, 0.1);	AD4.setMode(MD_AD9833::MODE_SINE);
+
+	// Initialize StationManager
 	station_manager.updateStations(7000000);
 }
 
@@ -523,12 +511,6 @@ void activate_branding_mode() {
     }
 }
 #endif
-
-bool main_menu(){
-    return true;
-}
-
-
 
 EventDispatcher * set_application(int application, HT16K33Disp *display){
 	EventDispatcher *dispatcher;
@@ -586,14 +568,10 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 }
 
 void purge_events(){
-	while(encoder_handlerA.changed());
-	while(encoder_handlerB.changed());
-
-	while(encoder_handlerA.pressed());
-	while(encoder_handlerA.long_pressed());
-
-	while(encoder_handlerB.pressed());
-	while(encoder_handlerB.long_pressed());
+	// Clear all pending encoder events
+	while(encoder_handlerA.changed() || encoder_handlerB.changed() || 
+	      encoder_handlerA.pressed() || encoder_handlerA.long_pressed() ||
+	      encoder_handlerB.pressed() || encoder_handlerB.long_pressed());
 }
 
 void loop()
@@ -740,6 +718,19 @@ void loop()
 	cw_station1.begin(time + random(1000));
 	cw_station1.set_station_state(AUDIBLE);
 #endif
+
+#ifdef CONFIG_DEV_LOW_RAM
+	// Initialize development configuration stations
+#ifdef ENABLE_MORSE_STATION
+	cw_station1.begin(time + random(1000));
+	cw_station1.set_station_state(AUDIBLE);
+#endif
+	
+#ifdef ENABLE_NUMBERS_STATION
+	numbers_station1.begin(time + random(1000));
+	numbers_station1.set_station_state(AUDIBLE);
+#endif
+#endif
 	set_application(APP_SIMRADIO, &display);
 
 	while(true){
@@ -757,7 +748,6 @@ void loop()
         } else {
             analogWrite(WHITE_PANEL_LED, 0);
         }        // Comment out the old animation:
-        // panel_leds.step(time);
 		realization_pool.step(time);
 
 		// NOTE: Station step() calls are handled automatically by realization_pool.step()
@@ -797,20 +787,9 @@ void loop()
 				}
 
 				purge_events();
-					
-				// display.scroll_string(title, DISPLAY_SHOW_TIME, DISPLAY_SCROLL_TIME);
-				// dispatcher->set_mode(&display, 0);
-
-				// // empty outstanding events
-				// encoder_handlerA.changed();
-				// encoder_handlerB.changed();
-				// encoder_handlerA.pressed();
-				// encoder_handlerA.long_pressed();
-				// encoder_handlerB.pressed();
-				// encoder_handlerB.long_pressed();
 			}
 		}
-				if(encoder_handlerA.changed()){
+		if(encoder_handlerA.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_TUNING, encoder_handlerA.diff(), 0);
 #ifndef DISABLE_DISPLAY_OPERATIONS
 			dispatcher->update_display(&display);
@@ -822,7 +801,8 @@ void loop()
 			
 			dispatcher->update_realization();
 		}
-				if(encoder_handlerB.changed()){
+
+		if(encoder_handlerB.changed()){
 			dispatcher->dispatch_event(&display, ID_ENCODER_MODES, encoder_handlerB.diff(), 0);
 			purge_events();  // Clear any noise/overshoot after mode change
 			
@@ -837,5 +817,3 @@ void loop()
 		}
 	}
 }
-
-

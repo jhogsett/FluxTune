@@ -1,6 +1,6 @@
 #include "vfo.h"
 #include "wavegen.h"
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 #include "sim_station.h"
 #include "signal_meter.h"
 
@@ -14,8 +14,8 @@
 #define WAIT_SECONDS 4
 
 // mode is expected to be a derivative of VFO
-SimStation::SimStation(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
-    : SimTransmitter(realizer_pool), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
+SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
+    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
 {
     // Store fixed frequency in base class
     _fixed_freq = fixed_freq;    // Initialize operator frustration drift tracking
@@ -38,11 +38,10 @@ bool SimStation::begin(unsigned long time){
     if(!common_begin(time, _fixed_freq))
         return false;
     
-    // DEBUG: Track reallocation and frequency setting
     #ifdef PLATFORM_NATIVE
     printf("DEBUG: SimStation::begin() - realizer=%d, time=%lu\n", _realizer, time);
     #endif
-      WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+      WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     wavegen->set_frequency(SPACE_FREQUENCY, false);    // Set _enabled and force frequency update with existing _vfo_freq
     // _vfo_freq should retain its value from the previous cycle
     _enabled = true;
@@ -53,6 +52,7 @@ bool SimStation::begin(unsigned long time){
     printf("DEBUG: SimStation::begin() - _enabled=%s, _vfo_freq=%f, _frequency=%f\n", 
            _enabled ? "true" : "false", _vfo_freq, _frequency);
     #endif
+    // JH!
     
     // Start first CQ immediately (after frequencies are set)
     _morse.start_morse(_generated_message, _stored_wpm);
@@ -75,7 +75,7 @@ void SimStation::realize(){
            _active ? "true" : "false", _frequency);
     #endif
     
-    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
 
@@ -93,7 +93,7 @@ bool SimStation::update(Mode *mode){
     #endif
     
     if(_enabled && _realizer != -1){
-        WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+        WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
         wavegen->set_frequency(_frequency);
     }
 
@@ -200,8 +200,6 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
     }
 #else    // Arduino version with improved randomness
     // Use current time for better seed distribution
-    // JH: no longer needed
-    // randomSeed(millis());
     
     int prefix_idx = random(3);
     int digit = random(10);  // 0-9, will be doubled
@@ -217,7 +215,7 @@ void SimStation::generate_random_callsign(char *callsign_buffer, size_t buffer_s
 
 void SimStation::generate_cq_message()
 {
-    char callsign[8];  // Enough for W1ABC format
+    char callsign[12];  // Increased buffer size for safety (e.g., "K99ABCD" + null)
     generate_random_callsign(callsign, sizeof(callsign));
     
     // Generate standard CQ message: "CQ CQ DE [CALL] [CALL] K    "

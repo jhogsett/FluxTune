@@ -106,7 +106,8 @@ void AsyncMorse::start_morse(const char *s, int wpm){
 
     async_phase = PHASE_CHAR;
     async_position = 0;
-    async_morse = 0;    async_element = 0;
+    async_morse = 0;    
+    async_element = 0;
     async_active = false;
     async_next_event = 0L;
     async_space = false;
@@ -160,11 +161,8 @@ int AsyncMorse::step_element(unsigned long time){
         byte bit = async_morse & 0x1;
     
         async_active = true;
-        if(bit == 1){
-            async_next_event = compute_element_time(time, 3, false);//  time + (3 * async_element_del);
-        } else{ 
-            async_next_event = compute_element_time(time, 1, false);//time + async_element_del;
-        }
+
+        async_next_event = compute_element_time(time, bit == 1 ? 3 : 1, false);
     } else {
         async_space = true;
         async_active = false;

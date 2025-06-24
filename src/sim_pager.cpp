@@ -1,6 +1,6 @@
 #include "vfo.h"
 #include "wavegen.h"
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 #include "sim_pager.h"
 #include "signal_meter.h"
 
@@ -10,8 +10,8 @@
 #include <cmath>
 #endif
 
-SimPager::SimPager(WaveGenPool *realizer_pool, SignalMeter *signal_meter, float fixed_freq) 
-    : SimTransmitter(realizer_pool), _signal_meter(signal_meter)
+SimPager::SimPager(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq) 
+    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter)
 {
     // Store fixed frequency in base class
     _fixed_freq = fixed_freq;
@@ -26,7 +26,7 @@ bool SimPager::begin(unsigned long time)
         return false;// Start pager transmission with repeat enabled
     _pager.start_pager_transmission(true);
 
-    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
 
     // Initialize both channels to silent
     wavegen->set_frequency(SILENT_FREQ, false);
@@ -41,7 +41,7 @@ void SimPager::realize()
         return;  // Out of audible range
     }
     
-    WaveGen *wavegen = _realizer_pool->access_realizer(_realizer);
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     
     if(_active) {
         // Set frequencies based on current pager state

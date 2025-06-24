@@ -35,6 +35,7 @@ public:
 
     void start_rtty_message(const char* message, bool repeat);
     int step_rtty(unsigned long time);
+    bool is_message_complete() const;  // Check if current message transmission is complete
     
 private:
     bool start_step_element(unsigned long time);
@@ -43,6 +44,7 @@ private:
     int step_element(unsigned long time);
     unsigned char get_baudot_code(char c);  // New method to get Baudot code for character
 
+    // JH! Many of these variables are similar to ones in AsyncMorse, so it might make sense to extract a base class with commonalities, like AsyncModulator
     const char *async_str;
     int async_length;
     int async_str_pos;      // Current position in string
@@ -60,6 +62,7 @@ private:
     bool async_switched_on;
 
 };
+// JH!
 
 // extern void start_rtty(const char *s, int wpm, bool repeat);
 // extern int step_rtty(unsigned long time);

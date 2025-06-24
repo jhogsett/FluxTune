@@ -19,6 +19,8 @@ public:
     virtual void update_signal_meter(SignalMeter *signal_meter);
     virtual void update_realization();
     void force_transmitter_refresh();  // Force hardware refresh when switching to SimRadio
+
+    // JH! I am uncomfortable with the term "dirty", terms like "needing refresh" or "invalidate" would be better 
     void mark_hardware_dirty();  // Mark hardware as needing refresh
 
     // Static utility for stations to calculate signal strength charge based on VFO proximity
