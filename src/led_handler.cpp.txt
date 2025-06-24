@@ -5,6 +5,7 @@
 #endif
 // #include "led_handler.h"
 
+// JH! This class should be removed, the LEDs are being assidgned to specific simulated radio functions
 LEDHandler::LEDHandler(int first_pin, int num_leds, const int *intensity, int show_time, int blank_time){
 	_first_pin = first_pin;
 	_num_leds = num_leds;
@@ -199,3 +200,4 @@ bool LEDHandler::step_flash(unsigned long time){
 	_flash_state = false;
 	return false;
 }
+// JH! 

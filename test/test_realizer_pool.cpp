@@ -1,6 +1,6 @@
 #include "unity.h"
 #include "../native/mock_arduino.h"   // Must be first for byte typedef
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 
 // Mock wave generators for testing
 class MockWaveGen {

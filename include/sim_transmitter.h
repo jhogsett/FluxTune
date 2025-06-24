@@ -4,7 +4,7 @@
 #include "signal_meter.h"
 #include "vfo.h"
 #include "realization.h"
-#include "realizer_pool.h"
+#include "wave_gen_pool.h"
 
 // Station states for dynamic station management
 enum StationState {
@@ -36,7 +36,7 @@ enum StationState {
 class SimTransmitter : public Realization
 {
 public:
-    SimTransmitter(WaveGenPool *realizer_pool);
+    SimTransmitter(WaveGenPool *wave_gen_pool);
     
     virtual bool step(unsigned long time) = 0;  // Pure virtual - must be implemented by derived classes
     virtual void end();  // Common cleanup logic

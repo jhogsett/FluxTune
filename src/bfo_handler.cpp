@@ -22,6 +22,7 @@ bool BFOHandler::event_sink(int event, int event_data){
     return true;
 }
 
+// JH! This just returns false, and also the same is seen in ContrastHandler and OptionHandler, so maybe there should be a common base class with this functionality
 bool BFOHandler::event_sink(bool pressed, bool long_pressed){
     return false;
 }

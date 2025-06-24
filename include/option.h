@@ -15,9 +15,4 @@ public:
 private:
 };
 
-// #endif // __VFO_H__
-
-// derived from mode
-
-
 #endif // __OPTIONS_H__

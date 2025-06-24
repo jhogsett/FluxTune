@@ -22,12 +22,7 @@ SOURCES = src/buffers.cpp \
           src/realizer.cpp \
           src/realizer_pool.cpp \
           src/saved_data.cpp \
-          src/seeding.cpp \
-          src/sim_rtty.cpp \
-          src/sim_signal.cpp \
-          src/sim_station.cpp \
-          src/sleep_mode.cpp \
-          src/speaker.cpp \
+          src/seeding.cpp \          src/sim_rtty.cpp \          src/sim_station.cpp \
           src/utils.cpp \
           src/vfo.cpp \
           src/vfo_presenter.cpp \

@@ -8,10 +8,6 @@ RealizationPool::RealizationPool(Realization **realizations, bool *statuses,  in
     _statuses = statuses;
     _nrealizations = nrealizations; 
     _hardware_dirty = false;  // Initialize as clean
-
-    // for(int i = 0; i < _nrealizations; i++){
-    //     free_realization(i);
-    // }   
 }
 
 bool RealizationPool::begin(unsigned long time){
@@ -29,39 +25,6 @@ bool RealizationPool::step(unsigned long time){
 void RealizationPool::end(){
 }
 
-
-// int RealizationPool::get_realization(){
-//     for(int i = 0; i < _nrealizations; i++){
-//         if(!_statuses[i]){
-//             _statuses[i] = true;
-
-//             // Serial.print("Get Realizer ");
-//             // Serial.println(i);
-
-//             return i;
-//         }
-//     }
-//     // Serial.println("No Free Realizer");
-//     return -1;
-// }
-
-// // multiplely gotten realizers must be freed individually
-// void WaveGenPool::free_realizer(int nrealizer){
-//     _statuses[nrealizer] = false;
-
-//     // Serial.print("Free Realizer ");
-//     // Serial.println(nrealizer);
-
-// }
-
-// Realizer * WaveGenPool::access_realizer(int nrealizer){
-
-//     // Serial.print("Access Realizer ");
-//     // Serial.println(nrealizer);
-
-//     return _realizers[nrealizer];
-// }
-
 void RealizationPool::update(Mode *mode){
     for(byte i = 0; i < _nrealizations; i++){
         _realizations[i]->update(mode);
@@ -74,7 +37,10 @@ void RealizationPool::update(Mode *mode){
     }
 }
 
+// JH! This method ought to be renamed, because RealizationPool _should_ have knowledge of _Realization_ but _SHOULD NOT_ be aware of its derived types
 void RealizationPool::force_sim_transmitter_refresh(){
+// JH!
+
     // Force wave generator hardware refresh for all SimTransmitter objects
     // This is called when switching to SimRadio to ensure wave generators
     // are properly synchronized with their software state
@@ -84,8 +50,10 @@ void RealizationPool::force_sim_transmitter_refresh(){
     }
 }
 
+// JH! The word "dirty" is a bit uncomfortable. This should be renamed with a term that means something like "needs refresh" or "invalidate hardware"
 void RealizationPool::mark_dirty(){
     // Mark hardware state as unknown - will trigger refresh on next update
     // This is called when switching applications that may affect hardware state
     _hardware_dirty = true;
 }
+// JH!

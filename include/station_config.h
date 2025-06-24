@@ -5,7 +5,15 @@
 // Choose ONE configuration mode by uncommenting it
 
 // ===== PRODUCTION CONFIGURATION =====
-#define CONFIG_MIXED_STATIONS    // Default: All different station types
+// #define CONFIG_MIXED_STATIONS    // Default: All different station types
+
+// ===== DEVELOPMENT CONFIGURATION =====  
+#define CONFIG_DEV_LOW_RAM       // Development: Minimal RAM usage for development work
+                                 // SAVES ~191 BYTES RAM: Disables RTTY and Pager stations
+                                 // Use this for dynamic station pipelining development
+
+// ===== DEMONSTRATION CONFIGURATION =====
+// #define CONFIG_MIXED_STATIONS    // Uncomment to restore full functionality for demos
 
 // ===== TEST CONFIGURATIONS =====
 // #define CONFIG_FOUR_CW          // Four CW/Morse stations for CW testing
@@ -21,6 +29,14 @@
                                    // Speeds: 12, 16, 18, 22 WPM  
                                    // Designed to often overlap in reception for realistic band activity
 
+// ===== MEMORY OPTIMIZATION OPTIONS =====
+
+// RTTY Memory Optimization
+// For minimal Flash usage, you can disable real Baudot encoding and just generate random bits
+// The RTTY simulation will sound authentic but won't transmit actual text
+// Saves ~128 bytes of Flash memory from the Baudot lookup table
+// #define RTTY_RANDOM_BITS_ONLY  // Uncomment to save Flash memory
+
 // ===== CONFIGURATION IMPLEMENTATION =====
 #ifdef CONFIG_MIXED_STATIONS
     // Production: Mixed station types (default)
@@ -30,6 +46,15 @@
     #define ENABLE_RTTY_STATION     // RTTY Station (SimRTTY)
     // NOTE: To enable jammer, comment out RTTY and uncomment below:
     // #define ENABLE_JAMMER_STATION   // Jammer Station (SimJammer) - replaces RTTY
+#endif
+
+#ifdef CONFIG_DEV_LOW_RAM
+    // Development: Optimized for low RAM usage during development
+    #define ENABLE_MORSE_STATION    // Basic CW/Morse station (SimStation) - essential for testing
+    #define ENABLE_NUMBERS_STATION  // Numbers Station (SimNumbers) - moderate RAM usage
+    // #define ENABLE_PAGER_STATION    // Pager Station (SimPager) - disabled to save RAM
+    // #define ENABLE_RTTY_STATION     // RTTY Station (SimRTTY) - disabled to save RAM 
+    // #define ENABLE_JAMMER_STATION   // Jammer Station (SimJammer) - disabled to save RAM
 #endif
 
 #ifdef CONFIG_FOUR_CW
