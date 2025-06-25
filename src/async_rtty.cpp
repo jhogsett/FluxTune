@@ -37,17 +37,15 @@ const unsigned char baudot_letters[] PROGMEM = {
 };
 #endif // RTTY_RANDOM_BITS_ONLY
 
-AsyncRTTY::AsyncRTTY()
+AsyncRTTY::AsyncRTTY() : AsyncModulator()
 {
-    // Initialize all state variables to safe defaults
-    async_active = false;
-    async_switched_on = false;
-    async_element_done = true;
-    async_element = 0;
-    async_next_event = 0;
-    async_str = NULL;
-    async_length = 0;
+    // Initialize RTTY-specific state variables
     async_str_pos = 0;
+    async_repeat = false;
+    async_phase = 0;
+    async_char = 0;
+    async_rtty = 0;
+    async_space = false;
 }
 
 unsigned char AsyncRTTY::get_baudot_code(char c) {
@@ -70,23 +68,27 @@ unsigned char AsyncRTTY::get_baudot_code(char c) {
 }
 
 bool AsyncRTTY::start_step_element(unsigned long time){
-    async_element_done = false;
-    async_element = 0;
+    set_element_done(false);
+    set_current_element(0);
     return false;
 }
 
 void AsyncRTTY::start_rtty_message(const char* message, bool repeat) {
     async_repeat = repeat;
-    async_active = false;
-    async_switched_on = false;
-    async_next_event = 0L;
-    async_element_done = true;
-    async_str = message;
-    async_length = strlen(message);
+    set_active(false);
+    set_next_event_time(0L);
+    set_switched_on(false);  // Reset to ensure TURN_ON event is generated
+    set_element_done(true);
+    set_string(message);
     async_str_pos = 0;
 
     if(!start_step_element(0))  // Use 0 instead of millis() - timing will be set on first step_rtty call
         return;
+}
+
+void AsyncRTTY::start_transmission(const char* message, int timing_param) {
+    // For RTTY, timing_param is interpreted as repeat flag (0=false, 1=true)
+    start_rtty_message(message, timing_param != 0);
 }
 
 
@@ -95,58 +97,57 @@ unsigned long AsyncRTTY::compute_element_time(unsigned long time, bool stop_bit)
 }
 
 int AsyncRTTY::step_element(unsigned long time){
-    if(async_element_done){
+    if(is_element_done()){
         return STEP_ELEMENT_DONE;
     }
-    
-    if(time < async_next_event){
+      if(time < get_next_event_time()){
         return STEP_ELEMENT_EARLY;
     }
 
-    switch(async_element){
+    switch(get_current_element()){
         case 0:
             // start bit SPACE
-            async_active = false;
-            async_next_event = compute_element_time(time, false);
-            async_element++;
+            set_active(false);
+            set_next_event_time(compute_element_time(time, false));
+            advance_element();
             break;        case 1:
         case 2:
         case 3:
         case 4:
         case 5:
             // Generate data bits from Baudot message
-            if (async_str != NULL && async_str_pos < async_length) {
+            if (get_string() != NULL && async_str_pos < get_string_length()) {
                 // Get current character and its Baudot code
-                char current_char = async_str[async_str_pos];
+                char current_char = get_string()[async_str_pos];
                 unsigned char baudot_code = get_baudot_code(current_char);
                 
                 if (baudot_code != 0xFF) {
                     // Extract the specific bit for this element (LSB first)
-                    int bit_index = async_element - 1; // element 1-5 -> bit 0-4
-                    async_active = (baudot_code >> bit_index) & 1;
+                    int bit_index = get_current_element() - 1; // element 1-5 -> bit 0-4
+                    set_active((baudot_code >> bit_index) & 1);
                 } else {
                     // Unsupported character, use space
-                    async_active = (BAUDOT_SPACE >> (async_element - 1)) & 1;
+                    set_active((BAUDOT_SPACE >> (get_current_element() - 1)) & 1);
                 }
             } else {
                 // End of message or no message - transmit idle (all marks/ones)
-                async_active = true;
+                set_active(true);
             }
             
-            async_next_event = compute_element_time(time, false);
-            async_element++;
+            set_next_event_time(compute_element_time(time, false));
+            advance_element();
             break;
 
         case 6:
-            async_active = true;
-            async_next_event = compute_element_time(time, true);
-            async_element = 0;
+            set_active(true);
+            set_next_event_time(compute_element_time(time, true));
+            set_current_element(0);
             
             // Move to next character after stop bit
-            if (async_str != NULL && async_str_pos < async_length) {
+            if (get_string() != NULL && async_str_pos < get_string_length()) {
                 async_str_pos++;
                 // If we've reached the end and repeat is enabled, restart
-                if (async_str_pos >= async_length && async_repeat) {
+                if (async_str_pos >= get_string_length() && async_repeat) {
                     async_str_pos = 0;
                 }
             }
@@ -156,21 +157,16 @@ int AsyncRTTY::step_element(unsigned long time){
     return STEP_ELEMENT_ACTIVE;
 }
 
-int AsyncRTTY::step_rtty(unsigned long time){
+int AsyncRTTY::step_modulator(unsigned long time){
     step_element(time);
 
-    // Generate output signal based on current active state
-    if(async_active != async_switched_on) {
-        async_switched_on = async_active;
-        return async_active ? STEP_RTTY_TURN_ON : STEP_RTTY_TURN_OFF;
-    } else {
-        return async_active ? STEP_RTTY_LEAVE_ON : STEP_RTTY_LEAVE_OFF;
-    }
+    // Use base class output generation
+    return generate_output_step();
 }
 
-bool AsyncRTTY::is_message_complete() const {
+bool AsyncRTTY::is_transmission_complete() const {
     // Message is complete if we've reached the end and not repeating
-    return (async_str == NULL || (async_str_pos >= async_length && !async_repeat));
+    return (get_string() == NULL || (async_str_pos >= get_string_length() && !async_repeat));
 }
 
 
