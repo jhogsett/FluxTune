@@ -17,6 +17,7 @@ class SimStation : public SimTransmitter
 {
 public:
     SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm);
+    SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm, byte fist_quality);
     virtual bool begin(unsigned long time) override;
     
     virtual bool update(Mode *mode) override;

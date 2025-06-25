@@ -36,6 +36,32 @@ SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, fl
     _in_wait_delay = false;
     _next_cq_time = 0;
     
+    // Set default perfect fist quality (0 = mechanical precision)
+    _morse.set_fist_quality(0);
+    
+    // Generate random callsign and CQ message for this session
+    generate_cq_message();
+}
+
+SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm, byte fist_quality) 
+    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
+{
+    // Store fixed frequency in base class
+    _fixed_freq = fixed_freq;    // Initialize operator frustration drift tracking
+    _cycles_completed = 0;
+#ifdef PLATFORM_NATIVE
+    _cycles_until_qsy = 3 + (rand() % 6);  // 3-8 cycles before frustration (realistic)
+#else
+    _cycles_until_qsy = 3 + (random(6));   // 3-8 cycles before frustration (realistic)
+#endif
+    
+    // Initialize repetition state
+    _in_wait_delay = false;
+    _next_cq_time = 0;
+    
+    // Set specified fist quality (0 = perfect, 255 = maximum bad fist)
+    _morse.set_fist_quality(fist_quality);
+    
     // Generate random callsign and CQ message for this session
     generate_cq_message();
 }
@@ -44,21 +70,12 @@ bool SimStation::begin(unsigned long time){
     if(!common_begin(time, _fixed_freq))
         return false;
     
-    #ifdef PLATFORM_NATIVE
-    printf("DEBUG: SimStation::begin() - realizer=%d, time=%lu\n", _realizer, time);
-    #endif
-      WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     wavegen->set_frequency(SPACE_FREQUENCY, false);    // Set _enabled and force frequency update with existing _vfo_freq
     // _vfo_freq should retain its value from the previous cycle
     _enabled = true;
     force_frequency_update();
     realize();  // CRITICAL: Set active state for audio output!
-    
-    #ifdef PLATFORM_NATIVE
-    printf("DEBUG: SimStation::begin() - _enabled=%s, _vfo_freq=%f, _frequency=%f\n", 
-           _enabled ? "true" : "false", _vfo_freq, _frequency);
-    #endif
-    // JH!
     
     // Start first CQ immediately (after frequencies are set)
     _morse.start_morse(_generated_message, _stored_wpm);
@@ -76,11 +93,6 @@ void SimStation::realize(){
         return;  // Out of audible range
     }
     
-    #ifdef PLATFORM_NATIVE
-    printf("DEBUG: SimStation::realize() - _active=%s, _frequency=%f\n", 
-           _active ? "true" : "false", _frequency);
-    #endif
-    
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     wavegen->set_active_frequency(_active);
 }
@@ -88,15 +100,6 @@ void SimStation::realize(){
 // returns true on successful update
 bool SimStation::update(Mode *mode){
     common_frequency_update(mode);
-    
-    #ifdef PLATFORM_NATIVE
-    static int update_count = 0;
-    if(update_count < 5) {  // Only show first few updates to avoid spam
-        printf("DEBUG: SimStation::update() - _frequency=%f, _enabled=%s, _realizer=%d\n", 
-               _frequency, _enabled ? "true" : "false", _realizer);
-        update_count++;
-    }
-    #endif
     
     if(_enabled && _realizer != -1){
         WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
@@ -115,10 +118,6 @@ bool SimStation::step(unsigned long time){
     int morse_state = _morse.step_morse(time);
       switch(morse_state){
     	case STEP_MORSE_TURN_ON:
-            #ifdef PLATFORM_NATIVE
-            printf("DEBUG: STEP_MORSE_TURN_ON - _frequency=%f, _enabled=%s, _realizer=%d\n", 
-                   _frequency, _enabled ? "true" : "false", _realizer);
-            #endif
             _active = true;
             realize();
             send_carrier_charge_pulse(_signal_meter);  // Send charge pulse when carrier turns on

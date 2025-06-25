@@ -33,6 +33,10 @@ public:
     int step_morse(unsigned long time) { return step_modulator(time); }
     bool is_done() const { return is_transmission_complete(); }
     
+    // Operator fist quality control
+    void set_fist_quality(byte quality) { _fist_quality = quality; }
+    byte get_fist_quality() const { return _fist_quality; }
+    
 private:// ========================================
     // INTERNAL HELPER METHODS
     // ========================================
@@ -55,6 +59,9 @@ private:// ========================================
     // Timing state (some inherited from base class)
     bool async_space;                      // True when in gap between elements
     bool async_just_completed;             // True for one step after message completion
+    
+    // Operator fist quality (0 = perfect, 255 = maximum bad fist)
+    byte _fist_quality;                    // Controls timing variations for realistic operator simulation
 
 };
 

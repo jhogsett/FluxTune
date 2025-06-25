@@ -230,11 +230,11 @@ Realization *realizations[4] = {
 #endif
 
 #ifdef CONFIG_FOUR_FD
-// Four CW stations with different speeds
-SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 13);
-SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002500.0, 20);
-SimStation cw_station3(&wave_gen_pool, &signal_meter, 7003000.0, 25);
-SimStation cw_station4(&wave_gen_pool, &signal_meter, 7003500.0, 30);
+// Four CW stations with different speeds and realistic fist qualities for Field Day
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 13, 50);    // Novice: noticeable timing variations (moderate)
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7004000.0, 20, 15);    // Experienced: very slight variations (good operator)
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7006000.0, 25, 80);    // Tired operator: more obvious variations  
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7008000.0, 30, 0);     // Expert: mechanical precision
 
 SimTransmitter *station_pool[4] = {
     &cw_station1,
@@ -340,8 +340,16 @@ Realization *realizations[4] = {
 #endif
 
 #ifdef CONFIG_MINIMAL_CW
-// MINIMAL: Single CW station for memory testing
-SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 15);
+// MINIMAL: Single CW station for fist quality testing
+// Change the fist quality value here to test different levels:
+//   0 = Perfect timing (mechanical precision)
+//   5 = Very slight variations (should work)
+//  10 = Low fist quality (should work) 
+//  40 = Moderate fist quality (current Field Day "novice" setting)
+//  80 = High fist quality (current Field Day "tired operator" setting)
+// 255 = Maximum bad fist (extreme case)
+
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7006000.0, 25, (byte)255);  // Field Day Station test: MAXIMUM fist quality for testing - CAST TO BYTE!
 
 SimTransmitter *station_pool[1] = {  // Only 1 entry for minimal config
     &cw_station1
