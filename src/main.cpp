@@ -132,8 +132,7 @@ SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 11);
 SimNumbers numbers_station1(&wave_gen_pool, &signal_meter, 7002700.0, 18);
 #endif
 #ifdef ENABLE_RTTY_STATION
-// SimRTTY rtty_station1(&wave_gen_pool, &signal_meter, 14004100.0);
-SimRTTY rtty_station1(&wave_gen_pool, &signal_meter, 7000000.0);
+SimRTTY rtty_station1(&wave_gen_pool, &signal_meter, 14004100.0);
 #endif
 #ifdef ENABLE_JAMMER_STATION
 SimJammer jammer_station1(&wave_gen_pool);
