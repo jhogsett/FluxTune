@@ -1,9 +1,3 @@
-// Field Day Configuration - Must be defined before including sim_station.h
-#include "station_config.h"
-#ifdef CONFIG_FOUR_FD
-#define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
-#endif
-
 #include "vfo.h"
 #include "wavegen.h"
 #include "wave_gen_pool.h"

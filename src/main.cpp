@@ -1,9 +1,3 @@
-// Field Day Configuration - Must be defined before any includes
-#include "station_config.h"
-#ifdef CONFIG_FOUR_FD
-#define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
-#endif
-
 #ifdef PLATFORM_NATIVE
 #include "../native/platform.h"
 #else
@@ -41,6 +35,9 @@
 #include "wave_out.h"
 
 #ifdef ENABLE_MORSE_STATION
+#ifdef CONFIG_FOUR_FD
+#define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
+#endif
 #include "sim_station.h"
 #endif
 

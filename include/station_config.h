@@ -5,9 +5,6 @@
 // Choose ONE configuration mode by uncommenting it
 
 // ===== PRODUCTION CONFIGURATION =====
-// Choose ONE configuration mode by uncommenting it
-
-// ===== PRODUCTION CONFIGURATION =====
 // #define CONFIG_MIXED_STATIONS    // Default: All different station types
 
 // ===== DEVELOPMENT CONFIGURATION =====  
