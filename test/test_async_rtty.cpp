@@ -412,6 +412,187 @@ void test_rtty_empty_message_handling(void) {
     TEST_ASSERT_FALSE_MESSAGE(crashed, "Should not crash with empty message");
 }
 
+void test_rtty_message_completion_cycle(void) {
+    // Test that messages properly complete and reset for new transmissions
+    // This ensures the silent period functionality works correctly
+    
+    // Start a short message
+    rtty->start_rtty_message("AB", false);  // Short message for faster completion
+    
+    // Track completion state
+    bool message_completed = false;
+    bool found_activity = false;
+    unsigned long completion_time = 0;
+    
+    // Run long enough for message to complete
+    for (unsigned long time = 0; time <= 1000; time += 5) {
+        int state = rtty->step_rtty(time);
+        
+        // Track if we see any activity
+        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
+            found_activity = true;
+        }
+        
+        // Check for completion
+        if (rtty->is_message_complete()) {
+            if (!message_completed) {
+                completion_time = time;
+                message_completed = true;
+            }
+        }
+        
+        // Break once we've found completion to avoid infinite checking
+        if (message_completed && time > completion_time + 100) {
+            break;
+        }
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(found_activity, "Should have transmission activity");
+    TEST_ASSERT_TRUE_MESSAGE(message_completed, "Message should complete");
+    
+    // Now test that a new message can start properly after completion
+    rtty->start_rtty_message("CD", false);  // Different message
+    
+    bool found_new_activity = false;
+    for (unsigned long time = 0; time <= 200; time += 5) {
+        int state = rtty->step_rtty(time);
+        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
+            found_new_activity = true;
+            break;
+        }
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(found_new_activity, "Should be able to start new transmission after completion");
+}
+
+// Regression test for RTTY silent period fix
+void test_rtty_silent_period_regression(void) {
+    // This test ensures that after message completion, the transmitter properly
+    // indicates completion and can start new transmissions correctly
+    
+    // Test sequence: start message -> complete -> verify completion -> start new message
+    
+    // Start first message
+    rtty->start_rtty_message("TEST", false);  // Non-repeating message
+    
+    // Step through until completion
+    bool found_activity = false;
+    bool message_completed = false;
+    unsigned long completion_time = 0;
+    
+    for (unsigned long time = 0; time <= 2000; time += 10) {
+        int state = rtty->step_rtty(time);
+        
+        // Track any transmission activity
+        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
+            found_activity = true;
+        }
+        
+        // Check for completion
+        if (rtty->is_message_complete()) {
+            if (!message_completed) {
+                message_completed = true;
+                completion_time = time;
+            }
+        }
+        
+        // Stop after completion is detected and confirmed
+        if (message_completed && time > completion_time + 50) {
+            break;
+        }
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(found_activity, "First message should have activity");
+    TEST_ASSERT_TRUE_MESSAGE(message_completed, "First message should complete");
+    
+    // Verify that completion state is properly set
+    TEST_ASSERT_TRUE_MESSAGE(rtty->is_message_complete(), "Should report as complete");
+    
+    // Now start a second message - this tests the silent period transition
+    rtty->start_rtty_message("NEW", false);  // Different message
+    
+    // Verify the new message is not immediately complete
+    TEST_ASSERT_FALSE_MESSAGE(rtty->is_message_complete(), "New message should not be immediately complete");
+    
+    // Verify the new message can start and produce activity
+    bool found_new_activity = false;
+    for (unsigned long time = 0; time <= 500; time += 5) {
+        int state = rtty->step_rtty(time);
+        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
+            found_new_activity = true;
+            break;
+        }
+    }
+    
+    TEST_ASSERT_TRUE_MESSAGE(found_new_activity, "New message should start with activity");
+}
+
+// Regression test for final MARK tone enhancement
+void test_rtty_final_mark_tone_enhancement(void) {
+    // Test that verifies AsyncRTTY properly handles message completion for the enhanced pattern
+    // The actual pattern logic (message → MARK → message → MARK → message → MARK → silence) 
+    // is implemented in SimRTTY, but we verify AsyncRTTY supports it correctly
+    
+    // Start a short message for quick completion
+    rtty->start_rtty_message("A", false);  // Single character
+    
+    // Track message progression and completion
+    bool found_activity = false;
+    bool message_completed = false;
+    unsigned long completion_time = 0;
+    
+    // Run long enough for the single message to complete
+    for (unsigned long time = 0; time <= 500; time += 5) {
+        int state = rtty->step_rtty(time);
+        
+        // Track if we see transmission activity
+        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
+            found_activity = true;
+        }
+        
+        // Check for completion
+        if (rtty->is_message_complete()) {
+            if (!message_completed) {
+                completion_time = time;
+                message_completed = true;
+                break; // Exit once complete
+            }
+        }
+    }
+    
+    // Verify the message transmitted and completed properly
+    TEST_ASSERT_TRUE_MESSAGE(found_activity, "Should have transmission activity");
+    TEST_ASSERT_TRUE_MESSAGE(message_completed, "Message should complete");
+    TEST_ASSERT_GREATER_THAN_MESSAGE(0, completion_time, "Completion should happen at valid time");
+    
+    // Verify that after completion, we can start a new message (supporting the enhanced pattern)
+    rtty->start_rtty_message("B", false);  // Start new message
+    
+    // Reset completion tracking
+    message_completed = false;
+    found_activity = false;
+    
+    // Run again to verify new message works
+    for (unsigned long time = completion_time + 10; time <= completion_time + 500; time += 5) {
+        int state = rtty->step_rtty(time);
+        
+        if (state == STEP_RTTY_TURN_ON || state == STEP_RTTY_TURN_OFF) {
+            found_activity = true;
+        }
+        
+        if (rtty->is_message_complete()) {
+            message_completed = true;
+            break;
+        }
+    }
+    
+    // Verify second message also works (supporting multiple messages in enhanced pattern)
+    TEST_ASSERT_TRUE_MESSAGE(found_activity, "Second message should have activity");
+    TEST_ASSERT_TRUE_MESSAGE(message_completed, "Second message should complete");
+    
+    TEST_PASS_MESSAGE("AsyncRTTY supports enhanced pattern with multiple message cycles");
+}
+
 int main(void) {
     UNITY_BEGIN();
     
@@ -447,6 +628,9 @@ int main(void) {
     RUN_TEST(test_rtty_baudot_message_transmission);
     RUN_TEST(test_rtty_baudot_vs_different_messages);
     RUN_TEST(test_rtty_empty_message_handling);
+    RUN_TEST(test_rtty_message_completion_cycle);
+    RUN_TEST(test_rtty_silent_period_regression);
+    RUN_TEST(test_rtty_final_mark_tone_enhancement);
     
     return UNITY_END();
 }
