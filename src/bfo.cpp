@@ -20,11 +20,7 @@ void BFO::prev_option(){
 }
 
 void BFO::update_display(HT16K33Disp *display){
-
-#ifndef DISABLE_DISPLAY_OPERATIONS
-
     // No hardware adjustment needed for BFO (unlike contrast which affects display hardware)
     sprintf(display_text_buffer, "%d Hz", option_bfo_offset);
     display->scroll_string(display_text_buffer, 1, 1);
-#endif
 }
