@@ -10,7 +10,6 @@
 
 #include "displays.h"
 #include "hardware.h"
-#include "led_handler.h"
 #include "leds.h"
 #include "saved_data.h"
 #include "seeding.h"

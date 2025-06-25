@@ -2,7 +2,6 @@
 #define __LEDS_H__
 
 #include "hardware.h"
-#include "led_handler.h"
 
 // default on/off time when animating all LEDs
 #define DEFAULT_ALL_LEDS_SHOW_TIME    1000

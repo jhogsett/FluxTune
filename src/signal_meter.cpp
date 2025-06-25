@@ -132,7 +132,8 @@ void SignalMeter::write_leds()
     if (_flashlight_mode) {
         // Flashlight mode: set all LEDs to white at specified brightness
         // White is created using RGB mix since these are RGB LEDs, not RGBW
-        int white_brightness = _flashlight_brightness / SIGNAL_METER_BRIGHTNESS_DIVISOR;
+
+        int white_brightness = _flashlight_brightness; // / SIGNAL_METER_BRIGHTNESS_DIVISOR;
         
         for (int i = 0; i < LED_COUNT; i++) {
             _led_buffer[i].red = white_brightness;

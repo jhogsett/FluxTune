@@ -1,5 +1,4 @@
 #include "hardware.h"
-#include "led_handler.h"
 #include "leds.h"
 
 const int led_intensities[] = {LED_INTENSITY1, LED_INTENSITY2};
