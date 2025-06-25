@@ -1,6 +1,8 @@
 #ifndef __ASYNC_MORSE_H__
 #define __ASYNC_MORSE_H__
 
+#include "async_modulator.h"
+
 #define MORSE_TIME_FROM_WPM(w) (1000 / w)
 
 #define PHASE_DONE 0
@@ -9,55 +11,49 @@
 
 #define MAX_ELEMENT 6
 
-#define STEP_MORSE_TURN_ON   1
-#define STEP_MORSE_TURN_OFF  2
-#define STEP_MORSE_LEAVE_ON  3
-#define STEP_MORSE_LEAVE_OFF 4
-#define STEP_MORSE_MESSAGE_COMPLETE 5  // Signals end of message (doesn't affect wave generator)
+// Morse-specific step codes (inherit common ones from base class)
+#define STEP_MORSE_TURN_ON   STEP_TURN_ON
+#define STEP_MORSE_TURN_OFF  STEP_TURN_OFF
+#define STEP_MORSE_LEAVE_ON  STEP_LEAVE_ON
+#define STEP_MORSE_LEAVE_OFF STEP_LEAVE_OFF
+#define STEP_MORSE_MESSAGE_COMPLETE STEP_MESSAGE_COMPLETE
 
-#define STEP_ELEMENT_EARLY 0
-#define STEP_ELEMENT_ACTIVE 1
-#define STEP_ELEMENT_DONE 2
-
-class AsyncMorse
+class AsyncMorse : public AsyncModulator
 {
 public:
-    AsyncMorse();    void start_morse(const char *s, int wpm);
-    int step_morse(unsigned long time);
-    bool is_done() const;  // Check if current transmission is complete
+    AsyncMorse();
     
-private:    // ========================================
+    // Implement AsyncModulator interface
+    virtual void start_transmission(const char* text, int wpm) override;
+    virtual int step_modulator(unsigned long time) override;
+    virtual bool is_transmission_complete() const override;
+    
+    // Morse-specific interface (for backward compatibility)
+    void start_morse(const char *s, int wpm) { start_transmission(s, wpm); }
+    int step_morse(unsigned long time) { return step_modulator(time); }
+    bool is_done() const { return is_transmission_complete(); }
+    
+private:// ========================================
     // INTERNAL HELPER METHODS
     // ========================================
-    char lookup_morse_char(char c);
-    bool start_step_element(unsigned long time);
+    char lookup_morse_char(char c);    bool start_step_element(unsigned long time);
     unsigned long compute_element_time(unsigned long time, byte element_count, bool is_space);
     int step_element(unsigned long time);
     bool step_position(unsigned long time);
     void step_space(unsigned long time);
     void handle_transmission_complete(unsigned long time);
-    bool is_time_ready(unsigned long current_time);
-
-    // ========================================
-    // STATE VARIABLES
-    // ========================================
-      // Text configuration
-    const char *async_str = NULL;          // String being transmitted
-    int async_length;                      // Length of text string
-    int async_element_del;                 // Base timing unit in milliseconds (from WPM)
     
-    // Current transmission state  
+    // ========================================
+    // STATE VARIABLES (Morse-specific)
+    // ========================================
+      
+    // Morse-specific state  
     byte async_phase;                      // Current phase: PHASE_DONE, PHASE_CHAR, PHASE_SPACE
-    byte async_position;                   // Current position in text string
     char async_char;                       // Morse table index for current character
     byte async_morse;                      // Bit pattern for current character
-    byte async_element;                    // Current element within character (0-6)
-    bool async_element_done;               // True when current element is finished
-      // Timing and output state
-    bool async_active;                     // True when transmitter should be ON
-    unsigned long async_next_event;        // Time when next state change occurs
+    
+    // Timing state (some inherited from base class)
     bool async_space;                      // True when in gap between elements
-    bool async_switched_on;                // Tracks output transitions for TURN_ON/TURN_OFF
     bool async_just_completed;             // True for one step after message completion
 
 };

@@ -38,14 +38,12 @@ void Flashlight::prev_option(){
 }
 
 void Flashlight::update_display(HT16K33Disp *display){
-#ifndef DISABLE_DISPLAY_OPERATIONS
     if(option_flashlight == 0) {
         sprintf(display_text_buffer, "OFF");
     } else {
-        sprintf(display_text_buffer, "Flux %3d", option_flashlight);  // Right-align the number in 3 characters
+        sprintf(display_text_buffer, "FLuX %3d", option_flashlight);  // Right-align the number in 3 characters
     }
     display->scroll_string(display_text_buffer, 1, 1);
-#endif
 
     // Update signal meter LEDs to reflect current flashlight setting
     // This ensures the LEDs show the correct state when the option is first displayed

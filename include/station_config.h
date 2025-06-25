@@ -5,10 +5,10 @@
 // Choose ONE configuration mode by uncommenting it
 
 // ===== PRODUCTION CONFIGURATION =====
-// #define CONFIG_MIXED_STATIONS    // Default: All different station types
+#define CONFIG_MIXED_STATIONS    // Default: All different station types
 
 // ===== DEVELOPMENT CONFIGURATION =====  
-#define CONFIG_DEV_LOW_RAM       // Development: Minimal RAM usage for development work
+// #define CONFIG_DEV_LOW_RAM       // Development: Minimal RAM usage for development work
                                  // SAVES ~191 BYTES RAM: Disables RTTY and Pager stations
                                  // Use this for dynamic station pipelining development
 

@@ -39,7 +39,7 @@ extern const int led_intensities[];
 // extern LEDHandler all_leds;
 
 // LED handler for just the panel LEDs
-extern LEDHandler panel_leds;
+// extern LEDHandler panel_leds;
 
 // LED handler for just the button LEDs
 // extern LEDHandler button_leds;
