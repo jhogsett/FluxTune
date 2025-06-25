@@ -1,6 +1,8 @@
 #ifndef __ASYNC_RTTY_H__
 #define __ASYNC_RTTY_H__
 
+#include "async_modulator.h"
+
 #ifdef PLATFORM_NATIVE
 #include "../native/platform.h"
 #else
@@ -10,16 +12,11 @@
 #define RTTY_TIME_BASIS 22
 #define RTTY_TIME_BASIS2 33
 
-// #define MAX_ELEMENT 6
-
-#define STEP_RTTY_TURN_ON   1
-#define STEP_RTTY_TURN_OFF  2
-#define STEP_RTTY_LEAVE_ON  3
-#define STEP_RTTY_LEAVE_OFF 4
-
-#define STEP_ELEMENT_EARLY 0
-#define STEP_ELEMENT_ACTIVE 1
-#define STEP_ELEMENT_DONE 2
+// RTTY-specific step codes (inherit common ones from base class)
+#define STEP_RTTY_TURN_ON   STEP_TURN_ON
+#define STEP_RTTY_TURN_OFF  STEP_TURN_OFF
+#define STEP_RTTY_LEAVE_ON  STEP_LEAVE_ON
+#define STEP_RTTY_LEAVE_OFF STEP_LEAVE_OFF
 
 // Baudot RTTY code definitions
 #define BAUDOT_LTRS    0x1F  // Switch to letters mode
@@ -28,39 +25,34 @@
 #define BAUDOT_CR      0x08  // Carriage return
 #define BAUDOT_LF      0x02  // Line feed
 
-class AsyncRTTY
+class AsyncRTTY : public AsyncModulator
 {
 public:
     AsyncRTTY();
 
-    void start_rtty_message(const char* message, bool repeat);
-    int step_rtty(unsigned long time);
-    bool is_message_complete() const;  // Check if current message transmission is complete
+    // Implement AsyncModulator interface
+    virtual void start_transmission(const char* message, int timing_param) override;
+    virtual int step_modulator(unsigned long time) override;
+    virtual bool is_transmission_complete() const override;
     
-private:
+    // RTTY-specific interface (for backward compatibility)
+    void start_rtty_message(const char* message, bool repeat);
+    int step_rtty(unsigned long time) { return step_modulator(time); }
+    bool is_message_complete() const { return is_transmission_complete(); }
+    
+private:private:
     bool start_step_element(unsigned long time);
-    // void restart_rtty();
     unsigned long compute_element_time(unsigned long time, bool stop_bit);
     int step_element(unsigned long time);
     unsigned char get_baudot_code(char c);  // New method to get Baudot code for character
 
-    // JH! Many of these variables are similar to ones in AsyncMorse, so it might make sense to extract a base class with commonalities, like AsyncModulator
-    const char *async_str;
-    int async_length;
-    int async_str_pos;      // Current position in string
-    int async_element_del;
-    bool async_repeat;
-    byte async_phase;
-    byte async_position;
-    char async_char;
-    byte async_rtty;
-    byte async_element;
-    bool async_element_done;
-    bool async_active;
-    unsigned long async_next_event;
-    bool async_space;
-    bool async_switched_on;
-
+    // RTTY-specific state variables
+    int async_str_pos;      // Current position in string  
+    bool async_repeat;      // Whether to repeat the message
+    byte async_phase;       // Current transmission phase
+    char async_char;        // Current character being transmitted
+    byte async_rtty;        // Current bit pattern for character
+    bool async_space;       // True when in gap between elements
 };
 // JH!
 
