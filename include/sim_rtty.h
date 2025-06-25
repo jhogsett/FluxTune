@@ -8,7 +8,6 @@ class SignalMeter; // Forward declaration
 
 #define MARK_FREQ_SHIFT 170.0
 #define RTTY_WAIT_SECONDS 6      // Wait time between message rounds
-#define RTTY_IDLE_SECONDS 4      // Duration of idle pattern before next message
 #define RTTY_MARK_TONE_SECONDS 3 // Duration of MARK tone between messages and at round start
 
 class SimRTTY : public SimTransmitter
@@ -25,8 +24,6 @@ public:
     bool is_in_wait_delay() const { return _in_wait_delay; }
     
 private:
-    void start_next_message();
-    
     AsyncRTTY _rtty;
     int _phase;
     SignalMeter *_signal_meter;     // Pointer to signal meter for charge pulses    // Message cycling state

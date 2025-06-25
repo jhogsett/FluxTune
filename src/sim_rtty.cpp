@@ -218,10 +218,3 @@ bool SimRTTY::step(unsigned long time){
 
     return true;
 }
-
-void SimRTTY::start_next_message()
-{
-    // Reset repetition counter and start transmission of the message
-    _current_repeat = 0;
-    _rtty.start_rtty_message(rtty_message, false);
-}
