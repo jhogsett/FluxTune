@@ -1,7 +1,7 @@
 # FluxTune
 Arduino Based Artificial Radio
 
-![20250622_153218(2)](https://github.com/user-attachments/assets/0506e151-d5c0-4904-bd3c-40e6352cefdd)
+![20250624_144336(1)](https://github.com/user-attachments/assets/a3883e58-d091-49f9-a104-2a4143bb5c5b)
 
 ## Features
 
