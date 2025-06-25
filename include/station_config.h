@@ -5,7 +5,10 @@
 // Choose ONE configuration mode by uncommenting it
 
 // ===== PRODUCTION CONFIGURATION =====
-#define CONFIG_MIXED_STATIONS    // Default: All different station types
+// Choose ONE configuration mode by uncommenting it
+
+// ===== PRODUCTION CONFIGURATION =====
+// #define CONFIG_MIXED_STATIONS    // Default: All different station types
 
 // ===== DEVELOPMENT CONFIGURATION =====  
 // #define CONFIG_DEV_LOW_RAM       // Development: Minimal RAM usage for development work
@@ -17,6 +20,7 @@
 
 // ===== TEST CONFIGURATIONS =====
 // #define CONFIG_FOUR_CW          // Four CW/Morse stations for CW testing
+#define CONFIG_FOUR_FD          // Four CW/Morse stations for simulating Field Day traffic
 // #define CONFIG_FOUR_NUMBERS     // Four Numbers stations for spooky testing
 // #define CONFIG_FOUR_PAGER       // Four Pager stations for digital testing
 // #define CONFIG_FOUR_RTTY        // Four RTTY stations for RTTY testing
@@ -58,6 +62,13 @@
 #endif
 
 #ifdef CONFIG_FOUR_CW
+    // Test: Four CW stations with different messages/speeds
+    #define ENABLE_FOUR_CW_STATIONS
+    #define ENABLE_MORSE_STATION
+    // Other stations disabled for focused CW testing
+#endif
+
+#ifdef CONFIG_FOUR_FD
     // Test: Four CW stations with different messages/speeds
     #define ENABLE_FOUR_CW_STATIONS
     #define ENABLE_MORSE_STATION
