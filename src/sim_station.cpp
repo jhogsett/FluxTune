@@ -1,3 +1,9 @@
+// Field Day Configuration - Must be defined before including sim_station.h
+#include "station_config.h"
+#ifdef CONFIG_FOUR_FD
+#define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
+#endif
+
 #include "vfo.h"
 #include "wavegen.h"
 #include "wave_gen_pool.h"
@@ -218,12 +224,12 @@ void SimStation::generate_cq_message()
     char callsign[12];  // Increased buffer size for safety (e.g., "K99ABCD" + null)
     generate_random_callsign(callsign, sizeof(callsign));
     
-    // Generate standard CQ message: "CQ CQ DE [CALL] [CALL] K    "
+    // Generate CQ message using configurable format
 #ifdef PLATFORM_NATIVE
     snprintf(_generated_message, sizeof(_generated_message), 
-             "CQ CQ DE %s %s K    ", callsign, callsign);
+             CQ_MESSAGE_FORMAT, callsign, callsign);
 #else
-    sprintf(_generated_message, "CQ CQ DE %s %s K    ", callsign, callsign);
+    sprintf(_generated_message, CQ_MESSAGE_FORMAT, callsign, callsign);
 #endif
 }
 

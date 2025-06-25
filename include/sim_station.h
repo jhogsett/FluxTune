@@ -8,6 +8,11 @@ class SignalMeter; // Forward declaration
 
 #define SPACE_FREQUENCY 0.1
 
+// Configurable CQ message format - can be overridden by defining before including this header
+#ifndef CQ_MESSAGE_FORMAT
+#define CQ_MESSAGE_FORMAT "CQ CQ DE %s %s K    "
+#endif
+
 class SimStation : public SimTransmitter
 {
 public:

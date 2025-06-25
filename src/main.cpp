@@ -1,3 +1,9 @@
+// Field Day Configuration - Must be defined before any includes
+#include "station_config.h"
+#ifdef CONFIG_FOUR_FD
+#define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
+#endif
+
 #ifdef PLATFORM_NATIVE
 #include "../native/platform.h"
 #else
@@ -207,6 +213,28 @@ SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 11);
 SimStation cw_station2(&wave_gen_pool, &signal_meter, 7003000.0, 15);
 SimStation cw_station3(&wave_gen_pool, &signal_meter, 7004000.0, 20);
 SimStation cw_station4(&wave_gen_pool, &signal_meter, 7005000.0, 25);
+
+SimTransmitter *station_pool[4] = {
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4
+};
+
+Realization *realizations[4] = {
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4
+};
+#endif
+
+#ifdef CONFIG_FOUR_FD
+// Four CW stations with different speeds
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 13);
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002500.0, 20);
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7003000.0, 25);
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7003500.0, 30);
 
 SimTransmitter *station_pool[4] = {
     &cw_station1,
@@ -641,6 +669,21 @@ void loop()
 #endif
 
 #ifdef CONFIG_FOUR_CW
+	// Initialize four CW test stations
+	cw_station1.begin(time + random(1000));
+	cw_station1.set_station_state(AUDIBLE);
+	
+	cw_station2.begin(time + random(2000));
+	cw_station2.set_station_state(AUDIBLE);
+	
+	cw_station3.begin(time + random(3000));
+	cw_station3.set_station_state(AUDIBLE);
+	
+	cw_station4.begin(time + random(4000));
+	cw_station4.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_FOUR_FD
 	// Initialize four CW test stations
 	cw_station1.begin(time + random(1000));
 	cw_station1.set_station_state(AUDIBLE);
