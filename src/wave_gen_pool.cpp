@@ -40,3 +40,42 @@ int WaveGenPool::get_available_count(){
     }
     return available;
 }
+
+// Allocate multiple wave generators atomically (all-or-nothing)
+// Returns number of generators allocated (0 if failed, count if successful)
+int WaveGenPool::get_multiple_realizers(int count, int* allocated_indices, int station_id) {
+    // First, check if we have enough available generators
+    if (get_available_count() < count) {
+        return 0;  // Not enough available
+    }
+    
+    // Find the required number of free generators
+    int found = 0;
+    for (int i = 0; i < _nrealizers && found < count; i++) {
+        if (!_statuses[i]) {
+            allocated_indices[found] = i;
+            found++;
+        }
+    }
+    
+    // If we couldn't find enough, fail
+    if (found < count) {
+        return 0;
+    }
+    
+    // Allocate all the found generators
+    for (int i = 0; i < count; i++) {
+        _statuses[allocated_indices[i]] = true;
+    }
+    
+    return count;  // Success
+}
+
+// Free multiple wave generators at once
+void WaveGenPool::free_multiple_realizers(int count, int* indices, int station_id) {
+    for (int i = 0; i < count; i++) {
+        if (indices[i] >= 0 && indices[i] < _nrealizers) {
+            _statuses[indices[i]] = false;
+        }
+    }
+}

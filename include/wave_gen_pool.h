@@ -14,16 +14,16 @@ public:
     WaveGenPool(WaveGen **wavegens, bool *statuses,  int nwavegens);
 
     // returns -1 if not available otherwise wave generator index into array
-    int get_realizer(int station_id = 0);
+    int get_realizer();
 
     // multiplely gotten wave generators must be freed individually
-    void free_realizer(int nrealizer, int station_id = 0);
+    void free_realizer(int nrealizer);
 
     WaveGen * access_realizer(int nrealizer);
 
-    // Get resource statistics for debugging
-    int get_available_count();
-    int get_total_count() { return _nrealizers; }
+    // Silence all wave generators (set them to inaudible frequency)
+    // Used when switching to Settings to avoid audio distraction
+    void silence_all();
 
 private:
     WaveGen **_realizers;

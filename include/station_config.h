@@ -27,6 +27,12 @@
 // #define CONFIG_FOUR_RTTY        // Four RTTY stations for RTTY testing
 // #define CONFIG_FOUR_JAMMER      // Four Jammer stations for interference testing
 // #define CONFIG_MINIMAL_CW       // Single CW station (minimal memory)
+#define CONFIG_DTMF_RESOURCE_TEST  // Mixed stations with DTMF pager (multi-generator resource test)
+// #define CONFIG_FOUR_NUMBERS     // Four Numbers stations for spooky testing
+// #define CONFIG_FOUR_PAGER       // Four Pager stations for digital testing
+// #define CONFIG_FOUR_RTTY        // Four RTTY stations for RTTY testing
+// #define CONFIG_FOUR_JAMMER      // Four Jammer stations for interference testing
+// #define CONFIG_MINIMAL_CW       // Single CW station (minimal memory)
 
 // ===== LISTENING PLEASURE CONFIGURATION =====
 // #define CONFIG_CW_CLUSTER       // Four CW stations clustered in 40m for listening pleasure
@@ -43,8 +49,8 @@
 
 // Resource Debug - Enable minimal debug output for resource allocation testing
 // Only use during resource contention testing - disable for production
-// #define DEBUG_WAVE_GEN_POOL  // Uncomment to enable resource debug output
-// #define DEBUG_STATION_RESOURCES  // Uncomment to enable station resource debug output
+#define DEBUG_WAVE_GEN_POOL  // Uncomment to enable resource debug output
+#define DEBUG_STATION_RESOURCES  // Uncomment to enable station resource debug output
 
 // RTTY Memory Optimization
 // For minimal Flash usage, you can disable real Baudot encoding and just generate random bits
@@ -91,6 +97,14 @@
     #define ENABLE_FIVE_CW_STATIONS
     #define ENABLE_MORSE_STATION
     // Other stations disabled for focused resource testing
+#endif
+
+#ifdef CONFIG_DTMF_RESOURCE_TEST
+    // Test: Mixed stations with DTMF pager requiring 2 generators
+    #define ENABLE_DTMF_RESOURCE_TEST_STATIONS
+    #define ENABLE_MORSE_STATION
+    #define ENABLE_DTMF_PAGER_STATION
+    // Other stations disabled for focused multi-generator testing
 #endif
 
 #ifdef CONFIG_FOUR_NUMBERS

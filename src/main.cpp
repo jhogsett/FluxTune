@@ -58,6 +58,10 @@
 #include "sim_pager.h"
 #endif
 
+#ifdef ENABLE_DTMF_PAGER_STATION
+#include "sim_dual_pager.h"
+#endif
+
 #ifdef ENABLE_JAMMER_STATION
 #include "sim_jammer.h"
 #endif
@@ -257,26 +261,46 @@ Realization *realizations[4] = {
 // Five CW stations with only 4 wave generators - resource contention test
 // Different frequencies spread across 40m band for easy identification
 // First 4 stations at 30 WPM for fast recycling, station 5 at 13 WPM for contrast
-SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001000.0, 30, 10);   // Station 1: 30 WPM, slight fist variation
-SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002000.0, 30, 20);   // Station 2: 30 WPM, moderate fist variation
-SimStation cw_station3(&wave_gen_pool, &signal_meter, 7003000.0, 30, 30);   // Station 3: 30 WPM, noticeable fist variation
-SimStation cw_station4(&wave_gen_pool, &signal_meter, 7004000.0, 30, 15);   // Station 4: 30 WPM, slight fist variation
-SimStation cw_station5(&wave_gen_pool, &signal_meter, 7005000.0, 13, 25);   // Station 5: 13 WPM, moderate fist variation
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001000.0, 20, 10);   // Station 1: 20 WPM, slight fist variation
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002000.0, 20, 20);   // Station 2: 20 WPM, moderate fist variation
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7003000.0, 20, 30);   // Station 3: 20 WPM, noticeable fist variation
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7004000.0, 20, 15);   // Station 4: 20 WPM, slight fist variation
+SimStation cw_station5(&wave_gen_pool, &signal_meter, 7005000.0, 20, 25);   // Station 5: 20 WPM, moderate fist variation
+SimStation cw_station6(&wave_gen_pool, &signal_meter, 7006000.0, 20, 25);   // Station 5: 20 WPM, moderate fist variation
 
-SimTransmitter *station_pool[5] = {  // 5 stations but only 4 wave generators available
+SimTransmitter *station_pool[6] = {  // 5 stations but only 4 wave generators available
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4,
+    &cw_station5,
+    &cw_station6
+};
+
+Realization *realizations[6] = {  // 5 realizations competing for 4 resources
     &cw_station1,
     &cw_station2,
     &cw_station3,
     &cw_station4,
     &cw_station5
 };
+#endif
 
-Realization *realizations[5] = {  // 5 realizations competing for 4 resources
+#ifdef CONFIG_DTMF_RESOURCE_TEST
+// DTMF Resource Test: Mixed stations with multi-generator dual-tone pager  
+// 1 CW station (1 generator) + 1 Dual pager (2 generators) = 3 total generators needed
+// This leaves 1 generator free for better resource dynamics
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001000.0, 20, 10);   // Station 1: 20 WPM CW
+SimDualPager dual_pager(&wave_gen_pool, &signal_meter, 7003000.0);          // Dual Pager: 2 generators
+
+SimTransmitter *station_pool[2] = {
     &cw_station1,
-    &cw_station2,
-    &cw_station3,
-    &cw_station4,
-    &cw_station5
+    &dual_pager
+};
+
+Realization *realizations[2] = {
+    &cw_station1,
+    &dual_pager
 };
 #endif
 
@@ -427,7 +451,9 @@ bool realization_stats[1] = {false};
 #elif defined(CONFIG_DEV_LOW_RAM)
 bool realization_stats[2] = {false, false};
 #elif defined(CONFIG_FIVE_CW_RESOURCE_TEST)
-bool realization_stats[5] = {false, false, false, false, false};  // 5 stations for resource test
+bool realization_stats[6] = {false, false, false, false, false, false};  // 5 stations for resource test
+#elif defined(CONFIG_DTMF_RESOURCE_TEST)
+bool realization_stats[2] = {false, false};  // 2 stations for DTMF resource test
 #else
 bool realization_stats[4] = {false, false, false, false};
 #endif
@@ -438,6 +464,8 @@ RealizationPool realization_pool(realizations, realization_stats, 1);  // Only 1
 RealizationPool realization_pool(realizations, realization_stats, 2);  // Only 2 stations for development config
 #elif defined(CONFIG_FIVE_CW_RESOURCE_TEST)
 RealizationPool realization_pool(realizations, realization_stats, 5);  // 5 stations competing for 4 wave generators
+#elif defined(CONFIG_DTMF_RESOURCE_TEST)
+RealizationPool realization_pool(realizations, realization_stats, 2);  // 2 stations for DTMF resource test
 #else
 RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stations for all other configs
 #endif
