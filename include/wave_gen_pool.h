@@ -15,9 +15,17 @@ public:
 
     // returns -1 if not available otherwise wave generator index into array
     int get_realizer(int station_id = 0);
+    
+    // Allocate multiple wave generators atomically (all-or-nothing)
+    // Returns number of generators allocated (0 if failed, count if successful)
+    // allocated_indices array must have space for 'count' integers
+    int get_multiple_realizers(int count, int* allocated_indices, int station_id = 0);
 
     // multiplely gotten wave generators must be freed individually
     void free_realizer(int nrealizer, int station_id = 0);
+    
+    // Free multiple wave generators at once
+    void free_multiple_realizers(int count, int* indices, int station_id = 0);
 
     WaveGen * access_realizer(int nrealizer);
 

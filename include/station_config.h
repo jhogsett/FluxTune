@@ -93,6 +93,14 @@
     // Other stations disabled for focused resource testing
 #endif
 
+#ifdef CONFIG_DTMF_RESOURCE_TEST
+    // Test: Mixed stations with DTMF pager requiring 2 generators
+    #define ENABLE_DTMF_RESOURCE_TEST_STATIONS
+    #define ENABLE_MORSE_STATION
+    #define ENABLE_DTMF_PAGER_STATION
+    // Other stations disabled for focused multi-generator testing
+#endif
+
 #ifdef CONFIG_FOUR_NUMBERS
     // Test: Four Numbers stations with different frequencies
     #define ENABLE_FOUR_NUMBERS_STATIONS
