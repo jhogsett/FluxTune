@@ -231,10 +231,10 @@ Realization *realizations[4] = {
 
 #ifdef CONFIG_FOUR_FD
 // Four CW stations with different speeds and realistic fist qualities for Field Day
-SimStation cw_station1(&wave_gen_pool, &signal_meter, 7002000.0, 13, 50);    // Novice: noticeable timing variations (moderate)
-SimStation cw_station2(&wave_gen_pool, &signal_meter, 7004000.0, 20, 15);    // Experienced: very slight variations (good operator)
-SimStation cw_station3(&wave_gen_pool, &signal_meter, 7006000.0, 25, 80);    // Tired operator: more obvious variations  
-SimStation cw_station4(&wave_gen_pool, &signal_meter, 7008000.0, 30, 0);     // Expert: mechanical precision
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001500.0, 30, 10);   // Advanced/Extra portion, fast precise sender
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002100.0, 22, 50);   // Advanced/Extra portion, slower tired sender
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7002700.0, 5, 175);   // Novice/General portion, novice first timer  
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7003400.0, 13, 40);   // Novice/General portion, experienced new ham
 
 SimTransmitter *station_pool[4] = {
     &cw_station1,
