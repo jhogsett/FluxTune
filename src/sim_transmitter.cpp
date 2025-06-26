@@ -3,10 +3,11 @@
 #include "vfo.h"
 #include "saved_data.h"  // For option_bfo_offset
 
-SimTransmitter::SimTransmitter(WaveGenPool *wave_gen_pool) : Realization(wave_gen_pool)
+SimTransmitter::SimTransmitter(WaveGenPool *wave_gen_pool, float fixed_freq) 
+    : Realization(wave_gen_pool, (int)(fixed_freq / 1000))  // Pass frequency in kHz as station ID
 {
     // Initialize common member variables
-    _fixed_freq = 0.0;
+    _fixed_freq = fixed_freq;
     _enabled = false;
     _frequency = 0.0;
     _active = false;
@@ -20,6 +21,9 @@ bool SimTransmitter::common_begin(unsigned long time, float fixed_freq)
 {
     _fixed_freq = fixed_freq;
     _frequency = 0.0;
+    
+    // Update station ID for debugging (frequency in kHz)
+    set_station_id((int)(fixed_freq / 1000));
     
     return Realization::begin(time);
 }

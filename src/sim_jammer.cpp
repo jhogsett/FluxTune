@@ -8,7 +8,7 @@
 #include <iomanip>
 #endif
 
-SimJammer::SimJammer(WaveGenPool *wave_gen_pool) : SimTransmitter(wave_gen_pool)
+SimJammer::SimJammer(WaveGenPool *wave_gen_pool) : SimTransmitter(wave_gen_pool, 0.0)  // Default freq, will be set in begin()
 {
     // Base class initializes all common variables
     // Jammer transmission will be started in begin() method

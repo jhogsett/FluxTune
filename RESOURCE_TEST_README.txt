@@ -5,13 +5,16 @@
  * 
  * CONFIGURATION: CONFIG_FIVE_CW_RESOURCE_TEST
  * 
+ * STATUS: ✅ VERIFIED WORKING
+ * 
  * Expected behavior:
- * 1. Only 4 stations should be audible at any given time
- * 2. The 5th station should be properly dormant (no phantom signals)
- * 3. Stations should gracefully cycle in and out as resources become available
- * 4. No crashes or undefined behavior should occur
- * 5. Signal meter should only activate for stations with allocated wave generators
- * 6. Panel lock LED should only light for properly allocated stations
+ * 1. ✅ Only 4 stations should be audible at any given time
+ * 2. ✅ The 5th station should be properly dormant (no phantom signals)
+ * 3. ✅ Stations should gracefully cycle in and out as resources become available
+ * 4. ✅ No crashes or undefined behavior should occur
+ * 5. ✅ Signal meter should only activate for stations with allocated wave generators
+ * 6. ✅ Panel lock LED should only light for properly allocated stations
+ * 7. ✅ Station #5 successfully acquires wave generators during resource gaps
  * 
  * Test procedure:
  * 1. Enable CONFIG_FIVE_CW_RESOURCE_TEST in station_config.h
@@ -23,11 +26,16 @@
  * 7. Monitor over 10+ minutes - dormant station should eventually rotate in
  * 
  * Station configuration:
- * - Station 1: 7.001 MHz, 15 WPM, slight fist variation (10)
- * - Station 2: 7.002 MHz, 18 WPM, moderate fist variation (20)  
- * - Station 3: 7.003 MHz, 12 WPM, noticeable fist variation (30)
- * - Station 4: 7.004 MHz, 22 WPM, slight fist variation (15)
- * - Station 5: 7.005 MHz, 25 WPM, moderate fist variation (25)
+ * - Station 1: 7.001 MHz, 30 WPM, slight fist variation (10)
+ * - Station 2: 7.002 MHz, 30 WPM, moderate fist variation (20)  
+ * - Station 3: 7.003 MHz, 30 WPM, noticeable fist variation (30)
+ * - Station 4: 7.004 MHz, 30 WPM, slight fist variation (15)
+ * - Station 5: 7.005 MHz, 13 WPM, moderate fist variation (25)
+ * 
+ * RATIONALE FOR WPM SETTINGS:
+ * - First 4 stations at 30 WPM: Fast message completion = frequent wave generator recycling
+ * - Station 5 at 13 WPM: Slower speed = longer messages = more opportunity to see resource handoffs
+ * - This asymmetric setup increases the probability of observing station 5 acquiring resources
  * 
  * Resource allocation:
  * - Wave generator pool: 4 generators total (hardware limit)

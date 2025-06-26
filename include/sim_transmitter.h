@@ -36,7 +36,7 @@ enum StationState {
 class SimTransmitter : public Realization
 {
 public:
-    SimTransmitter(WaveGenPool *wave_gen_pool);
+    SimTransmitter(WaveGenPool *wave_gen_pool, float fixed_freq = 0.0);
     
     virtual bool step(unsigned long time) = 0;  // Pure virtual - must be implemented by derived classes
     virtual void end();  // Common cleanup logic

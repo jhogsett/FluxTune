@@ -256,11 +256,12 @@ Realization *realizations[4] = {
 #ifdef CONFIG_FIVE_CW_RESOURCE_TEST
 // Five CW stations with only 4 wave generators - resource contention test
 // Different frequencies spread across 40m band for easy identification
-SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001000.0, 15, 10);   // Station 1: 15 WPM, slight fist variation
-SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002000.0, 18, 20);   // Station 2: 18 WPM, moderate fist variation
-SimStation cw_station3(&wave_gen_pool, &signal_meter, 7003000.0, 12, 30);   // Station 3: 12 WPM, noticeable fist variation
-SimStation cw_station4(&wave_gen_pool, &signal_meter, 7004000.0, 22, 15);   // Station 4: 22 WPM, slight fist variation
-SimStation cw_station5(&wave_gen_pool, &signal_meter, 7005000.0, 25, 25);   // Station 5: 25 WPM, moderate fist variation
+// First 4 stations at 30 WPM for fast recycling, station 5 at 13 WPM for contrast
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001000.0, 30, 10);   // Station 1: 30 WPM, slight fist variation
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002000.0, 30, 20);   // Station 2: 30 WPM, moderate fist variation
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7003000.0, 30, 30);   // Station 3: 30 WPM, noticeable fist variation
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7004000.0, 30, 15);   // Station 4: 30 WPM, slight fist variation
+SimStation cw_station5(&wave_gen_pool, &signal_meter, 7005000.0, 13, 25);   // Station 5: 13 WPM, moderate fist variation
 
 SimTransmitter *station_pool[5] = {  // 5 stations but only 4 wave generators available
     &cw_station1,
@@ -753,19 +754,23 @@ void loop()
 #ifdef CONFIG_FIVE_CW_RESOURCE_TEST
 	// Initialize five CW test stations (resource contention test)
 	// Only 4 wave generators available, so one station should be dormant at any given time
-	cw_station1.begin(time + random(1000));
+	// Give all stations similar startup delays to create fair competition for initial allocation
+	cw_station1.begin(time + random(2000));
 	cw_station1.set_station_state(AUDIBLE);
 	
 	cw_station2.begin(time + random(2000));
 	cw_station2.set_station_state(AUDIBLE);
 	
-	cw_station3.begin(time + random(3000));
+	cw_station3.begin(time + random(2000));
 	cw_station3.set_station_state(AUDIBLE);
 	
-	cw_station4.begin(time + random(4000));
+	cw_station4.begin(time + random(2000));
 	cw_station4.set_station_state(AUDIBLE);
 	
-	cw_station5.begin(time + random(5000));
+	if(!cw_station5.begin(time + random(2000))) {  // Check if begin() succeeds
+		// If begin() fails, put station in retry state so it will try again during runtime
+		cw_station5.set_retry_state(time + 1000);  // Retry in 1 second
+	}
 	cw_station5.set_station_state(AUDIBLE);
 #endif
 

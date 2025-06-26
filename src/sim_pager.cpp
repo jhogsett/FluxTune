@@ -11,10 +11,8 @@
 #endif
 
 SimPager::SimPager(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq) 
-    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter)
+    : SimTransmitter(wave_gen_pool, fixed_freq), _signal_meter(signal_meter)
 {
-    // Store fixed frequency in base class
-    _fixed_freq = fixed_freq;
     // Generate initial tone pair
     generate_new_tone_pair();
     // Pager transmission will be started in begin() method

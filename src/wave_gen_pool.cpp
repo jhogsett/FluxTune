@@ -8,11 +8,11 @@ WaveGenPool::WaveGenPool(WaveGen **wavegens, bool *statuses,  int nwavegens){
     _nrealizers = nwavegens;
 
     for(int i = 0; i < _nrealizers; i++){
-        free_realizer(i);
+        free_realizer(i, 0);  // Initialize with station_id 0
     }   
 }
 
-int WaveGenPool::get_realizer(){
+int WaveGenPool::get_realizer(int station_id){
     for(int i = 0; i < _nrealizers; i++){
         if(!_statuses[i]){
             _statuses[i] = true;
@@ -23,7 +23,7 @@ int WaveGenPool::get_realizer(){
 }
 
 // multiplely gotten realizers must be freed individually
-void WaveGenPool::free_realizer(int nrealizer){
+void WaveGenPool::free_realizer(int nrealizer, int station_id){
     _statuses[nrealizer] = false;
 }
 

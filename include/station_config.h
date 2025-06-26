@@ -41,6 +41,11 @@
 // This removes one of the three main application modes but saves substantial RAM for station development
 #define DISABLE_WAVE_GEN_APP    // Uncomment to disable Wave Gen application and save RAM
 
+// Resource Debug - Enable minimal debug output for resource allocation testing
+// Only use during resource contention testing - disable for production
+// #define DEBUG_WAVE_GEN_POOL  // Uncomment to enable resource debug output
+// #define DEBUG_STATION_RESOURCES  // Uncomment to enable station resource debug output
+
 // RTTY Memory Optimization
 // For minimal Flash usage, you can disable real Baudot encoding and just generate random bits
 // The RTTY simulation will sound authentic but won't transmit actual text
