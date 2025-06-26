@@ -16,11 +16,11 @@
                                  // Use this for dynamic station pipelining development
 
 // ===== DEMONSTRATION CONFIGURATION =====
-#define CONFIG_MIXED_STATIONS    // Uncomment to restore full functionality for demos
+// #define CONFIG_MIXED_STATIONS    // Uncomment to restore full functionality for demos
 
 // ===== TEST CONFIGURATIONS =====
 // #define CONFIG_FOUR_CW          // Four CW/Morse stations for CW testing
-// #define CONFIG_FOUR_FD          // Four CW/Morse stations for simulating Field Day traffic
+#define CONFIG_FOUR_FD          // Four CW/Morse stations for simulating Field Day traffic
 // #define CONFIG_FOUR_NUMBERS     // Four Numbers stations for spooky testing
 // #define CONFIG_FOUR_PAGER       // Four Pager stations for digital testing
 // #define CONFIG_FOUR_RTTY        // Four RTTY stations for RTTY testing

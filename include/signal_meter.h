@@ -51,11 +51,11 @@ private:
     static const int MAX_ACCUMULATOR = 510;     // Maximum accumulator value (2x LED range for resolution)
     // Panel LED lock indicator parameters
     static const int PANEL_LED_MAX_ACCUMULATOR = 255;
-    static const int PANEL_LED_DECAY_RATE = 32;
+    static const int PANEL_LED_DECAY_RATE = 64;
     
     // TUNABLE PARAMETERS for capacitor behavior:
-    static const int DECAY_RATE = 3;            // Accumulator decay per update (higher = faster decay)
-    static const unsigned long DECAY_INTERVAL = 50;  // Decay update interval in milliseconds
+    static const int DECAY_RATE = 16;            // Accumulator decay per update (higher = faster decay)
+    static const unsigned long DECAY_INTERVAL = 100;  // Decay update interval in milliseconds
     static const int DEFAULT_CHARGE = 6;        // Default charge amount per pulse (lower = slower buildup)
     
     int _accumulator;                           // Current charge accumulator (0 to MAX_ACCUMULATOR)
