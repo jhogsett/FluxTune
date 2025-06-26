@@ -1,5 +1,3 @@
-
-
 #include "basic_types.h"
 #include "wave_gen_pool.h"
 
@@ -31,4 +29,14 @@ void WaveGenPool::free_realizer(int nrealizer){
 
 WaveGen * WaveGenPool::access_realizer(int nrealizer){
     return _realizers[nrealizer];
+}
+
+int WaveGenPool::get_available_count(){
+    int available = 0;
+    for(int i = 0; i < _nrealizers; i++){
+        if(!_statuses[i]){
+            available++;
+        }
+    }
+    return available;
 }

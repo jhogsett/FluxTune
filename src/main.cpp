@@ -38,7 +38,9 @@
 #include "flashlight_handler.h"
 
 #include "wavegen.h"
+#ifndef DISABLE_WAVE_GEN_APP
 #include "wave_out.h"
+#endif
 
 #ifdef ENABLE_MORSE_STATION
 #include "sim_station.h"
@@ -251,6 +253,32 @@ Realization *realizations[4] = {
 };
 #endif
 
+#ifdef CONFIG_FIVE_CW_RESOURCE_TEST
+// Five CW stations with only 4 wave generators - resource contention test
+// Different frequencies spread across 40m band for easy identification
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001000.0, 15, 10);   // Station 1: 15 WPM, slight fist variation
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002000.0, 18, 20);   // Station 2: 18 WPM, moderate fist variation
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7003000.0, 12, 30);   // Station 3: 12 WPM, noticeable fist variation
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7004000.0, 22, 15);   // Station 4: 22 WPM, slight fist variation
+SimStation cw_station5(&wave_gen_pool, &signal_meter, 7005000.0, 25, 25);   // Station 5: 25 WPM, moderate fist variation
+
+SimTransmitter *station_pool[5] = {  // 5 stations but only 4 wave generators available
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4,
+    &cw_station5
+};
+
+Realization *realizations[5] = {  // 5 realizations competing for 4 resources
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4,
+    &cw_station5
+};
+#endif
+
 #ifdef CONFIG_FOUR_NUMBERS
 // TEST: Four Numbers stations with different frequencies  
 SimNumbers numbers_station1(&wave_gen_pool, &signal_meter, 7002700.0, 12);
@@ -397,6 +425,8 @@ Realization *realizations[2] = {
 bool realization_stats[1] = {false};
 #elif defined(CONFIG_DEV_LOW_RAM)
 bool realization_stats[2] = {false, false};
+#elif defined(CONFIG_FIVE_CW_RESOURCE_TEST)
+bool realization_stats[5] = {false, false, false, false, false};  // 5 stations for resource test
 #else
 bool realization_stats[4] = {false, false, false, false};
 #endif
@@ -405,6 +435,8 @@ bool realization_stats[4] = {false, false, false, false};
 RealizationPool realization_pool(realizations, realization_stats, 1);  // Only 1 station for minimal config
 #elif defined(CONFIG_DEV_LOW_RAM)
 RealizationPool realization_pool(realizations, realization_stats, 2);  // Only 2 stations for development config
+#elif defined(CONFIG_FIVE_CW_RESOURCE_TEST)
+RealizationPool realization_pool(realizations, realization_stats, 5);  // 5 stations competing for 4 wave generators
 #else
 RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stations for all other configs
 #endif
@@ -414,20 +446,24 @@ RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stat
 // ============================================================================
 StationManager station_manager(station_pool);
 
+#ifndef DISABLE_WAVE_GEN_APP
 WaveOut waveout1(&wave_gen_pool);
 WaveOut waveout2(&wave_gen_pool);
 WaveOut waveout3(&wave_gen_pool);
 WaveOut waveout4(&wave_gen_pool);
+#endif
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
 VFO vfoc("VFO C", 146520000.0, 5000, &realization_pool);
 
+#ifndef DISABLE_WAVE_GEN_APP
 Realization *waveouts[] = {&waveout1};
 
 VFO vfod("CHAN 1", 1.0, 1L, &realization_pool);
 VFO vfoe("CHAN 2", 100.0, 10L, &realization_pool);
 VFO vfof("CHAN 3", 1000000.0, 100L, &realization_pool);
+#endif
 
 Contrast contrast("Contrast");
 BFO bfo("BFO");
@@ -437,20 +473,26 @@ VFO_Tuner tunera(&vfoa);
 VFO_Tuner tunerb(&vfob);
 VFO_Tuner tunerc(&vfoc);
 
+#ifndef DISABLE_WAVE_GEN_APP
 VFO_Tuner tunerd(&vfod);
 VFO_Tuner tunere(&vfoe);
 VFO_Tuner tunerf(&vfof);
+#endif
 
 ContrastHandler contrast_handler(&contrast);
 BFOHandler bfo_handler(&bfo);
 FlashlightHandler flashlight_handler(&flashlight);
 
 ModeHandler *handlers1[3] = {&tunera, &tunerb, &tunerc};
+#ifndef DISABLE_WAVE_GEN_APP
 ModeHandler *handlers2[3] = {&tunerd, &tunere, &tunerf};
+#endif
 ModeHandler *handlers3[3] = {&contrast_handler, &bfo_handler, &flashlight_handler};
 
 EventDispatcher dispatcher1(handlers1, 3);
+#ifndef DISABLE_WAVE_GEN_APP
 EventDispatcher dispatcher2(handlers2, 3);
+#endif
 EventDispatcher dispatcher3(handlers3, 3);
 
 EventDispatcher * dispatcher = &dispatcher1;
@@ -565,11 +607,13 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 			title = (FSTR("SimRadio"));
 		break;
 
+#ifndef DISABLE_WAVE_GEN_APP
 		case APP_WAVEGEN:
 		dispatcher = &dispatcher2;
 			current_dispatcher = APP_WAVEGEN;
 			title = (FSTR("Wave Gen"));
 		break;
+#endif
 
 		case APP_SETTINGS:
 			dispatcher = &dispatcher3;
@@ -706,6 +750,25 @@ void loop()
 	cw_station4.set_station_state(AUDIBLE);
 #endif
 
+#ifdef CONFIG_FIVE_CW_RESOURCE_TEST
+	// Initialize five CW test stations (resource contention test)
+	// Only 4 wave generators available, so one station should be dormant at any given time
+	cw_station1.begin(time + random(1000));
+	cw_station1.set_station_state(AUDIBLE);
+	
+	cw_station2.begin(time + random(2000));
+	cw_station2.set_station_state(AUDIBLE);
+	
+	cw_station3.begin(time + random(3000));
+	cw_station3.set_station_state(AUDIBLE);
+	
+	cw_station4.begin(time + random(4000));
+	cw_station4.set_station_state(AUDIBLE);
+	
+	cw_station5.begin(time + random(5000));
+	cw_station5.set_station_state(AUDIBLE);
+#endif
+
 #ifdef CONFIG_FOUR_NUMBERS
 	// Initialize four Numbers test stations
 	numbers_station1.begin(time + random(1000));
@@ -818,17 +881,23 @@ void loop()
 				switch(current_dispatcher){
 					case 1:
 						// 
+#ifdef DISABLE_WAVE_GEN_APP
+						dispatcher = set_application(APP_SETTINGS, &display); // Skip Wave Gen, go to Settings
+#else
 						dispatcher = set_application(APP_WAVEGEN, &display); // &dispatcher2;
+#endif
 						// current_dispatcher = 2;
 						// title = (FSTR("AudioOut"));
 						break;
 						
+#ifndef DISABLE_WAVE_GEN_APP
 						case 2:
 						// 
 						dispatcher = set_application(APP_SETTINGS, &display); // &dispatcher3;
 						// current_dispatcher = 3;
 						// title = (FSTR("Settings"));
 						break;
+#endif
 								case 3:
 						// Clear flashlight mode when leaving settings
 						signal_meter.clear_flashlight_mode();

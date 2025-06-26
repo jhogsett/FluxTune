@@ -1,4 +1,3 @@
-
 #ifndef __WAVEGEN_POOL_H__
 #define __WAVEGEN_POOL_H__
 
@@ -21,6 +20,10 @@ public:
     void free_realizer(int nrealizer);
 
     WaveGen * access_realizer(int nrealizer);
+
+    // Get resource statistics for debugging
+    int get_available_count();
+    int get_total_count() { return _nrealizers; }
 
 private:
     WaveGen **_realizers;

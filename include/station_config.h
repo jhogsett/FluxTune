@@ -20,7 +20,8 @@
 
 // ===== TEST CONFIGURATIONS =====
 // #define CONFIG_FOUR_CW          // Four CW/Morse stations for CW testing
-#define CONFIG_FOUR_FD          // Four CW/Morse stations for simulating Field Day traffic
+// #define CONFIG_FOUR_FD          // Four CW/Morse stations for simulating Field Day traffic
+#define CONFIG_FIVE_CW_RESOURCE_TEST  // Five CW stations with only 4 wave generators (resource contention test)
 // #define CONFIG_FOUR_NUMBERS     // Four Numbers stations for spooky testing
 // #define CONFIG_FOUR_PAGER       // Four Pager stations for digital testing
 // #define CONFIG_FOUR_RTTY        // Four RTTY stations for RTTY testing
@@ -34,6 +35,11 @@
                                    // Designed to often overlap in reception for realistic band activity
 
 // ===== MEMORY OPTIMIZATION OPTIONS =====
+
+// Wave Generator Application - Disable to save significant RAM
+// Disables the "Wave Gen" application mode and all related VFO channels (vfod, vfoe, vfof)
+// This removes one of the three main application modes but saves substantial RAM for station development
+#define DISABLE_WAVE_GEN_APP    // Uncomment to disable Wave Gen application and save RAM
 
 // RTTY Memory Optimization
 // For minimal Flash usage, you can disable real Baudot encoding and just generate random bits
@@ -73,6 +79,13 @@
     #define ENABLE_FOUR_CW_STATIONS
     #define ENABLE_MORSE_STATION
     // Other stations disabled for focused CW testing
+#endif
+
+#ifdef CONFIG_FIVE_CW_RESOURCE_TEST
+    // Test: Five CW stations with only 4 wave generators (resource contention test)
+    #define ENABLE_FIVE_CW_STATIONS
+    #define ENABLE_MORSE_STATION
+    // Other stations disabled for focused resource testing
 #endif
 
 #ifdef CONFIG_FOUR_NUMBERS
