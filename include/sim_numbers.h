@@ -6,7 +6,12 @@
 
 class SignalMeter; // Forward declaration
 
-#define NUMBERS_SPACE_FREQUENCY 0.1
+// Space frequency for numbers stations - uses the configurable silent frequency  
+#ifdef ENABLE_SILENT_FREQ_CONFIG
+  #define NUMBERS_SPACE_FREQUENCY SILENT_FREQ_HZ
+#else
+  #define NUMBERS_SPACE_FREQUENCY 0.1  // Default space frequency
+#endif
 #define DEFAULT_INTERVAL_REPEATS 6  // Number of "FT" interval signals for optimal anticipation
 
 /**

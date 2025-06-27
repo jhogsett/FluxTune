@@ -17,7 +17,15 @@ enum StationState {
 // Common constants for simulated transmitters
 #define MAX_AUDIBLE_FREQ 5000.0
 #define MIN_AUDIBLE_FREQ 150.0
-#define SILENT_FREQ 0.1
+
+// Silent frequency - used when stations are not transmitting
+// 0.0 causes audible POPs when generators turn off
+// 0.1 provides inaudible background noise (10-second sine wave cycle)
+#ifdef ENABLE_SILENT_FREQ_CONFIG
+  #define SILENT_FREQ SILENT_FREQ_HZ
+#else
+  #define SILENT_FREQ 0.1  // Default silent frequency
+#endif
 
 // BFO (Beat Frequency Oscillator) offset for comfortable audio tuning
 // This shifts the audio frequency without affecting signal meter calculations

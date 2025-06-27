@@ -2,6 +2,7 @@
 #include "wavegen.h"
 #include "vfo.h"
 #include "saved_data.h"  // For option_bfo_offset
+#include "station_config.h"
 
 SimTransmitter::SimTransmitter(WaveGenPool *wave_gen_pool, float fixed_freq) 
     : Realization(wave_gen_pool, (int)(fixed_freq / 1000))  // Pass frequency in kHz as station ID
@@ -43,7 +44,20 @@ void SimTransmitter::common_frequency_update(Mode *mode)
 
 bool SimTransmitter::check_frequency_bounds()
 {
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;  // No realizer available
+    }
+    
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+        return false;  // Invalid realizer
+    }
     
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
@@ -71,7 +85,13 @@ void SimTransmitter::force_wave_generator_refresh()
     // This is needed when returning to SimRadio after application switches
     if(_realizer != -1) {
         WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-        wavegen->force_refresh();
+        if(wavegen != nullptr) {
+            wavegen->force_refresh();
+        } else {
+            // CRITICAL: This should never happen if _realizer != -1!
+            Serial.print("C");
+            Serial.print(_realizer);
+        }
     }
 }
 
@@ -156,6 +176,12 @@ void SimTransmitter::force_frequency_update()
         _frequency = raw_frequency + option_bfo_offset;
           // Update the wave generator with the new frequency
         WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-        wavegen->set_frequency(_frequency);
+        if(wavegen != nullptr) {
+            wavegen->set_frequency(_frequency);
+        } else {
+            // CRITICAL: This should never happen if _realizer != -1!
+            Serial.print("C");
+            Serial.print(_realizer);
+        }
     }
 }

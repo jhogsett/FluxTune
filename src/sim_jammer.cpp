@@ -2,6 +2,7 @@
 #include "wavegen.h"
 #include "realization_pool.h"
 #include "sim_jammer.h"
+#include "station_config.h"
 
 #ifdef PLATFORM_NATIVE
 #include <iostream>
@@ -22,7 +23,20 @@ bool SimJammer::begin(unsigned long time, float fixed_freq)
     // Start jammer transmission with repeat enabled (jammers run continuously)
     _jammer.start_jammer_transmission(true);
 
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;  // No realizer available
+    }
+
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+        return false;
+    }
 
     // Initialize both channels to silent
     wavegen->set_frequency(SILENT_FREQ, false);
@@ -37,7 +51,20 @@ void SimJammer::realize()
         return;  // Out of audible range
     }
     
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return;  // No realizer available
+    }
+    
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+        return;
+    }
     
     if(_active && _jammer.get_current_state() == JAMMER_STATE_TRANSMITTING) {
         // Calculate current jamming frequency

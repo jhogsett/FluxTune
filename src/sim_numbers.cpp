@@ -3,6 +3,7 @@
 #include "wave_gen_pool.h"
 #include "sim_numbers.h"
 #include "signal_meter.h"
+#include "station_config.h"
 
 #ifdef PLATFORM_NATIVE
 #include <cstdlib>  // For rand()
@@ -35,6 +36,11 @@ bool SimNumbers::begin(unsigned long time)
     if(!common_begin(time, _fixed_freq))
         return false;
     
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;
+    }
+    
     // WPM is already stored from constructor, no need to update it
     
     // Start with interval signal phase
@@ -42,7 +48,20 @@ bool SimNumbers::begin(unsigned long time)
     _interval_repeats_sent = 0;
     _groups_sent = 0;
     
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;  // No realizer available
+    }
+    
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+        return false;
+    }
     wavegen->set_frequency(NUMBERS_SPACE_FREQUENCY, false);    // Set _enabled and force frequency update with existing _vfo_freq
     // _vfo_freq should retain its value from the previous cycle
     _enabled = true;
@@ -66,7 +85,15 @@ void SimNumbers::realize()
     }
     
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-    wavegen->set_active_frequency(_active);
+    if(wavegen != nullptr) {
+        wavegen->set_active_frequency(_active);
+    } else {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+    }
 }
 
 bool SimNumbers::update(Mode *mode)
@@ -75,7 +102,15 @@ bool SimNumbers::update(Mode *mode)
     
     if(_enabled && _realizer != -1){
         WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-        wavegen->set_frequency(_frequency);
+        if(wavegen != nullptr) {
+            wavegen->set_frequency(_frequency);
+        } else {
+            // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+            Serial.print("C");
+            Serial.print(_realizer);
+#endif
+        }
     }
 
     realize();

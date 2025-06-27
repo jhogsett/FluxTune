@@ -45,6 +45,22 @@
 // #define DEBUG_WAVE_GEN_POOL  // Uncomment to enable resource debug output
 // #define DEBUG_STATION_RESOURCES  // Uncomment to enable station resource debug output
 
+// ===== SILENT FREQUENCY EXPERIMENTATION =====
+// Temporary development feature to experiment with different background noise levels
+// The silent frequency is used when stations are not transmitting
+// 0.0 causes audible POPs when generators turn off, 0.1 provides inaudible background noise
+// #define ENABLE_SILENT_FREQ_CONFIG  // Uncomment to enable silent frequency adjustment
+#ifdef ENABLE_SILENT_FREQ_CONFIG
+  #ifndef SILENT_FREQ_HZ
+    #define SILENT_FREQ_HZ 0.1  // Default silent frequency in MHz (only if not defined elsewhere)
+  #endif
+#endif
+
+// ===== CRASH DEBUGGING =====
+// Master debug flag for crash investigation - wraps all serial debug output we added
+// Enable this when investigating crashes, disable for production to save Flash/RAM
+// #define DEBUG_CRASH_INVESTIGATION  // Uncomment to enable crash debug output
+
 // RTTY Memory Optimization
 // For minimal Flash usage, you can disable real Baudot encoding and just generate random bits
 // The RTTY simulation will sound authentic but won't transmit actual text
