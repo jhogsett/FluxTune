@@ -3,6 +3,7 @@
 #include "wave_gen_pool.h"
 #include "sim_pager.h"
 #include "signal_meter.h"
+#include "station_config.h"
 
 #ifdef PLATFORM_NATIVE
 #include <iostream>
@@ -21,7 +22,14 @@ SimPager::SimPager(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float 
 bool SimPager::begin(unsigned long time)
 {
     if(!common_begin(time, _fixed_freq))
-        return false;// Start pager transmission with repeat enabled
+        return false;
+
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;
+    }
+
+    // Start pager transmission with repeat enabled
     _pager.start_pager_transmission(true);
 
     // Check if we have a valid realizer before accessing it
@@ -30,6 +38,14 @@ bool SimPager::begin(unsigned long time)
     }
 
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+        return false;
+    }
 
     // Initialize both channels to silent
     wavegen->set_frequency(SILENT_FREQ, false);
@@ -50,6 +66,14 @@ void SimPager::realize()
     }
     
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+        return;
+    }
     
     if(_active) {
         // Set frequencies based on current pager state
@@ -129,9 +153,11 @@ bool SimPager::step(unsigned long time)
             // First ensure frequencies are silenced
             if(_realizer != -1) {
                 WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-                wavegen->set_frequency(SILENT_FREQ, true);
-                wavegen->set_frequency(SILENT_FREQ, false);
-                wavegen->set_active_frequency(false);
+                if(wavegen != nullptr) {
+                    wavegen->set_frequency(SILENT_FREQ, true);
+                    wavegen->set_frequency(SILENT_FREQ, false);
+                    wavegen->set_active_frequency(false);
+                }
             }
             // Release the resource for other stations to use during silence
             end();  // This calls Realization::end() which frees the realizer

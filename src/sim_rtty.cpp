@@ -3,6 +3,7 @@
 #include "wave_gen_pool.h"
 #include "sim_rtty.h"
 #include "signal_meter.h"
+#include "station_config.h"
 
 // Single authentic RTTY message for realistic station simulation
 static const char rtty_message[] = "CQ CQ DE N6CCM K       ";
@@ -26,10 +27,18 @@ bool SimRTTY::begin(unsigned long time){
 
     // Check if we have a valid realizer before accessing it
     if(_realizer == -1) {
-        return false;
+        return false;  // No realizer available
     }
 
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+        return false;
+    }
 
     wavegen->set_frequency(SILENT_FREQ, false);
     wavegen->set_frequency(SILENT_FREQ, true);
@@ -53,7 +62,15 @@ void SimRTTY::realize(){
     if (_realizer == -1) {
         return;  // No resource available - station is dormant
     }
-      WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+        return;
+    }
     
     if(_in_round_break) {
         // During long silent period between rounds, force both channels to silent frequency
@@ -72,8 +89,16 @@ bool SimRTTY::update(Mode *mode){
     
     if(_enabled && _realizer != -1){  // RESOURCE MANAGEMENT: Check if we have a wave generator
         WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-        wavegen->set_frequency(_frequency, true);
-        wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
+        if(wavegen != nullptr) {
+            wavegen->set_frequency(_frequency, true);
+            wavegen->set_frequency(_frequency + MARK_FREQ_SHIFT, false);
+        } else {
+            // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+            Serial.print("C");
+            Serial.print(_realizer);
+#endif
+        }
     }
 
     realize();

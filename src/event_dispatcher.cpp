@@ -1,6 +1,7 @@
 #include "mode_handler.h"
 #include "event_dispatcher.h"
 #include "signal_meter.h"
+#include "station_config.h"
 
 // change to accept an array of mode handlers
 EventDispatcher::EventDispatcher(ModeHandler **mode_handlers, int nhandlers){
@@ -16,7 +17,11 @@ void EventDispatcher::set_mode(int nhandler){
     _mode_handler = _mode_handlers[_ncurrent_handler];
 }
 
-void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){    set_mode(nhandler);
+void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){
+#ifdef DEBUG_CRASH_INVESTIGATION
+    Serial.print("M");  // Just mode switch marker
+#endif
+    set_mode(nhandler);
     _mode_handler->show_title(display);
     update_display(display);
     update_realization();

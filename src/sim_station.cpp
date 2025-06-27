@@ -20,6 +20,7 @@
 #include <Arduino.h>
 #endif
 
+#define SPACE_FREQUENCY 0.1
 #define WAIT_SECONDS 4
 
 // mode is expected to be a derivative of VFO
@@ -83,6 +84,7 @@ bool SimStation::begin(unsigned long time){
 
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     wavegen->set_frequency(SPACE_FREQUENCY, false);    // Set _enabled and force frequency update with existing _vfo_freq
+    
     // _vfo_freq should retain its value from the previous cycle
     _enabled = true;
     force_frequency_update();
@@ -116,7 +118,15 @@ void SimStation::realize(){
     #endif
     
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-    wavegen->set_active_frequency(_active);
+    if(wavegen != nullptr) {
+        wavegen->set_active_frequency(_active);
+    } else {
+        // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+        Serial.print("C");
+        Serial.print(_realizer);
+#endif
+    }
 }
 
 // returns true on successful update
@@ -134,7 +144,15 @@ bool SimStation::update(Mode *mode){
     
     if(_enabled && _realizer != -1){
         WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-        wavegen->set_frequency(_frequency);
+        if(wavegen != nullptr) {
+            wavegen->set_frequency(_frequency);
+        } else {
+            // CRITICAL: This should never happen if _realizer != -1!
+#ifdef DEBUG_CRASH_INVESTIGATION
+            Serial.print("C");
+            Serial.print(_realizer);
+#endif
+        }
     }
 
     realize();

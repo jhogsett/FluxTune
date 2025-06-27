@@ -6,7 +6,6 @@
 
 class SignalMeter; // Forward declaration
 
-#define NUMBERS_SPACE_FREQUENCY 0.1
 #define DEFAULT_INTERVAL_REPEATS 6  // Number of "FT" interval signals for optimal anticipation
 
 /**

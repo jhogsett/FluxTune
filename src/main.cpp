@@ -59,6 +59,7 @@
 #endif
 
 #include "async_morse.h"
+#include "sim_transmitter.h"  // For SILENT_FREQ constant
 
 #include "wave_gen_pool.h"
 
@@ -534,6 +535,10 @@ void setup_buttons(){
 
 void setup(){
 	Serial.begin(115200);
+	delay(100);  // Let serial stabilize
+#ifdef DEBUG_CRASH_INVESTIGATION
+	Serial.println("STARTUP");  // Clear startup marker
+#endif
 	randomizer.randomize();
 
 	load_save_data();
@@ -543,22 +548,22 @@ void setup(){
 	setup_signal_meter();
 
 	AD1.begin();
-	AD1.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	AD1.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD1.setFrequency((MD_AD9833::channel_t)0, SILENT_FREQ);
+	AD1.setFrequency((MD_AD9833::channel_t)1, SILENT_FREQ);
 	AD1.setMode(MD_AD9833::MODE_SINE);
 
 	AD2.begin();
-	AD2.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	AD2.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD2.setFrequency((MD_AD9833::channel_t)0, SILENT_FREQ);
+	AD2.setFrequency((MD_AD9833::channel_t)1, SILENT_FREQ);
 	AD2.setMode(MD_AD9833::MODE_SINE);
 
 	AD3.begin();
-	AD3.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	AD3.setFrequency((MD_AD9833::channel_t)1, 0.1);
+	AD3.setFrequency((MD_AD9833::channel_t)0, SILENT_FREQ);
+	AD3.setFrequency((MD_AD9833::channel_t)1, SILENT_FREQ);
 	AD3.setMode(MD_AD9833::MODE_SINE);
 	AD4.begin();
-	AD4.setFrequency((MD_AD9833::channel_t)0, 0.1);
-	AD4.setFrequency((MD_AD9833::channel_t)1, 0.1);	AD4.setMode(MD_AD9833::MODE_SINE);
+	AD4.setFrequency((MD_AD9833::channel_t)0, SILENT_FREQ);
+	AD4.setFrequency((MD_AD9833::channel_t)1, SILENT_FREQ);	AD4.setMode(MD_AD9833::MODE_SINE);
 
 	// Initialize StationManager
 	station_manager.updateStations(7000000);
@@ -664,10 +669,29 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 }
 
 void purge_events(){
-	// Clear all pending encoder events
-	while(encoder_handlerA.changed() || encoder_handlerB.changed() || 
-	      encoder_handlerA.pressed() || encoder_handlerA.long_pressed() ||
-	      encoder_handlerB.pressed() || encoder_handlerB.long_pressed());
+	// Clear all pending encoder events by consuming them
+	// Add safety counter to prevent infinite loops from noisy encoders
+	int safety_counter = 0;
+	const int MAX_PURGE_ITERATIONS = 100; // Allow up to 100 iterations
+	
+	while((encoder_handlerA.changed() || encoder_handlerB.changed() || 
+	       encoder_handlerA.pressed() || encoder_handlerA.long_pressed() ||
+	       encoder_handlerB.pressed() || encoder_handlerB.long_pressed()) &&
+	      safety_counter < MAX_PURGE_ITERATIONS) {
+		
+		// Consume the events by calling the methods
+		encoder_handlerA.diff();       // Clears changed() flag
+		encoder_handlerB.diff();       // Clears changed() flag  
+		encoder_handlerA.pressed();    // Clears pressed() flag
+		encoder_handlerA.long_pressed(); // Clears long_pressed() flag
+		encoder_handlerB.pressed();    // Clears pressed() flag
+		encoder_handlerB.long_pressed(); // Clears long_pressed() flag
+		
+		safety_counter++;
+		
+		// Add small delay to allow interrupts and prevent tight loop
+		delayMicroseconds(10); // Very short delay, just enough to let interrupts run
+	}
 }
 
 void loop()
@@ -868,8 +892,17 @@ void loop()
 #endif
 	set_application(APP_SIMRADIO, &display);
 
+	static int alive_counter = 0;  // Simple alive marker
 	while(true){
 		unsigned long time = millis();
+		
+		// Simple alive marker every 1000 loops (much less frequent)
+		if(++alive_counter >= 1000) {
+#ifdef DEBUG_CRASH_INVESTIGATION
+			Serial.print(".");  // Just a dot
+#endif
+			alive_counter = 0;
+		}
 				// Update signal meter decay (capacitor-like discharge)
 		signal_meter.update(time);
 				// Test StationManager call in main loop (safe location)
