@@ -86,10 +86,13 @@ void SignalMeter::update_signal_strength(int strength)
     if (strength > 0) {
         // Convert strength to appropriate charge amount (reduced for better balance)
         // Higher signal strength = more charge pulses
+
         int charge_pulses = (strength * 2) / 40;  // Convert 0-255 to 0-12 charge pulses (reduced from 25)
-        for (int i = 0; i < charge_pulses; i++) {
-            add_charge();  // Use default charge amount (now 6 instead of 10)
-        }
+
+        // for (int i = 0; i < charge_pulses; i++) {
+        //     add_charge();  // Use default charge amount (now 6 instead of 10)
+        // }
+        add_charge(DEFAULT_CHARGE * charge_pulses);
     }
 }
 

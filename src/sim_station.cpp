@@ -36,6 +36,32 @@ SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, fl
     _in_wait_delay = false;
     _next_cq_time = 0;
     
+    // Set default perfect fist quality (0 = mechanical precision)
+    _morse.set_fist_quality(0);
+    
+    // Generate random callsign and CQ message for this session
+    generate_cq_message();
+}
+
+SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm, byte fist_quality) 
+    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
+{
+    // Store fixed frequency in base class
+    _fixed_freq = fixed_freq;    // Initialize operator frustration drift tracking
+    _cycles_completed = 0;
+#ifdef PLATFORM_NATIVE
+    _cycles_until_qsy = 3 + (rand() % 6);  // 3-8 cycles before frustration (realistic)
+#else
+    _cycles_until_qsy = 3 + (random(6));   // 3-8 cycles before frustration (realistic)
+#endif
+    
+    // Initialize repetition state
+    _in_wait_delay = false;
+    _next_cq_time = 0;
+    
+    // Set specified fist quality (0 = perfect, 255 = maximum bad fist)
+    _morse.set_fist_quality(fist_quality);
+    
     // Generate random callsign and CQ message for this session
     generate_cq_message();
 }

@@ -55,6 +55,7 @@ AsyncMorse::AsyncMorse() : AsyncModulator() {
     async_morse = 0;
     async_space = false;
     async_just_completed = false;
+    _fist_quality = 0;  // Default to perfect fist (mechanical precision)
 }
 
 // ========================================
@@ -138,9 +139,58 @@ void AsyncMorse::start_transmission(const char *s, int wpm){
 }
 
 unsigned long AsyncMorse::compute_element_time(unsigned long time, byte element_count, bool is_space){
-    // Simple timing calculation - both elements and spacing use the same base timing
-    // The is_space parameter is kept for potential future timing enhancements
-    return time + (element_count * get_element_delay());
+    unsigned long base_time = element_count * get_element_delay();
+    
+    // Apply fist quality variations if enabled (0 = perfect, 255 = maximum bad fist)
+    if (_fist_quality > 0) {
+        // Very conservative timing variations for authentic but stable CW
+        // Even "bad fist" operators don't vary timing by more than a few percent
+        
+        // Maximum variation: ±3% at maximum bad fist (255)
+        // This gives realistic human timing variation without breaking modulation
+        int max_variation_percent = (_fist_quality * 3) / 255;
+        
+        // Even more conservative approach: cap at 2% maximum
+        if (max_variation_percent > 2) max_variation_percent = 2;
+        
+        // Different timing errors for elements vs spacing
+        int variation_percent;
+        if (is_space) {
+            // Inter-element and inter-character spacing gets slightly more variation
+            variation_percent = max_variation_percent + 1;  // Just +1% more
+            if (variation_percent > 3) variation_percent = 3;  // Hard cap at 3%
+        } else {
+            // Element timing (dots and dashes) has smaller variations
+            variation_percent = max_variation_percent;
+            if (variation_percent > 2) variation_percent = 2;  // Hard cap at 2%
+        }
+        
+        // Generate random variation (both positive and negative)
+        if (variation_percent > 0) {
+#ifdef PLATFORM_NATIVE
+            int random_variation = (rand() % (variation_percent * 2 + 1)) - variation_percent;
+#else
+            int random_variation = (random(variation_percent * 2 + 1)) - variation_percent;
+#endif
+            // Apply the variation more safely
+            long variation = ((long)base_time * random_variation) / 100;
+            long new_time = (long)base_time + variation;
+            
+            // Safety limits: ensure timing stays within reasonable bounds
+            long min_time = (long)base_time * 80 / 100;  // No less than 80% of base time
+            long max_time = (long)base_time * 120 / 100; // No more than 120% of base time
+            
+            if (new_time < min_time) {
+                new_time = min_time;
+            } else if (new_time > max_time) {
+                new_time = max_time;
+            }
+            
+            base_time = (unsigned long)new_time;
+        }
+    }
+    
+    return time + base_time;
 }
 
 int AsyncMorse::step_element(unsigned long time){
