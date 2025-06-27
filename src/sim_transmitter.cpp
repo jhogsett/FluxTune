@@ -43,16 +43,21 @@ void SimTransmitter::common_frequency_update(Mode *mode)
 
 bool SimTransmitter::check_frequency_bounds()
 {
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;  // No realizer available
+    }
+    
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        return false;  // Invalid realizer
+    }
+    
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
             _enabled = false;
-
-            // Check if we have a valid realizer before accessing it
-            if(_realizer != -1) {
-                WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-                wavegen->set_frequency(SILENT_FREQ, true);
-                wavegen->set_frequency(SILENT_FREQ, false);
-            }
+            wavegen->set_frequency(SILENT_FREQ, true);
+            wavegen->set_frequency(SILENT_FREQ, false);
         }
         return false;  // Out of bounds
     } 
@@ -74,7 +79,9 @@ void SimTransmitter::force_wave_generator_refresh()
     // This is needed when returning to SimRadio after application switches
     if(_realizer != -1) {
         WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-        wavegen->force_refresh();
+        if(wavegen != nullptr) {
+            wavegen->force_refresh();
+        }
     }
 }
 
@@ -159,6 +166,8 @@ void SimTransmitter::force_frequency_update()
         _frequency = raw_frequency + option_bfo_offset;
           // Update the wave generator with the new frequency
         WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-        wavegen->set_frequency(_frequency);
+        if(wavegen != nullptr) {
+            wavegen->set_frequency(_frequency);
+        }
     }
 }

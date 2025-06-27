@@ -16,7 +16,9 @@ void EventDispatcher::set_mode(int nhandler){
     _mode_handler = _mode_handlers[_ncurrent_handler];
 }
 
-void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){    set_mode(nhandler);
+void EventDispatcher::set_mode(HT16K33Disp *display, int nhandler){
+    Serial.print("M");  // Just mode switch marker
+    set_mode(nhandler);
     _mode_handler->show_title(display);
     update_display(display);
     update_realization();

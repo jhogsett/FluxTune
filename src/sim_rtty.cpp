@@ -24,11 +24,6 @@ bool SimRTTY::begin(unsigned long time){
     if(!common_begin(time, _fixed_freq))
         return false;
 
-    // Check if we have a valid realizer before accessing it
-    if(_realizer == -1) {
-        return false;
-    }
-
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
 
     wavegen->set_frequency(SILENT_FREQ, false);

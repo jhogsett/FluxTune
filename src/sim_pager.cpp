@@ -21,15 +21,20 @@ SimPager::SimPager(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float 
 bool SimPager::begin(unsigned long time)
 {
     if(!common_begin(time, _fixed_freq))
-        return false;// Start pager transmission with repeat enabled
-    _pager.start_pager_transmission(true);
+        return false;
 
     // Check if we have a valid realizer before accessing it
     if(_realizer == -1) {
-        return false;  // No realizer available
+        return false;
     }
 
+    // Start pager transmission with repeat enabled
+    _pager.start_pager_transmission(true);
+
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        return false;
+    }
 
     // Initialize both channels to silent
     wavegen->set_frequency(SILENT_FREQ, false);
@@ -50,6 +55,9 @@ void SimPager::realize()
     }
     
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+    if(wavegen == nullptr) {
+        return;
+    }
     
     if(_active) {
         // Set frequencies based on current pager state
@@ -129,9 +137,11 @@ bool SimPager::step(unsigned long time)
             // First ensure frequencies are silenced
             if(_realizer != -1) {
                 WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-                wavegen->set_frequency(SILENT_FREQ, true);
-                wavegen->set_frequency(SILENT_FREQ, false);
-                wavegen->set_active_frequency(false);
+                if(wavegen != nullptr) {
+                    wavegen->set_frequency(SILENT_FREQ, true);
+                    wavegen->set_frequency(SILENT_FREQ, false);
+                    wavegen->set_active_frequency(false);
+                }
             }
             // Release the resource for other stations to use during silence
             end();  // This calls Realization::end() which frees the realizer

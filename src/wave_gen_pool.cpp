@@ -1,5 +1,6 @@
 #include "basic_types.h"
 #include "wave_gen_pool.h"
+#include "hardware.h"
 
 // pass array of wave generator addresses, array of free/in-use bools, count of wave generators 
 WaveGenPool::WaveGenPool(WaveGen **wavegens, bool *statuses,  int nwavegens){
@@ -16,19 +17,35 @@ int WaveGenPool::get_realizer(int station_id){
     for(int i = 0; i < _nrealizers; i++){
         if(!_statuses[i]){
             _statuses[i] = true;
+            Serial.print("G");
+            Serial.print(i);
             return i;
         }
     }
+    Serial.print("X");
     return -1;
 }
 
 // multiplely gotten realizers must be freed individually
 void WaveGenPool::free_realizer(int nrealizer, int station_id){
-    _statuses[nrealizer] = false;
+    if(nrealizer >= 0 && nrealizer < _nrealizers) {
+        _statuses[nrealizer] = false;
+        Serial.print("F");
+        Serial.print(nrealizer);
+    } else {
+        Serial.print("E");
+        Serial.print(nrealizer);
+    }
 }
 
 WaveGen * WaveGenPool::access_realizer(int nrealizer){
-    return _realizers[nrealizer];
+    if(nrealizer >= 0 && nrealizer < _nrealizers) {
+        return _realizers[nrealizer];
+    } else {
+        Serial.print("A");
+        Serial.print(nrealizer);
+        return nullptr;
+    }
 }
 
 int WaveGenPool::get_available_count(){

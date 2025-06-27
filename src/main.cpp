@@ -534,6 +534,8 @@ void setup_buttons(){
 
 void setup(){
 	Serial.begin(115200);
+	delay(100);  // Let serial stabilize
+	Serial.println("STARTUP");  // Clear startup marker
 	randomizer.randomize();
 
 	load_save_data();
@@ -664,10 +666,29 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 }
 
 void purge_events(){
-	// Clear all pending encoder events
-	while(encoder_handlerA.changed() || encoder_handlerB.changed() || 
-	      encoder_handlerA.pressed() || encoder_handlerA.long_pressed() ||
-	      encoder_handlerB.pressed() || encoder_handlerB.long_pressed());
+	// Clear all pending encoder events by consuming them
+	// Add safety counter to prevent infinite loops from noisy encoders
+	int safety_counter = 0;
+	const int MAX_PURGE_ITERATIONS = 100; // Allow up to 100 iterations
+	
+	while((encoder_handlerA.changed() || encoder_handlerB.changed() || 
+	       encoder_handlerA.pressed() || encoder_handlerA.long_pressed() ||
+	       encoder_handlerB.pressed() || encoder_handlerB.long_pressed()) &&
+	      safety_counter < MAX_PURGE_ITERATIONS) {
+		
+		// Consume the events by calling the methods
+		encoder_handlerA.diff();       // Clears changed() flag
+		encoder_handlerB.diff();       // Clears changed() flag  
+		encoder_handlerA.pressed();    // Clears pressed() flag
+		encoder_handlerA.long_pressed(); // Clears long_pressed() flag
+		encoder_handlerB.pressed();    // Clears pressed() flag
+		encoder_handlerB.long_pressed(); // Clears long_pressed() flag
+		
+		safety_counter++;
+		
+		// Add small delay to allow interrupts and prevent tight loop
+		delayMicroseconds(10); // Very short delay, just enough to let interrupts run
+	}
 }
 
 void loop()
@@ -868,8 +889,15 @@ void loop()
 #endif
 	set_application(APP_SIMRADIO, &display);
 
+	static int alive_counter = 0;  // Simple alive marker
 	while(true){
 		unsigned long time = millis();
+		
+		// Simple alive marker every 1000 loops (much less frequent)
+		if(++alive_counter >= 1000) {
+			Serial.print(".");  // Just a dot
+			alive_counter = 0;
+		}
 				// Update signal meter decay (capacitor-like discharge)
 		signal_meter.update(time);
 				// Test StationManager call in main loop (safe location)
