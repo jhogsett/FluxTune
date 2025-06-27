@@ -11,10 +11,8 @@
 #endif
 
 SimPager::SimPager(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq) 
-    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter)
+    : SimTransmitter(wave_gen_pool, fixed_freq), _signal_meter(signal_meter)
 {
-    // Store fixed frequency in base class
-    _fixed_freq = fixed_freq;
     // Generate initial tone pair
     generate_new_tone_pair();
     // Pager transmission will be started in begin() method
@@ -39,6 +37,11 @@ void SimPager::realize()
 {
     if(!check_frequency_bounds()) {
         return;  // Out of audible range
+    }
+    
+    // Don't try to access wave generator if we don't have one (during silence)
+    if(_realizer == -1) {
+        return;
     }
     
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
@@ -90,6 +93,16 @@ bool SimPager::step(unsigned long time)
             // Check if this is the start of a new page cycle (silence → tone A)
             if (_pager.get_current_state() == PAGER_STATE_TONE_A) {
                 generate_new_tone_pair();
+                
+                // RESOURCE MANAGEMENT: Acquire wave generator after silent period
+                // Need to get a new realizer if we freed it during silence
+                if(_realizer == -1) {
+                    if(!common_begin(0, _fixed_freq)) {
+                        // Failed to get wave generator - stay inactive
+                        _active = false;
+                        return true;
+                    }
+                }
             }
             _active = true;
             realize();
@@ -104,6 +117,18 @@ bool SimPager::step(unsigned long time)
         case STEP_PAGER_TURN_OFF:
             _active = false;
             realize();
+            
+            // RESOURCE MANAGEMENT: Release wave generator during silent period
+            // First ensure frequencies are silenced
+            if(_realizer != -1) {
+                WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+                wavegen->set_frequency(SILENT_FREQ, true);
+                wavegen->set_frequency(SILENT_FREQ, false);
+                wavegen->set_active_frequency(false);
+            }
+            // Release the resource for other stations to use during silence
+            end();  // This calls Realization::end() which frees the realizer
+            
             // No charge pulse when carrier turns off
             break;
               case STEP_PAGER_CHANGE_FREQ:

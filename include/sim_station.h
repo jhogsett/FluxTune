@@ -25,6 +25,9 @@ public:
 
     void realize();
     void apply_wpm_drift();         // Add slight WPM drift for realism
+    
+    // Set station into retry state (used when initialization fails)
+    void set_retry_state(unsigned long next_try_time);
 
 private:
     AsyncMorse _morse;

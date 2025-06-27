@@ -4,6 +4,9 @@
 #define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
 #endif
 
+// Temporary debug output for resource testing - disabled after successful testing
+// #define DEBUG_STATION_RESOURCES
+
 #include "vfo.h"
 #include "wavegen.h"
 #include "wave_gen_pool.h"
@@ -21,10 +24,9 @@
 
 // mode is expected to be a derivative of VFO
 SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
-    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
+    : SimTransmitter(wave_gen_pool, fixed_freq), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
 {
-    // Store fixed frequency in base class
-    _fixed_freq = fixed_freq;    // Initialize operator frustration drift tracking
+    // Initialize operator frustration drift tracking
     _cycles_completed = 0;
 #ifdef PLATFORM_NATIVE
     _cycles_until_qsy = 3 + (rand() % 6);  // 3-8 cycles before frustration (realistic)
@@ -44,10 +46,9 @@ SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, fl
 }
 
 SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm, byte fist_quality) 
-    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
+    : SimTransmitter(wave_gen_pool, fixed_freq), _signal_meter(signal_meter), _stored_wpm(wpm), _base_wpm(wpm)
 {
-    // Store fixed frequency in base class
-    _fixed_freq = fixed_freq;    // Initialize operator frustration drift tracking
+    // Initialize operator frustration drift tracking    // Initialize operator frustration drift tracking
     _cycles_completed = 0;
 #ifdef PLATFORM_NATIVE
     _cycles_until_qsy = 3 + (rand() % 6);  // 3-8 cycles before frustration (realistic)
@@ -67,8 +68,9 @@ SimStation::SimStation(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, fl
 }
 
 bool SimStation::begin(unsigned long time){
-    if(!common_begin(time, _fixed_freq))
+    if(!common_begin(time, _fixed_freq)) {
         return false;
+    }
     
     #ifdef PLATFORM_NATIVE
     printf("DEBUG: SimStation::begin() - realizer=%d, time=%lu\n", _realizer, time);
@@ -195,11 +197,22 @@ bool SimStation::step(unsigned long time){
             // Note: begin() now handles frequency update internally
         } else {
             // WaveGen not available - extend wait period and try again later
-            _next_cq_time = time + 1000;  // Try again in 1 second
+            // Add randomization to prevent thundering herd problem
+            #ifdef PLATFORM_NATIVE
+            _next_cq_time = time + 500 + (rand() % 1000);  // Try again in 0.5-1.5 seconds
+            #else
+            _next_cq_time = time + 500 + random(1000);     // Try again in 0.5-1.5 seconds
+            #endif
         }
     }
     
     return true;
+}
+
+// Set station into retry state (used when initialization fails)
+void SimStation::set_retry_state(unsigned long next_try_time) {
+    _in_wait_delay = true;
+    _next_cq_time = next_try_time;
 }
 
 // Use base class end() method for cleanup

@@ -2,9 +2,10 @@
 #include "wave_gen_pool.h"
 #include "realization.h"
 
-Realization::Realization(WaveGenPool *wave_gen_pool){
+Realization::Realization(WaveGenPool *wave_gen_pool, int station_id){
     _wave_gen_pool = wave_gen_pool;
     _realizer = -1;
+    _station_id = station_id;
 }
 
 // returns true on successful update
@@ -20,7 +21,7 @@ bool Realization::begin(unsigned long time){
     }
     
     // attempt to acquire a realizer
-    _realizer = _wave_gen_pool->get_realizer();
+    _realizer = _wave_gen_pool->get_realizer(_station_id);
     if(_realizer == -1)
         return false;
     return true;
@@ -41,7 +42,7 @@ bool Realization::step(unsigned long time){
 
 void Realization::end(){
     if(_realizer != -1) {
-        _wave_gen_pool->free_realizer(_realizer);
+        _wave_gen_pool->free_realizer(_realizer, _station_id);
         _realizer = -1;  // Reset to avoid double-free or invalid access
     }
 }
