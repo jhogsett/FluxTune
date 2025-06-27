@@ -75,7 +75,13 @@ bool SimStation::begin(unsigned long time){
     #ifdef PLATFORM_NATIVE
     printf("DEBUG: SimStation::begin() - realizer=%d, time=%lu\n", _realizer, time);
     #endif
-      WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;
+    }
+
+    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     wavegen->set_frequency(SPACE_FREQUENCY, false);    // Set _enabled and force frequency update with existing _vfo_freq
     // _vfo_freq should retain its value from the previous cycle
     _enabled = true;

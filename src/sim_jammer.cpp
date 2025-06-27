@@ -22,6 +22,11 @@ bool SimJammer::begin(unsigned long time, float fixed_freq)
     // Start jammer transmission with repeat enabled (jammers run continuously)
     _jammer.start_jammer_transmission(true);
 
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;  // No realizer available
+    }
+
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
 
     // Initialize both channels to silent
@@ -37,6 +42,11 @@ void SimJammer::realize()
         return;  // Out of audible range
     }
     
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return;  // No realizer available
+    }
+
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     
     if(_active && _jammer.get_current_state() == JAMMER_STATE_TRANSMITTING) {

@@ -43,13 +43,16 @@ void SimTransmitter::common_frequency_update(Mode *mode)
 
 bool SimTransmitter::check_frequency_bounds()
 {
-    WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-    
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
             _enabled = false;
-            wavegen->set_frequency(SILENT_FREQ, true);
-            wavegen->set_frequency(SILENT_FREQ, false);
+
+            // Check if we have a valid realizer before accessing it
+            if(_realizer != -1) {
+                WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+                wavegen->set_frequency(SILENT_FREQ, true);
+                wavegen->set_frequency(SILENT_FREQ, false);
+            }
         }
         return false;  // Out of bounds
     } 
