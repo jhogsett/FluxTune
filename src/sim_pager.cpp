@@ -90,6 +90,18 @@ bool SimPager::step(unsigned long time)
             // Check if this is the start of a new page cycle (silence → tone A)
             if (_pager.get_current_state() == PAGER_STATE_TONE_A) {
                 generate_new_tone_pair();
+                
+                // RESOURCE MANAGEMENT: Acquire wave generator after silent period
+                // Need to get a new realizer if we freed it during silence
+                if(_realizer == -1) {
+                    if(!common_begin(time, _fixed_freq)) {
+                        // Failed to get wave generator - stay inactive
+                        _active = false;
+                        return true;
+                    }
+                    // CRITICAL: Force frequency update after reacquiring generator
+                    force_frequency_update();
+                }
             }
             _active = true;
             realize();
