@@ -4,13 +4,6 @@ A centralized list of minor issues, enhancements, and technical debt to address 
 
 ## ✅ Recently Completed
 
-### Silent Frequency Experimentation Feature (COMPLETED)
-- [x] **Configurable silent frequency setting** - Added temporary development feature for background noise experimentation
-- [x] **Easy enable/disable via defines** - Can be toggled on/off without code changes
-- [x] **Comprehensive implementation** - Affects all wave generator initialization and station silent frequencies
-- [x] **Documentation created** - SILENT_FREQUENCY_EXPERIMENTATION.md explains usage and testing
-- [x] **Default value preserved** - Maintains existing 0.1 MHz behavior when feature is disabled
-
 ### Dynamic WaveGen Allocation (COMPLETED)
 - [x] **SimStation and SimNumbers dynamic allocation** - Successfully implemented per-message-cycle allocation/freeing
 - [x] **Fixed first morse element bug** - Removed premature force_frequency_update() calls that used stale _vfo_freq

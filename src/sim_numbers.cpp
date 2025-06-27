@@ -12,6 +12,7 @@
 #include <Arduino.h>
 #endif
 
+#define NUMBERS_SPACE_FREQUENCY 0.1
 #define INTER_GROUP_DELAY 2000  // 2 seconds delay between number groups (more distinct)
 #define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 

@@ -6,13 +6,6 @@
 
 class SignalMeter; // Forward declaration
 
-// Space frequency for CW stations - uses the configurable silent frequency
-#ifdef ENABLE_SILENT_FREQ_CONFIG
-  #define SPACE_FREQUENCY SILENT_FREQ
-#else
-  #define SPACE_FREQUENCY 0.1  // Default space frequency
-#endif
-
 // Configurable CQ message format - can be overridden by defining before including this header
 #ifndef CQ_MESSAGE_FORMAT
 #define CQ_MESSAGE_FORMAT "CQ CQ DE %s %s K    "

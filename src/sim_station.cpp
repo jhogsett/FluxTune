@@ -20,6 +20,7 @@
 #include <Arduino.h>
 #endif
 
+#define SPACE_FREQUENCY 0.1
 #define WAIT_SECONDS 4
 
 // mode is expected to be a derivative of VFO
