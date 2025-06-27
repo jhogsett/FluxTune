@@ -50,20 +50,17 @@ bool SimTransmitter::check_frequency_bounds()
     }
     
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
-    if(wavegen == nullptr) {
-        // CRITICAL: This should never happen if _realizer != -1!
-#ifdef DEBUG_CRASH_INVESTIGATION
-        Serial.print("C");
-        Serial.print(_realizer);
-#endif
-        return false;  // Invalid realizer
-    }
     
     if(_frequency > MAX_AUDIBLE_FREQ || _frequency < MIN_AUDIBLE_FREQ){
         if(_enabled){
             _enabled = false;
-            wavegen->set_frequency(SILENT_FREQ, true);
-            wavegen->set_frequency(SILENT_FREQ, false);
+
+            // Check if we have a valid realizer before accessing it
+            if(_realizer != -1) {
+                WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
+                wavegen->set_frequency(SILENT_FREQ, true);
+                wavegen->set_frequency(SILENT_FREQ, false);
+            }
         }
         return false;  // Out of bounds
     } 

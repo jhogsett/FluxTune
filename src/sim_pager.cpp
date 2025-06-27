@@ -32,6 +32,11 @@ bool SimPager::begin(unsigned long time)
     // Start pager transmission with repeat enabled
     _pager.start_pager_transmission(true);
 
+    // Check if we have a valid realizer before accessing it
+    if(_realizer == -1) {
+        return false;  // No realizer available
+    }
+
     WaveGen *wavegen = _wave_gen_pool->access_realizer(_realizer);
     if(wavegen == nullptr) {
         // CRITICAL: This should never happen if _realizer != -1!
