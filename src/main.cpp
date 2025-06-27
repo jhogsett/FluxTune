@@ -1,8 +1,8 @@
 // Field Day Configuration - Must be defined before any includes
 #include "station_config.h"
-#ifdef CONFIG_FOUR_FD
-#define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
-#endif
+// #ifdef CONFIG_FOUR_FD
+// #define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
+// #endif
 
 #ifdef PLATFORM_NATIVE
 #include "../native/platform.h"
@@ -70,7 +70,7 @@
 // BRANDING MODE FOR PRODUCT PHOTOGRAPHY
 // Comment out this #define to disable branding mode and save Flash memory
 // ============================================================================
-// #define ENABLE_BRANDING_MODE  // OPTIMIZATION: Disabled by default to save Flash
+#define ENABLE_BRANDING_MODE  // OPTIMIZATION: Disabled by default to save Flash
 
 // Create an ledStrip object and specify the pin it will use.
 PololuLedStrip<12> ledStrip;
@@ -237,19 +237,22 @@ SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001500.0, 31, 10);   // A
 SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002100.0, 19, 50);   // Advanced/Extra portion, slower tired sender
 SimStation cw_station3(&wave_gen_pool, &signal_meter, 7002700.0, 7, 175);   // Novice/General portion, novice first timer  
 SimStation cw_station4(&wave_gen_pool, &signal_meter, 7003400.0, 14, 40);   // Novice/General portion, experienced new ham
+SimStation cw_station5(&wave_gen_pool, &signal_meter, 7004100.0, 23, 80);   // Novice/General portion, experienced tired ham
 
-SimTransmitter *station_pool[4] = {
+SimTransmitter *station_pool[5] = {
     &cw_station1,
     &cw_station2,
     &cw_station3,
-    &cw_station4
+    &cw_station4,
+    &cw_station5
 };
 
-Realization *realizations[4] = {
+Realization *realizations[5] = {
     &cw_station1,
     &cw_station2,
     &cw_station3,
-    &cw_station4
+    &cw_station4,
+    &cw_station5
 };
 #endif
 
@@ -574,7 +577,8 @@ void setup(){
 void activate_branding_mode() {
     // Keep display showing "FluxTune" from previous code - perfect for branding photos!
       // Directly set signal meter LEDs to 4x brightness (bypass dynamic system)
-    rgb_color full_colors[LED_COUNT] = 
+	rgb_color full_colors[LED_COUNT] = 
+#ifdef DEVICE_VARIANT_RED_DISPLAY
     {
       { 60, 0, 0 },   // 4x brightness for all LEDs (was 15)
       { 60, 30, 0 }, 
@@ -584,7 +588,18 @@ void activate_branding_mode() {
       { 0, 0, 60 }, 
       { 30, 0, 60 }     // Red at the end
     };
-    
+#else
+    {
+      { 0, 60, 0 },   // 4x brightness for all LEDs (was 15)
+      { 0, 60, 0 }, 
+      { 0, 60, 0 }, 
+      { 0, 60, 0 }, 
+      { 60, 60, 0 }, 
+      { 60, 60, 0 }, 
+      { 60, 0, 6 }     // Red at the end
+    };
+#endif
+
     // Enter infinite loop for photography - device stays in perfect display state
     while(true) {
         // Keep signal meter LEDs at full brightness
@@ -749,6 +764,9 @@ void loop()
 	
 	cw_station4.begin(time + random(4000));
 	cw_station4.set_station_state(AUDIBLE);
+
+	cw_station5.begin(time + random(5000));
+	cw_station5.set_station_state(AUDIBLE);
 #endif
 
 #ifdef CONFIG_FIVE_CW_RESOURCE_TEST
