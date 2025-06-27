@@ -26,7 +26,7 @@
     #define PANEL_LED_BRIGHTNESS_DIVISOR 2         // Divide by 5 for red display
 #else    // Green display variant (default): Original brightness
     #define SIGNAL_METER_BRIGHTNESS_DIVISOR 1      // No scaling for green display
-    #define PANEL_LED_BRIGHTNESS_DIVISOR 1         // No scaling for green display
+    #define PANEL_LED_BRIGHTNESS_DIVISOR 2         // Divide by 2 for green display
 #endif
 
 #endif

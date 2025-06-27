@@ -4,8 +4,8 @@
 #define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
 #endif
 
-// Temporary debug output for resource testing
-#define DEBUG_STATION_RESOURCES
+// Temporary debug output for resource testing - disabled after successful testing
+// #define DEBUG_STATION_RESOURCES
 
 #include "vfo.h"
 #include "wavegen.h"

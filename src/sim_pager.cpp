@@ -97,11 +97,13 @@ bool SimPager::step(unsigned long time)
                 // RESOURCE MANAGEMENT: Acquire wave generator after silent period
                 // Need to get a new realizer if we freed it during silence
                 if(_realizer == -1) {
-                    if(!common_begin(0, _fixed_freq)) {
+                    if(!common_begin(time, _fixed_freq)) {
                         // Failed to get wave generator - stay inactive
                         _active = false;
                         return true;
                     }
+                    // CRITICAL: Force frequency update after reacquiring generator
+                    force_frequency_update();
                 }
             }
             _active = true;
