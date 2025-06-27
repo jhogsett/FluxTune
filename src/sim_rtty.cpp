@@ -9,10 +9,9 @@ static const char rtty_message[] = "CQ CQ DE N6CCM K       ";
 
 // mode is expected to be a derivative of VFO
 SimRTTY::SimRTTY(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq) 
-    : SimTransmitter(wave_gen_pool), _signal_meter(signal_meter)
+    : SimTransmitter(wave_gen_pool, fixed_freq), _signal_meter(signal_meter)
 {
-    // Store fixed frequency in base class
-    _fixed_freq = fixed_freq;    // Initialize message cycling state - start with initial MARK tone
+    // Initialize message cycling state - start with initial MARK tone
     _in_wait_delay = true;
     _in_round_break = false;
     _in_initial_mark = true;  // Start each round with initial MARK tone

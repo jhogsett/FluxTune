@@ -15,10 +15,9 @@
 #define INTER_CYCLE_DELAY 8000  // 8 seconds delay between complete cycles
 
 SimNumbers::SimNumbers(WaveGenPool *wave_gen_pool, SignalMeter *signal_meter, float fixed_freq, int wpm) 
-    : SimTransmitter(wave_gen_pool), _wpm(wpm), _signal_meter(signal_meter)
+    : SimTransmitter(wave_gen_pool, fixed_freq), _wpm(wpm), _signal_meter(signal_meter)
 {
     // Base class initializes all common variables, including _fixed_freq
-    _fixed_freq = fixed_freq;  // Set the base class frequency directly
     _groups_sent = 0;
     _total_groups_per_cycle = 13;  // 13 groups for creepiness
     _in_inter_group_delay = false;

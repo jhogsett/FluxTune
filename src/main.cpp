@@ -1,8 +1,4 @@
-// Field Day Configuration - Must be defined before any includes
 #include "station_config.h"
-#ifdef CONFIG_FOUR_FD
-#define CQ_MESSAGE_FORMAT "CQ FD CQ FD DE %s %s K    "
-#endif
 
 #ifdef PLATFORM_NATIVE
 #include "../native/platform.h"
@@ -38,7 +34,9 @@
 #include "flashlight_handler.h"
 
 #include "wavegen.h"
+#ifndef DISABLE_WAVE_GEN_APP
 #include "wave_out.h"
+#endif
 
 #ifdef ENABLE_MORSE_STATION
 #include "sim_station.h"
@@ -235,19 +233,49 @@ SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001500.0, 31, 10);   // A
 SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002100.0, 19, 50);   // Advanced/Extra portion, slower tired sender
 SimStation cw_station3(&wave_gen_pool, &signal_meter, 7002700.0, 7, 175);   // Novice/General portion, novice first timer  
 SimStation cw_station4(&wave_gen_pool, &signal_meter, 7003400.0, 14, 40);   // Novice/General portion, experienced new ham
+SimStation cw_station5(&wave_gen_pool, &signal_meter, 7004100.0, 23, 80);   // Novice/General portion, experienced tired ham
 
-SimTransmitter *station_pool[4] = {
+SimTransmitter *station_pool[5] = {
     &cw_station1,
     &cw_station2,
     &cw_station3,
-    &cw_station4
+    &cw_station4,
+    &cw_station5
 };
 
-Realization *realizations[4] = {
+Realization *realizations[5] = {
     &cw_station1,
     &cw_station2,
     &cw_station3,
-    &cw_station4
+    &cw_station4,
+    &cw_station5
+};
+#endif
+
+#ifdef CONFIG_FIVE_CW_RESOURCE_TEST
+// Five CW stations with only 4 wave generators - resource contention test
+// Different frequencies spread across 40m band for easy identification
+// First 4 stations at 30 WPM for fast recycling, station 5 at 13 WPM for contrast
+SimStation cw_station1(&wave_gen_pool, &signal_meter, 7001000.0, 30, 10);   // Station 1: 30 WPM, slight fist variation
+SimStation cw_station2(&wave_gen_pool, &signal_meter, 7002000.0, 30, 20);   // Station 2: 30 WPM, moderate fist variation
+SimStation cw_station3(&wave_gen_pool, &signal_meter, 7003000.0, 30, 30);   // Station 3: 30 WPM, noticeable fist variation
+SimStation cw_station4(&wave_gen_pool, &signal_meter, 7004000.0, 30, 15);   // Station 4: 30 WPM, slight fist variation
+SimStation cw_station5(&wave_gen_pool, &signal_meter, 7005000.0, 13, 25);   // Station 5: 13 WPM, moderate fist variation
+
+SimTransmitter *station_pool[5] = {  // 5 stations but only 4 wave generators available
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4,
+    &cw_station5
+};
+
+Realization *realizations[5] = {  // 5 realizations competing for 4 resources
+    &cw_station1,
+    &cw_station2,
+    &cw_station3,
+    &cw_station4,
+    &cw_station5
 };
 #endif
 
@@ -397,6 +425,8 @@ Realization *realizations[2] = {
 bool realization_stats[1] = {false};
 #elif defined(CONFIG_DEV_LOW_RAM)
 bool realization_stats[2] = {false, false};
+#elif defined(CONFIG_FIVE_CW_RESOURCE_TEST)
+bool realization_stats[5] = {false, false, false, false, false};  // 5 stations for resource test
 #else
 bool realization_stats[4] = {false, false, false, false};
 #endif
@@ -405,6 +435,8 @@ bool realization_stats[4] = {false, false, false, false};
 RealizationPool realization_pool(realizations, realization_stats, 1);  // Only 1 station for minimal config
 #elif defined(CONFIG_DEV_LOW_RAM)
 RealizationPool realization_pool(realizations, realization_stats, 2);  // Only 2 stations for development config
+#elif defined(CONFIG_FIVE_CW_RESOURCE_TEST)
+RealizationPool realization_pool(realizations, realization_stats, 5);  // 5 stations competing for 4 wave generators
 #else
 RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stations for all other configs
 #endif
@@ -414,20 +446,24 @@ RealizationPool realization_pool(realizations, realization_stats, 4);  // 4 stat
 // ============================================================================
 StationManager station_manager(station_pool);
 
+#ifndef DISABLE_WAVE_GEN_APP
 WaveOut waveout1(&wave_gen_pool);
 WaveOut waveout2(&wave_gen_pool);
 WaveOut waveout3(&wave_gen_pool);
 WaveOut waveout4(&wave_gen_pool);
+#endif
 
 VFO vfoa("VFO A",   7000000.0, 10, &realization_pool);
 VFO vfob("VFO B",  14000000.0, 10, &realization_pool);
 VFO vfoc("VFO C", 146520000.0, 5000, &realization_pool);
 
+#ifndef DISABLE_WAVE_GEN_APP
 Realization *waveouts[] = {&waveout1};
 
 VFO vfod("CHAN 1", 1.0, 1L, &realization_pool);
 VFO vfoe("CHAN 2", 100.0, 10L, &realization_pool);
 VFO vfof("CHAN 3", 1000000.0, 100L, &realization_pool);
+#endif
 
 Contrast contrast("Contrast");
 BFO bfo("BFO");
@@ -437,20 +473,26 @@ VFO_Tuner tunera(&vfoa);
 VFO_Tuner tunerb(&vfob);
 VFO_Tuner tunerc(&vfoc);
 
+#ifndef DISABLE_WAVE_GEN_APP
 VFO_Tuner tunerd(&vfod);
 VFO_Tuner tunere(&vfoe);
 VFO_Tuner tunerf(&vfof);
+#endif
 
 ContrastHandler contrast_handler(&contrast);
 BFOHandler bfo_handler(&bfo);
 FlashlightHandler flashlight_handler(&flashlight);
 
 ModeHandler *handlers1[3] = {&tunera, &tunerb, &tunerc};
+#ifndef DISABLE_WAVE_GEN_APP
 ModeHandler *handlers2[3] = {&tunerd, &tunere, &tunerf};
+#endif
 ModeHandler *handlers3[3] = {&contrast_handler, &bfo_handler, &flashlight_handler};
 
 EventDispatcher dispatcher1(handlers1, 3);
+#ifndef DISABLE_WAVE_GEN_APP
 EventDispatcher dispatcher2(handlers2, 3);
+#endif
 EventDispatcher dispatcher3(handlers3, 3);
 
 EventDispatcher * dispatcher = &dispatcher1;
@@ -531,7 +573,8 @@ void setup(){
 void activate_branding_mode() {
     // Keep display showing "FluxTune" from previous code - perfect for branding photos!
       // Directly set signal meter LEDs to 4x brightness (bypass dynamic system)
-    rgb_color full_colors[LED_COUNT] = 
+	rgb_color full_colors[LED_COUNT] = 
+#ifdef DEVICE_VARIANT_RED_DISPLAY
     {
       { 60, 0, 0 },   // 4x brightness for all LEDs (was 15)
       { 60, 30, 0 }, 
@@ -541,7 +584,18 @@ void activate_branding_mode() {
       { 0, 0, 60 }, 
       { 30, 0, 60 }     // Red at the end
     };
-    
+#else
+    {
+      { 0, 60, 0 },   // 4x brightness for all LEDs (was 15)
+      { 0, 60, 0 }, 
+      { 0, 60, 0 }, 
+      { 0, 60, 0 }, 
+      { 60, 60, 0 }, 
+      { 60, 60, 0 }, 
+      { 60, 0, 6 }     // Red at the end
+    };
+#endif
+
     // Enter infinite loop for photography - device stays in perfect display state
     while(true) {
         // Keep signal meter LEDs at full brightness
@@ -565,11 +619,13 @@ EventDispatcher * set_application(int application, HT16K33Disp *display){
 			title = (FSTR("SimRadio"));
 		break;
 
+#ifndef DISABLE_WAVE_GEN_APP
 		case APP_WAVEGEN:
 		dispatcher = &dispatcher2;
 			current_dispatcher = APP_WAVEGEN;
 			title = (FSTR("Wave Gen"));
 		break;
+#endif
 
 		case APP_SETTINGS:
 			dispatcher = &dispatcher3;
@@ -704,6 +760,32 @@ void loop()
 	
 	cw_station4.begin(time + random(4000));
 	cw_station4.set_station_state(AUDIBLE);
+
+	cw_station5.begin(time + random(5000));
+	cw_station5.set_station_state(AUDIBLE);
+#endif
+
+#ifdef CONFIG_FIVE_CW_RESOURCE_TEST
+	// Initialize five CW test stations (resource contention test)
+	// Only 4 wave generators available, so one station should be dormant at any given time
+	// Give all stations similar startup delays to create fair competition for initial allocation
+	cw_station1.begin(time + random(2000));
+	cw_station1.set_station_state(AUDIBLE);
+	
+	cw_station2.begin(time + random(2000));
+	cw_station2.set_station_state(AUDIBLE);
+	
+	cw_station3.begin(time + random(2000));
+	cw_station3.set_station_state(AUDIBLE);
+	
+	cw_station4.begin(time + random(2000));
+	cw_station4.set_station_state(AUDIBLE);
+	
+	if(!cw_station5.begin(time + random(2000))) {  // Check if begin() succeeds
+		// If begin() fails, put station in retry state so it will try again during runtime
+		cw_station5.set_retry_state(time + 1000);  // Retry in 1 second
+	}
+	cw_station5.set_station_state(AUDIBLE);
 #endif
 
 #ifdef CONFIG_FOUR_NUMBERS
@@ -818,17 +900,23 @@ void loop()
 				switch(current_dispatcher){
 					case 1:
 						// 
+#ifdef DISABLE_WAVE_GEN_APP
+						dispatcher = set_application(APP_SETTINGS, &display); // Skip Wave Gen, go to Settings
+#else
 						dispatcher = set_application(APP_WAVEGEN, &display); // &dispatcher2;
+#endif
 						// current_dispatcher = 2;
 						// title = (FSTR("AudioOut"));
 						break;
 						
+#ifndef DISABLE_WAVE_GEN_APP
 						case 2:
 						// 
 						dispatcher = set_application(APP_SETTINGS, &display); // &dispatcher3;
 						// current_dispatcher = 3;
 						// title = (FSTR("Settings"));
 						break;
+#endif
 								case 3:
 						// Clear flashlight mode when leaving settings
 						signal_meter.clear_flashlight_mode();
